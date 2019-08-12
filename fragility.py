@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import collections
 import json
 import math
 import re
@@ -8,32 +9,45 @@ import pdb
 from scipy.stats import lognorm
 import numpy as np
 
-class FragilityData():
+class DamageState():
+    def __init__(self,
+                 taxonomy,
+                 from_state,
+                 to_state,
+                 mean,
+                 stddev,
+                 intensity_field,
+                 intensity_unit):
+        self.taxonomy = taxonomy
+        self.from_state = from_state
+        self.to_state = to_state
+        self.mean = mean
+        self.stddev = stddev
+        self.intensity_field = intensity_field
+        self.intensity_unit = intensity_unit
+
+        self._f = self._create_probability_function()
+
+    def _create_probability_function(self):
+        scale = np.exp(self.mean)
+        s = self.stddev
+        f = lognorm(scale=scale, s=s)
+        return f.cdf
+
+    def get_probability_for_intensity(self, intesity, units):
+        field = self.intensity_field.upper()
+        value = intesity[field]
+        unit = units[field]
+
+        if unit != self.intensity_unit:
+            raise Exception('Not supported unit')
+
+        return self._f(value)
+
+class Fragility():
 
     def __init__(self, data):
         self._data = data
-        self._tax_data = self._prepare_tax_data()
-
-    def _prepare_tax_data(self):
-        data_arr = self._data['data']
-
-        data_dict = {}
-
-        for data_arr_element in data_arr:
-            taxonomy_name = data_arr_element['taxonomy']
-            data_dict[taxonomy_name] = FragilityTaxonomyData(data_arr_element)
-        return data_dict
-
-    def __iter__(self):
-        for tax_data in self._tax_data.values():
-            yield tax_data
-            
-    def get_taxonomies(self):
-        return self._data['meta']['taxonomies']
-
-    def get_data_for_taxonomy(self, taxonomy):
-        return self._tax_data[taxonomy]
-        
     
     @classmethod
     def from_file(cls, json_file):
@@ -41,74 +55,91 @@ class FragilityData():
             data = json.load(input_file)
         return cls(data)
 
-class FragilityTaxonomyData():
-    def __init__(self, data):
-        self._data = data
-        self._taxonomy_name = data['taxonomy']
-        self._intensity_field = data['imt']
-        self._intensity_unit = data['imu']
-
-    def __iter__(self):
-        for damage_state in self._get_damage_states():
-            mean, stddev = self._get_mean_and_stddev(damage_state)
-            from_damage_state, to_damage_state = self._get_from_to_damage_state(damage_state)
-            yield DamageState(from_damage_state, to_damage_state, mean, stddev, taxonomy=self)
-
-    def _get_from_to_damage_state(self, damage_state):
-        m = re.search(r'^D_(\d+)_(\d+)', damage_state)
-        if m:
-            from_d = 'D' + m.group(1)
-            to_d = 'D' + m.group(2)
-            return from_d, to_d
-        return 'D0', damage_state
-    
-    def _get_mean_and_stddev(self, damage_state):
-        mean = self._data[damage_state + '_mean']
-        stddev = self._data[damage_state + '_stddev']
-        return (mean, stddev)
-
-    def _get_damage_states(self):
-        return set(
-            [self._get_just_damage_state(k) for k in self._data.keys() if self._is_damage_state(k)]
-        )
-
-    def _is_damage_state(self, key_in_dict):
-        return re.search(r'^D_?\d+(_\d+)?_', key_in_dict)
-
-    def _get_just_damage_state(self, key_in_dict):
-        return re.search(r'^(D_?\d+(_\d+)?)_', key_in_dict).group(1)
-
-    def get_name(self):
-        return self._data['taxonomy']
-    
-class DamageState():
-    def __init__(self, from_damage_state, to_damage_state, mean, stddev, taxonomy):
-        self.from_damage_state = from_damage_state
-        self.to_damage_state = to_damage_state
-        self._mean = mean
-        self._stddev = stddev
-        self._taxonomy = taxonomy
-        self._f = self._create_function()
-
-    def __repr__(self):
-        return 'DamageState(to_state={0}, mean={1}, stddev={2})'.format(repr(self._to_damage_state),
-                                                                        repr(self._mean),
-                                                                        repr(self._stddev))
-
-    def _create_function(self):
-        scale = np.exp(self._mean)
-        s = self._stddev
-        f = lognorm(scale=scale, s=s)
-        return f.cdf
-    
-    def get_probability_for_intensity(self, intensity, units):
-        field = self._taxonomy._intensity_field.upper()
-        value = intensity[field]
-        unit = units[field]
-
-        if unit != self._taxonomy._intensity_unit:
-            # TODO maybe convert it
-            raise Exception('Not supported unit')
+    def to_fragility_provider(self):
+        damage_states_by_taxonomy = collections.defaultdict(list)
         
-        return self._f(value)
+        for dataset in self._data['data']:
+            taxonomy = dataset['taxonomy']
+            intensity_field = dataset['imt']
+            intensity_unit = dataset['imu']
+            for damage_state_mean_key in [
+                    k for k in dataset.keys()
+                    if k.startswith('D')
+                    and k.endswith('_mean')]:
+                #
+                # the data is in the format
+                # D1_mean, D2_mean, D3_mean
+                # (as there are is no from data state at the moment)
+                # but this code can also handle them the in the way
+                # D01, so that it is the damage state from 0 to 1 or
+                # D_0_1 or D0_1
+                #
+                to_state = int(re.search(r'(\d)_mean$', damage_state_mean_key).group(1))
+                from_state = int(re.search(r'^D_?(\d)_', damage_state_mean_key).group(1))
+
+                if to_state == from_state:
+                    from_state = 0
+
+                mean = dataset[damage_state_mean_key]
+                stddev_key = damage_state_mean_key.replace('_mean', '_stddev')
+                stddev = dataset[stddev_key]
+
+                damage_state = DamageState(
+                    taxonomy=taxonomy,
+                    from_state=from_state,
+                    to_state=to_state,
+                    mean=mean,
+                    stddev=stddev,
+                    intensity_field=intensity_field,
+                    intensity_unit=intensity_unit
+                )
+
+                damage_states_by_taxonomy[taxonomy].append(damage_state)
+        self._add_damage_states_if_missing(damage_states_by_taxonomy)
+        return FraglityProvider(damage_states_by_taxonomy)
+
+    def _add_damage_states_if_missing(self, damage_states_by_taxonomy):
         
+        for taxonomy in damage_states_by_taxonomy.keys():
+            self._add_damage_states_if_missing_to_dataset_list(
+                damage_states_by_taxonomy[taxonomy])
+            
+    def _add_damage_states_if_missing_to_dataset_list(self, damage_states):
+        '''
+        If there are data from damage state 0 to 5, 
+        but none for 1 to 5, than it they should be added.
+        '''
+        
+        max_damage_state = max([ds.to_state for ds in damage_states])
+        for from_damage_state in range(0, max_damage_state):
+            for to_damage_state in range(1, max_damage_state+1):
+                ds_option = [
+                    ds for ds in damage_states
+                    if ds.from_state == from_damage_state
+                    and ds.to_state == to_damage_state]
+                if not ds_option:
+                    ds_option_lower = [ds for ds in damage_states
+                                       if ds.from_state == from_damage_state - 1
+                                       and ds.to_state == to_damage_state]
+                    if ds_option_lower:
+                        ds_lower = ds_option_lower[0]
+                        ds_new = DamageState(
+                            taxonomy=ds_lower.taxonomy,
+                            from_state=ds_lower.from_state + 1,
+                            to_state=ds_lower.to_state,
+                            mean=ds_lower.mean,
+                            stddev=ds_lower.stddev,
+                            intensity_field=ds_lower.intensity_field,
+                            intensity_unit=ds_lower.intensity_unit
+                        )
+                        damage_states.append(ds_new)
+        
+class FraglityProvider():
+    def __init__(self, damage_states_by_taxonomy):
+        self._damage_states_by_taxonomy = damage_states_by_taxonomy
+
+    def get_damage_states_for_taxonomy(self, taxonomy):
+        return self._damage_states_by_taxonomy[taxonomy]
+
+    def get_taxonomies(self):
+        return self._damage_states_by_taxonomy.keys()

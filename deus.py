@@ -1,104 +1,64 @@
 #!/usr/bin/env python3
 
 import argparse
-import functools
-import math
-import io
-import tokenize
 import pdb
-import sys
 
 import shakemap
 import exposure
 import fragility
-import taxonomy
 
-import pandas as pd
 
-def dispatch_intensity_provider(intensity_file):
-    return shakemap.Shakemap.from_file(intensity_file).as_intensity_provider()
+def find_fragility_taxonomy_and_new_exposure_taxonomy(
+        exposure_taxonomy,
+        fragility_taxonomies):
+    # TODO
+    # here it will only take the very first fragility_taxonomy
+    # and it will stay with the existing exposure_taxonomy
+    # (but this may be changed in case of a different schema for
+    # the fragility; this will be the case for switching to tsunami
+    # fragility function).
+    return [*fragility_taxonomies][0], exposure_taxonomy
 
-def dispatch_fragility_function_provider(fragilty_file):
-    return fragility.FragilityData.from_file(fragilty_file)
+def update_exposure_cell(exposure_cell,
+                         intensity_provider,
+                         fragility_provider):
+    lon, lat = exposure_cell.get_lon_lat_of_centroid()
+    intensity, units = intensity_provider.get_nearest(lon=lon, lat=lat)
 
-def load_exposure_cell_iterable(exposure_file):
-    return exposure.ExposureList.from_file(exposure_file)
-
-def update_exposure(
-        exposure_cell,
-        intensity_provider,
-        fragility_function_provider,
-        taxonomy_tester):
-    geometry = exposure_cell['geometry']
-    centroid = geometry.centroid
-    lon = centroid.x
-    lat = centroid.y
-
-    intensity, units = intensity_provider.get_nearest(lon, lat)
-    value_pga = intensity['PGA']
-    units_pga = units['PGA']
-
-    fields_to_copy = ('name', 'geometry', 'gc_id')
-    fields_to_ignore_for_n = fields_to_copy + ('index',)
-
-    updated_exposure_cell = pd.Series()
-    for field in fields_to_copy:
-        updated_exposure_cell[field] = exposure_cell[field]
-        for taxonomy in fragility_function_provider:
-            for damage_state in taxonomy:
-                from_damage_state = damage_state.from_damage_state
-                to_damage_state = damage_state.to_damage_state
-                # TODO
-                # check values and units
-                p = damage_state.get_probability_for_intensity(intensity, units)
-                # find the numbers of buildings in that class
-                n_buildings = compute_n_buildings(
-                    exposure_cell,
-                    fields_to_ignore_for_n,
-                    taxonomy_tester,
-                    taxonomy,
-                    damage_state)
-
-                n_in_damage_state = p * n_buildings
-                new_field_name = taxonomy.get_name() + '_' + from_damage_state + '_' + to_damage_state           
-                updated_exposure_cell[new_field_name] = n_in_damage_state
-
-    # it can be the case that the taxonomy must be merged later
-    return updated_exposure_cell
-
-def compute_n_buildings(
-        exposure_cell,
-        fields_to_ignore_for_n,
-        taxonomy_tester,
-        taxonomy,
-        damage_state):
-
-    n_buildings = 0.0
+    updated_cell = exposure_cell.new_prototype()
     
-    for exposure_cell_field in exposure_cell.keys():
-        if exposure_cell_field not in fields_to_ignore_for_n:
+    for exposure_taxonomy in exposure_cell.get_taxonomies():
+        taxonomy = exposure_taxonomy.get_name()
+        count = exposure_taxonomy.get_count()
+        actual_damage_state = exposure_taxonomy.get_damage_state()
         
-            if taxonomy_tester.can_use_taxonomy(
-                exposure_cell_field,
-                    taxonomy.get_name(),
-                    damage_state.from_damage_state,
-                    damage_state.to_damage_state):
-                n_in_class = exposure_cell[exposure_cell_field]
-                if type(n_in_class) == str:
-                    n_in_class = float(n_in_class)
-                if math.isnan(n_in_class):
-                    n_in_class = 0.0
-                n_buildings += n_in_class
-    return n_buildings
+        fragility_taxonomy, new_exposure_taxonomy = find_fragility_taxonomy_and_new_exposure_taxonomy(
+            exposure_taxonomy=taxonomy,
+            fragility_taxonomies=fragility_provider.get_taxonomies()
+        )
 
-def write_exposure_list(exposure_list, output_stream):
-    p = functools.partial(print, file=output_stream)
+        damage_states = fragility_provider.get_damage_states_for_taxonomy(fragility_taxonomy)
+        damage_states_to_care = [
+            ds for ds in damage_states
+            if ds.from_state == actual_damage_state
+            and ds.to_state > actual_damage_state
+        ]
 
-    exposure_list = exposure.ExposureList.from_list(exposure_list)
-    json = exposure_list.to_json()
+        n_not_in_higher_damage_states = count
+        for ds in damage_states_to_care:
+            p = ds.get_probability_for_intensity(intensity, units)
+            n = p * count
+            n_not_in_higher_damage_states -= n
 
-    p(json)
+            updated_cell.add_n_for_damage_state(
+                new_exposure_taxonomy, ds.to_state, n)
+            
+        updated_cell.add_n_for_damage_state(
+            new_exposure_taxonomy, actual_damage_state, n_not_in_higher_damage_states)
     
+    return updated_cell
+    
+
 def main():
     argparser = argparse.ArgumentParser(
         description='Updates the exposure model and the damage classes of the Buildings')
@@ -108,24 +68,21 @@ def main():
 
     args = argparser.parse_args()
 
-    intensity_provider = dispatch_intensity_provider(args.intensity_file)
-    fragility_function_provider = dispatch_fragility_function_provider(args.fragilty_file)
-    exposure_cell_iterable = load_exposure_cell_iterable(args.exposure_file)
+    intensity_provider = shakemap.Shakemap.from_file(args.intensity_file).to_intensity_provider()
+    fragility_provider = fragility.Fragility.from_file(args.fragilty_file).to_fragility_provider()
+    exposure_cell_provider = exposure.ExposureCellProvider.from_file(args.exposure_file)
 
-    taxonomy_tester = taxonomy.TaxonomyTester()
+    updated_exposure_cells = exposure.ExposureCellCollector()
 
-    all_updated_exposure_cells = []
-
-    for exposure_cell in exposure_cell_iterable:
-        updated_exposure_cell = update_exposure(
-            exposure_cell,
-            intensity_provider,
-            fragility_function_provider,
-            taxonomy_tester)
-        all_updated_exposure_cells.append(updated_exposure_cell)
-
-    write_exposure_list(all_updated_exposure_cells, sys.stdout)
-
+    for exposure_cell in exposure_cell_provider:
+        single_updated_exposure_cell = update_exposure_cell(
+            exposure_cell=exposure_cell,
+            intensity_provider=intensity_provider,
+            fragility_provider=fragility_provider,
+        )
+        updated_exposure_cells.append(single_updated_exposure_cell)
+        
+    print(updated_exposure_cells)
 
 if __name__ == '__main__':
     main()

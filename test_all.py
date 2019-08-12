@@ -2,17 +2,13 @@
 
 import math
 
-from deus import *
+import geopandas as gpd
+import pandas as pd
+
+from shapely import wkt
+
+import exposure
 import fragility
-
-def test_all_imports_are_ok():
-    import scipy as sp
-    import lxml.etree as le
-
-def test_load_exposure_cell_iterable():
-    filename = './testinputs/exposure.json'
-    output = load_exposure_cell_iterable(filename)
-
 
 def test_fragility_data_without_sublevel():
     data = {
@@ -40,19 +36,19 @@ def test_fragility_data_without_sublevel():
         ],
     }
 
-    fg = fragility.FragilityData(data)
-
-    taxonomy_data_urm1 = fg.get_data_for_taxonomy('URM1')
-
+    fg = fragility.Fragility(data)
+    fp = fg.to_fragility_provider()
+    taxonomy_data_urm1 = fp.get_damage_states_for_taxonomy('URM1')
+    
     assert taxonomy_data_urm1 is not None
 
     damage_states = [ds for ds in taxonomy_data_urm1]
 
-    ds_1 = [ds for ds in damage_states if ds.to_damage_state == 'D1'][0]
+    ds_1 = [ds for ds in damage_states if ds.to_state == 1][0]
 
     assert ds_1 is not None
 
-    assert ds_1.from_damage_state == 'D0'
+    assert ds_1.from_state == 0
 
     p_0 = ds_1.get_probability_for_intensity(
         {'PGA': 0}, {'PGA': 'g'})
@@ -94,18 +90,82 @@ def test_fragility_data_with_sublevel():
         ],
     }
 
-    fg = fragility.FragilityData(data)
-
-    taxonomy_data_urm1 = fg.get_data_for_taxonomy('URM1')
+    fg = fragility.Fragility(data)
+    fp = fg.to_fragility_provider()
+    taxonomy_data_urm1 = fp.get_damage_states_for_taxonomy('URM1')
 
     assert taxonomy_data_urm1 is not None
 
     damage_states = [ds for ds in taxonomy_data_urm1]
 
-    ds_1 = [ds for ds in damage_states if ds.to_damage_state == 'D1' and ds.from_damage_state=='D0'][0]
+    ds_1 = [ds for ds in damage_states if ds.to_state == 1 and ds.from_state==0][0]
 
     assert ds_1 is not None
 
-    ds_2 = [ds for ds in damage_states if ds.to_damage_state == 'D2' and ds.from_damage_state=='D1'][0]
+    ds_2 = [ds for ds in damage_states if ds.to_state == 2 and ds.from_state==1][0]
     assert ds_2 is not None
+
+    taxonomy_data_cm = fp.get_damage_states_for_taxonomy('CM')
+    damage_states_cm = [ds for ds in taxonomy_data_cm]
+
+    ds_1_2 = [ds for ds in damage_states_cm if ds.to_state == 2 and ds.from_state==1][0]
+
+    assert ds_1_2 is not None
+
+def test_exposure_cell():
+    data = pd.DataFrame({
+        'geometry': ['POINT(12.0 15.0)'],
+        'name': ['example point1'],
+        'gc_id': ['abcdefg'],
+        r'MCF\/DNO\/_1': [6],
+        r'MUR+STDRE\/': [13],        
+    })
+    geodata = gpd.GeoDataFrame(data)
+    geodata['geometry'] = geodata['geometry'].apply(wkt.loads)
+    series = geodata.iloc[0]
+
+    exposure_cell = exposure.ExposureCell(series)
+
+    lon, lat = exposure_cell.get_lon_lat_of_centroid()
+
+    assert lon == 12.0
+    assert lat == 15.0
+
+    empty_exposure_cell = exposure_cell.new_prototype()
+
+    lon2, lat2 = empty_exposure_cell.get_lon_lat_of_centroid()
+
+    assert lon == lon2
+    assert lat == lat2
+
+    assert empty_exposure_cell._series['name'] == 'example point1'
+
+    taxonomies = exposure_cell.get_taxonomies()
+
+    assert exposure.Taxonomy(name=r'MCF\/DNO\/_1', count=6) in taxonomies
     
+def test_exposure_taxonomy_damage_state():
+    tax1 = exposure.Taxonomy(name=r'MCF\/DNO\/_1', count=6)
+
+    ds1 = tax1.get_damage_state()
+
+    assert ds1 == 0
+
+    tax2 = exposure.Taxonomy(name=r'MCF\/DNO\/_1_D1', count=6)
+
+    ds2 = tax2.get_damage_state()
+
+    assert ds2 == 1
+
+    tax3 = exposure.Taxonomy(name=r'MCF\/DNO\/_1_D5', count=6)
+
+    ds3 = tax3.get_damage_state()
+
+    assert ds3 == 5
+
+def test_update_damage_state():
+    updated = exposure.update_taxonomy_damage_state(r'MCF\/DNO\/_1', 0)
+    assert updated == r'MCF\/DNO\/_1_D0'
+
+    updated2 = exposure.update_taxonomy_damage_state(r'MCF\/DNO\/_1_D0', 1)
+    assert updated2 == r'MCF\/DNO\/_1_D1'

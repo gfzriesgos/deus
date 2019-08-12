@@ -25,7 +25,7 @@ class Shakemap():
         specification = self._root.find('{http://earthquake.usgs.gov/eqcenter/shakemap}grid_specification')
         return ShakemapGridSpecification(specification)
         
-    def as_intensity_provider(self):
+    def to_intensity_provider(self):
         grid_fields = self._find_grid_fields()
         grid_data = self._find_grid_data()
         specification = self._find_grid_specification()
