@@ -10,6 +10,7 @@ from shapely import wkt
 import exposure
 import fragility
 
+
 def test_fragility_data_without_sublevel():
     data = {
         'meta': {
@@ -36,10 +37,10 @@ def test_fragility_data_without_sublevel():
         ],
     }
 
-    fg = fragility.Fragility(data)
-    fp = fg.to_fragility_provider()
-    taxonomy_data_urm1 = fp.get_damage_states_for_taxonomy('URM1')
-    
+    frag = fragility.Fragility(data)
+    fragprov = frag.to_fragility_provider()
+    taxonomy_data_urm1 = fragprov.get_damage_states_for_taxonomy('URM1')
+
     assert taxonomy_data_urm1 is not None
 
     damage_states = [ds for ds in taxonomy_data_urm1]
@@ -90,27 +91,35 @@ def test_fragility_data_with_sublevel():
         ],
     }
 
-    fg = fragility.Fragility(data)
-    fp = fg.to_fragility_provider()
-    taxonomy_data_urm1 = fp.get_damage_states_for_taxonomy('URM1')
+    frag = fragility.Fragility(data)
+    fragprov = frag.to_fragility_provider()
+    taxonomy_data_urm1 = fragprov.get_damage_states_for_taxonomy('URM1')
 
     assert taxonomy_data_urm1 is not None
 
     damage_states = [ds for ds in taxonomy_data_urm1]
 
-    ds_1 = [ds for ds in damage_states if ds.to_state == 1 and ds.from_state==0][0]
+    ds_1 = [
+        ds for ds in damage_states if ds.to_state == 1 and ds.from_state == 0
+    ][0]
 
     assert ds_1 is not None
 
-    ds_2 = [ds for ds in damage_states if ds.to_state == 2 and ds.from_state==1][0]
+    ds_2 = [
+        ds for ds in damage_states if ds.to_state == 2 and ds.from_state == 1
+    ][0]
     assert ds_2 is not None
 
-    taxonomy_data_cm = fp.get_damage_states_for_taxonomy('CM')
+    taxonomy_data_cm = fragprov.get_damage_states_for_taxonomy('CM')
     damage_states_cm = [ds for ds in taxonomy_data_cm]
 
-    ds_1_2 = [ds for ds in damage_states_cm if ds.to_state == 2 and ds.from_state==1][0]
+    ds_1_2 = [
+        ds for ds in damage_states_cm if ds.to_state == 2
+        and ds.from_state == 1
+    ][0]
 
     assert ds_1_2 is not None
+
 
 def test_exposure_cell():
     data = pd.DataFrame({
@@ -118,7 +127,7 @@ def test_exposure_cell():
         'name': ['example point1'],
         'gc_id': ['abcdefg'],
         r'MCF\/DNO\/_1': [6],
-        r'MUR+STDRE\/': [13],        
+        r'MUR+STDRE\/': [13],
     })
     geodata = gpd.GeoDataFrame(data)
     geodata['geometry'] = geodata['geometry'].apply(wkt.loads)
@@ -143,7 +152,8 @@ def test_exposure_cell():
     taxonomies = exposure_cell.get_taxonomies()
 
     assert exposure.Taxonomy(name=r'MCF\/DNO\/_1', count=6) in taxonomies
-    
+
+
 def test_exposure_taxonomy_damage_state():
     tax1 = exposure.Taxonomy(name=r'MCF\/DNO\/_1', count=6)
 
@@ -162,6 +172,7 @@ def test_exposure_taxonomy_damage_state():
     ds3 = tax3.get_damage_state()
 
     assert ds3 == 5
+
 
 def test_update_damage_state():
     updated = exposure.update_taxonomy_damage_state(r'MCF\/DNO\/_1', 0)
