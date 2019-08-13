@@ -5,23 +5,24 @@
 
 ## What is it?
 
-This is the service to update a given expore file (as it is the output
+This is the service to update a given exposure file (as it is the output
 of the assetmaster script) and update the building and damage classes
 with given fragility functions and intensity values.
+
 
 ## Inputs
 
 ### Intensity Map
 
 The intensity map should be given in a format of a USGS shakemap.
-It contains a regular grid for a given area and the intesity values
+It contains a regular grid for a given area and the intensity values
 (the PGA) for each cell value. It can also contain heights in case of
 a tsunami simulation.
 
-### Expore Model
+### Exposure Model
 
-The expore model can be treated like a table.
-It lists spatial cells with the the different building classes and the
+The exposure model can be treated like a table.
+It lists spatial cells with the different building classes and the
 number of buildings in each class.
 
 | Class | n   |
@@ -57,14 +58,13 @@ into damage states:
 
 The output is also meant to be input for another loop through this
 update process. This is important to support the option to compute the
-damages of several earth quakes / tsunamis / ...
+damages of several earthquakes / tsunamis / ...
+
 
 ## Supported hazards
 
-This service is meant to not just to support earth quakes, but also to
+This service is meant to not just to support earthquakes, but also to
 support tsunamis or other hazards as long as they provide a shakemap
 object as input for the intensities and a predefined way to convert
 the building classes with damage states from one schema to another (if
-the hazard fraglity functions use a different schema).
-
-
+the hazard fragility functions use a different schema).
