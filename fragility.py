@@ -145,7 +145,7 @@ class Fragility():
 
                 damage_states_by_taxonomy[taxonomy].append(damage_state)
         Fragility._add_damage_states_if_missing(damage_states_by_taxonomy)
-        return FraglityProvider(damage_states_by_taxonomy)
+        return FragilityProvider(damage_states_by_taxonomy)
 
     @staticmethod
     def _add_damage_states_if_missing(damage_states_by_taxonomy):
@@ -171,7 +171,8 @@ class Fragility():
                 ds_option = [
                     ds for ds in damage_states
                     if ds.from_state == from_damage_state
-                    and ds.to_state == to_damage_state]
+                    and ds.to_state == to_damage_state
+                ]
                 if not ds_option:
                     ds_option_lower = [
                         ds for ds in damage_states
@@ -192,7 +193,7 @@ class Fragility():
                         damage_states.append(ds_new)
 
 
-class FraglityProvider():
+class FragilityProvider():
     '''
     Class to give access to the taxonomies and
     the damage states with the fragility functions.
