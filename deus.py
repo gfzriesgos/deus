@@ -31,9 +31,10 @@ def update_exposure_cell(exposure_cell,
         count = exposure_taxonomy.get_count()
         actual_damage_state = exposure_taxonomy.get_damage_state()
 
-        fragility_taxonomy, new_exposure_taxonomy = \
+        fragility_taxonomy, mapped_exposure_taxonomy, mapped_damage_state = \
             taxonomy_mapper.find_fragility_taxonomy_and_new_exposure_taxonomy(
                 exposure_taxonomy=taxonomy,
+                actual_damage_state=actual_damage_state,
                 fragility_taxonomies=fragility_provider.get_taxonomies()
             )
 
@@ -41,8 +42,8 @@ def update_exposure_cell(exposure_cell,
             fragility_taxonomy)
         damage_states_to_care = [
             ds for ds in damage_states
-            if ds.from_state == actual_damage_state
-            and ds.to_state > actual_damage_state
+            if ds.from_state == mapped_damage_state
+            and ds.to_state > mapped_damage_state
         ]
 
         n_not_in_higher_damage_states = count
@@ -53,12 +54,12 @@ def update_exposure_cell(exposure_cell,
             n_not_in_higher_damage_states -= n_buildings_in_damage_state
 
             updated_cell.add_n_for_damage_state(
-                new_exposure_taxonomy,
+                mapped_exposure_taxonomy,
                 single_damage_state.to_state,
                 n_buildings_in_damage_state)
 
         updated_cell.add_n_for_damage_state(
-            new_exposure_taxonomy,
+            mapped_exposure_taxonomy,
             actual_damage_state,
             n_not_in_higher_damage_states)
 

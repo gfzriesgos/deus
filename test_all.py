@@ -258,8 +258,9 @@ class TestAll(unittest.TestCase):
             def find_fragility_taxonomy_and_new_exposure_taxonomy(
                     self,
                     exposure_taxonomy,
+                    actual_damage_state,
                     fragility_taxonomies):
-                return 'URM1', exposure_taxonomy
+                return 'URM1', exposure_taxonomy, actual_damage_state
         taxonomy_mapper = MockedTaxonomyMapper()
 
         updated_exposure_cell = update_exposure_cell(

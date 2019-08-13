@@ -16,6 +16,7 @@ class TaxonomyMapper():
     def find_fragility_taxonomy_and_new_exposure_taxonomy(
             self,
             exposure_taxonomy,
+            actual_damage_state,
             fragility_taxonomies):
         '''
         Finds the taxonomy for the fragility functions
@@ -25,6 +26,11 @@ class TaxonomyMapper():
         for updating the exposure file in case of
         a schema switch (as for switching from tsunamis to
         earth quake hazards).
+
+        As on the mapping process it is also possible to
+        map from one building class to another one with
+        a different damage state, we also give back the
+        new damage state.
         '''
         # TODO
         # here it will only take the very first fragility_taxonomy
@@ -32,4 +38,8 @@ class TaxonomyMapper():
         # (but this may be changed in case of a different schema for
         # the fragility; this will be the case for switching to tsunami
         # fragility function).
-        return [*fragility_taxonomies][0], exposure_taxonomy
+        return (
+            [*fragility_taxonomies][0],
+            exposure_taxonomy,
+            actual_damage_state,
+        )
