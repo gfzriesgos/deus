@@ -175,7 +175,8 @@ class TestAll(unittest.TestCase):
         taxonomies = exposure_cell.get_taxonomies()
 
         self.assertIn(
-            exposure.Taxonomy(name=r'MCF\/DNO\/_1', count=6),
+            # the backslashes are removed
+            exposure.Taxonomy(name=r'MCF/DNO/_1', count=6),
             taxonomies
         )
 
