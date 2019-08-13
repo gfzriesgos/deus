@@ -42,7 +42,7 @@ class ExposureCellCollector():
 
     def append(self, exposure_cell):
         '''
-        Appends a exposure cell.
+        Appends an exposure cell.
         '''
         self._elements.append(exposure_cell)
 
@@ -53,7 +53,7 @@ class ExposureCellCollector():
 
 class ExposureCell():
     '''
-    Class to represent a exposure cell.
+    Class to represent an exposure cell.
     '''
     def __init__(self, series):
         self._series = series
@@ -80,7 +80,7 @@ class ExposureCell():
         '''
         Creates a new exposure cell that contains
         the same name and geometry as the base object,
-        but has no data about the count of builings for
+        but has no data about the count of buildings for
         a taxonomy.
         '''
         series = pd.Series()
@@ -134,7 +134,7 @@ class ExposureCell():
 
 def update_taxonomy_damage_state(taxonomy, new_damage_state):
     '''
-    Returns the nex taxonomy name for the new damage state.
+    Returns the new taxonomy name for the new damage state.
     For example from AA with new damage state 1 the result
     is AA_D1.
     For AA_D1 with new damage state 2 the result is
