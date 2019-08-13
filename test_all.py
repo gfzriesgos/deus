@@ -160,7 +160,9 @@ class TestAll(unittest.TestCase):
         self.assertEqual(lon, lon2)
         self.assertEqual(lat, lat2)
 
-        self.assertEqual(empty_exposure_cell.get_series()['name'], 'example point1')
+        self.assertEqual(
+            empty_exposure_cell.get_series()['name'],
+            'example point1')
 
         taxonomies = exposure_cell.get_taxonomies()
 
