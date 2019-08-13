@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/gfzriesgos/deus.svg?branch=master)](https://travis-ci.com/gfzriesgos/deus)
+
 # deus
 
 *D*amage-*E*xposure-*U*pdate-*S*ervice
