@@ -8,35 +8,16 @@ Please use -h for usage.
 
 import argparse
 
-import shakemap
 import exposure
 import fragility
-
-
-def find_fragility_taxonomy_and_new_exposure_taxonomy(
-        exposure_taxonomy,
-        fragility_taxonomies):
-    '''
-    Finds the taxonomy for the fragility functions
-    with for the given exposure taxonomy.
-
-    Can return a different exposure taxonomy to use
-    for updating the exposure file in case of
-    a schema switch (as for switching from tsunamis to
-    earth quake hazards).
-    '''
-    # TODO
-    # here it will only take the very first fragility_taxonomy
-    # and it will stay with the existing exposure_taxonomy
-    # (but this may be changed in case of a different schema for
-    # the fragility; this will be the case for switching to tsunami
-    # fragility function).
-    return [*fragility_taxonomies][0], exposure_taxonomy
+import shakemap
+import taxonomymapping
 
 
 def update_exposure_cell(exposure_cell,
                          intensity_provider,
-                         fragility_provider):
+                         fragility_provider,
+                         taxonomy_mapper):
     '''
     Returns the updated exposure cell.
     '''
@@ -51,7 +32,7 @@ def update_exposure_cell(exposure_cell,
         actual_damage_state = exposure_taxonomy.get_damage_state()
 
         fragility_taxonomy, new_exposure_taxonomy = \
-            find_fragility_taxonomy_and_new_exposure_taxonomy(
+            taxonomy_mapper.find_fragility_taxonomy_and_new_exposure_taxonomy(
                 exposure_taxonomy=taxonomy,
                 fragility_taxonomies=fragility_provider.get_taxonomies()
             )
@@ -112,6 +93,7 @@ def main():
         args.fragilty_file).to_fragility_provider()
     exposure_cell_provider = exposure.ExposureCellProvider.from_file(
         args.exposure_file)
+    taxonomy_mapper = taxonomymapping.TaxonomyMapper()
 
     updated_exposure_cells = exposure.ExposureCellCollector()
 
@@ -120,6 +102,7 @@ def main():
             exposure_cell=exposure_cell,
             intensity_provider=intensity_provider,
             fragility_provider=fragility_provider,
+            taxonomy_mapper=taxonomy_mapper,
         )
         updated_exposure_cells.append(single_updated_exposure_cell)
 
