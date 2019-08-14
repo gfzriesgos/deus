@@ -22,7 +22,8 @@ class LogncdfFactory():
         func = lognorm(scale=np.exp(mean), s=stddev)
         return func.cdf
 
-supported_fragility_function_factories = {
+
+SUPPORTED_FRAGILITY_FUNCTION_FACTORIES = {
     'logncdf': LogncdfFactory(),
 }
 
@@ -144,7 +145,8 @@ class Fragility():
                     to_state=to_state,
                     intensity_field=intensity_field,
                     intensity_unit=intensity_unit,
-                    fragility_function = supported_fragility_function_factories[shape](mean, stddev)
+                    fragility_function=SUPPORTED_FRAGILITY_FUNCTION_FACTORIES[
+                        shape](mean, stddev)
                 )
 
                 damage_states_by_taxonomy[taxonomy].append(damage_state)

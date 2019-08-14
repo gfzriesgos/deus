@@ -7,6 +7,8 @@ Please use -h for usage.
 '''
 
 import argparse
+import glob
+import os
 
 import exposure
 import fragility
@@ -94,7 +96,15 @@ def main():
         args.fragilty_file).to_fragility_provider()
     exposure_cell_provider = exposure.ExposureCellProvider.from_file(
         args.exposure_file)
-    taxonomy_mapper = taxonomymapping.TaxonomyMapper()
+
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+    pattern_to_search_for_ds_mappings = os.path.join(
+        current_dir, 'mapping_ds_*.json')
+    files_ds_mappings = glob.glob(pattern_to_search_for_ds_mappings)
+    damage_state_mapper = taxonomymapping.DamageStateMapper.from_files(
+        files_ds_mappings)
+
+    taxonomy_mapper = taxonomymapping.TaxonomyMapper(damage_state_mapper)
 
     updated_exposure_cells = exposure.ExposureCellCollector()
 
