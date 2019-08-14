@@ -13,6 +13,20 @@ from scipy.stats import lognorm
 import numpy as np
 
 
+class LogncdfFactory():
+    '''
+    This is function factory for the log normal cdf.
+    '''
+
+    def __call__(self, mean, stddev):
+        func = lognorm(scale=np.exp(mean), s=stddev)
+        return func.cdf
+
+supported_fragility_function_factories = {
+    'logncdf': LogncdfFactory(),
+}
+
+
 class DamageState():
     '''
     Class to represent the damage states.
@@ -21,27 +35,16 @@ class DamageState():
                  taxonomy,
                  from_state,
                  to_state,
-                 mean,
-                 stddev,
                  intensity_field,
-                 intensity_unit):
+                 intensity_unit,
+                 fragility_function):
         self.taxonomy = taxonomy
         self.from_state = from_state
         self.to_state = to_state
-        self.mean = mean
-        self.stddev = stddev
         self.intensity_field = intensity_field
         self.intensity_unit = intensity_unit
 
-        self._f = self._create_probability_function()
-
-    def _create_probability_function(self):
-        '''
-        Creates the function to compute the probability.
-        In this case it uses a lognorm cdf.
-        '''
-        func = lognorm(scale=np.exp(self.mean), s=self.stddev)
-        return func.cdf
+        self.fragility_function = fragility_function
 
     def get_probability_for_intensity(self, intesity, units):
         '''
@@ -68,7 +71,7 @@ class DamageState():
         if unit != self.intensity_unit:
             raise Exception('Not supported unit')
 
-        return self._f(value)
+        return self.fragility_function(value)
 
 
 class Fragility():
@@ -96,6 +99,8 @@ class Fragility():
         are returned.
         '''
         damage_states_by_taxonomy = collections.defaultdict(list)
+
+        shape = self._data['meta']['shape']
 
         for dataset in self._data['data']:
             taxonomy = dataset['taxonomy']
@@ -137,10 +142,9 @@ class Fragility():
                     taxonomy=taxonomy,
                     from_state=from_state,
                     to_state=to_state,
-                    mean=mean,
-                    stddev=stddev,
                     intensity_field=intensity_field,
-                    intensity_unit=intensity_unit
+                    intensity_unit=intensity_unit,
+                    fragility_function = supported_fragility_function_factories[shape](mean, stddev)
                 )
 
                 damage_states_by_taxonomy[taxonomy].append(damage_state)
@@ -185,10 +189,9 @@ class Fragility():
                             taxonomy=ds_lower.taxonomy,
                             from_state=ds_lower.from_state + 1,
                             to_state=ds_lower.to_state,
-                            mean=ds_lower.mean,
-                            stddev=ds_lower.stddev,
                             intensity_field=ds_lower.intensity_field,
-                            intensity_unit=ds_lower.intensity_unit
+                            intensity_unit=ds_lower.intensity_unit,
+                            fragility_function=ds_lower.fragility_function,
                         )
                         damage_states.append(ds_new)
 

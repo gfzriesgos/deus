@@ -29,6 +29,7 @@ class TestAll(unittest.TestCase):
         """
         data = {
             'meta': {
+                'shape': 'logncdf',
             },
             'data': [
                 {
@@ -84,6 +85,7 @@ class TestAll(unittest.TestCase):
         """
         data = {
             'meta': {
+                'shape': 'logncdf',
             },
             'data': [
                 {
@@ -229,6 +231,7 @@ class TestAll(unittest.TestCase):
 
         fragility_data = {
             'meta': {
+                'shape': 'logncdf',
             },
             'data': [
                 {

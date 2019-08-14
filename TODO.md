@@ -14,7 +14,6 @@ because no data for the tsunami damage classes and the costs exists.)
 (+ First is the mapping of the taxonomy then the mapping of the damage
 classes; both are be independant from each other - at least what we
 assume).
-## Add the option to use different functions then logncdf
 ## Add reading the name of the fragility schema
 ## Think about having columns for damage state
 (So that there is no _DXX at the end of the taxonomy).
