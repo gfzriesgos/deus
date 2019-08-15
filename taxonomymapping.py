@@ -137,3 +137,75 @@ class DamageStateMapper():
                     single_data['conv_matrix'])
                 data.append(single_data)
         return cls(data)
+
+class BuildingClassMapperResult():
+    '''
+    Class to represent the result building class
+    after the mapping.
+    '''
+    def __init__(self, building_class, n_buildings):
+        self._building_class = building_class
+        self._n_buildings = n_buildings
+
+    def get_building_class(self):
+        '''
+        Returns the building class.
+        '''
+        return self._building_class
+
+    def get_n_buildings(self):
+        '''
+        Returns the number of buildings in this
+        building class.
+        '''
+        return self._n_buildings
+
+    def __repr__(self):
+        return 'BuildingClassMapperResult(' + \
+            'building_class={0}, n_buildings={1})'.format(
+                repr(self._building_class),
+                repr(self._n_buildings))
+
+class BuildingClassMapper():
+    '''
+    This is the mapper for the building classes only.
+    '''
+
+    def __init__(self, data):
+        self._data = data
+
+    def map_building_class(
+            self,
+            source_building_class,
+            source_name,
+            target_name,
+            n_buildings=1):
+        '''
+        Maps one building class from one schema
+        to other building classes.
+        '''
+        if source_name == target_name:
+            return [BuildingClassMapperResult(
+                source_building_class, n_buildings)]
+        result = []
+        possible_mappings = [
+            entry for entry in self._data
+            if entry['source_name'] == source_name
+            and entry['target_name'] == target_name
+        ]
+        if not possible_mappings:
+            raise Exception('There is no data to map from {0} to {1}'.format(
+                source_name, target_name))
+        conv_matrix = possible_mappings[0]['conv_matrix']
+
+        settings_for_bc = conv_matrix[source_building_class]
+
+        for target_building_class in settings_for_bc.keys():
+            proportion = settings_for_bc[target_building_class]
+            if proportion > 0:
+                result.append(
+                    BuildingClassMapperResult(
+                        target_building_class,
+                        proportion*n_buildings))
+        return result
+    

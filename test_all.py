@@ -16,7 +16,7 @@ from shapely import wkt
 
 import exposure
 import fragility
-from taxonomymapping import DamageStateMapper
+from taxonomymapping import BuildingClassMapper, DamageStateMapper
 from deus import update_exposure_cell
 
 
@@ -459,6 +459,63 @@ class TestAll(unittest.TestCase):
 
         damage_state_mapper = DamageStateMapper.from_files(files)
         self.assertIsNotNone(damage_state_mapper)
+
+    def test_building_class_mapping(self):
+        '''
+        Test the mapping of one building class to another.
+        :return: None
+        '''
+
+        # the names and the data here are mostly
+        # fantasy values
+        
+        mapping_data = [
+            {
+                'source_name': 'ems_98',
+                'target_name': 'sup_13',
+                'conv_matrix': {
+                    'URM': {
+                        'WOOD': 0.2,
+                        'RC': 0.8,
+                    },
+                },
+            },
+        ]
+
+        building_class_mapper = BuildingClassMapper(mapping_data)
+
+        result_urm_ems_to_ems = building_class_mapper.map_building_class(
+            source_building_class='URM',
+            source_name='ems_98',
+            target_name='ems_98',
+            n_buildings=100.0
+        )
+
+        self.assertEqual(1, len(result_urm_ems_to_ems))
+        self.assertEqual('URM', result_urm_ems_to_ems[0].get_building_class())
+        self.assertLess(99.9999, result_urm_ems_to_ems[0].get_n_buildings())
+        self.assertLess(result_urm_ems_to_ems[0].get_n_buildings(), 100.0001)
+
+        result_urm_ems_to_sup = building_class_mapper.map_building_class(
+            source_building_class='URM',
+            source_name='ems_98',
+            target_name='sup_13',
+            n_buildings=100.0
+        )
+
+        self.assertEqual(2, len(result_urm_ems_to_sup))
+        result_urm_ems_to_sup_wood = [
+            x for x in result_urm_ems_to_sup
+            if x.get_building_class() == 'WOOD'][0]
+        result_urm_ems_to_sup_rc = [
+            x for x in result_urm_ems_to_sup
+            if x.get_building_class() == 'RC'][0]
+
+        self.assertLess(19.999, result_urm_ems_to_sup_wood.get_n_buildings())
+        self.assertLess(result_urm_ems_to_sup_wood.get_n_buildings(), 20.001)
+
+        self.assertLess(79.999, result_urm_ems_to_sup_rc.get_n_buildings())
+        self.assertLess(result_urm_ems_to_sup_rc.get_n_buildings(), 81.001)
 
 
 if __name__ == "__main__":
