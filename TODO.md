@@ -24,7 +24,44 @@ https://github.com/GFZ-Centre-for-Early-Warning/fuzzy_schemas/blob/master/schema
 (So that there is no _DXX at the end of the taxonomy).
 ## Check filling of damage state functions if there is one in middle
 (Say from damage state 3 to 5, but no 4 to 5, so it should use the
-same as 3 to 5, but 2 to 5 should still use 
+same as 3 to 5, but 2 to 5 should still use)
 ## Update the testinput data
 (Check assetmaster and modelprop for input data as taxonomy didn't
 match in this files).
+
+(The data from assetmaster, as they are at the moment, should be
+replaced against).
+
+(+ in the riesgos powerfolder there are compatible versions of
+assetmaster and modelprop, so that the used taxonomies for the schemas
+match.  
+## Keep track of the transitions
+(How many buildings go from one damage state to another).
+(Should be the transitions of the data *after* the mapping to another
+schema). (It is very important that the base damage state is,
+so that we can list them (RC_D0 -> D1 : 20,
+RC_D1 -> RC_D2 : -5,
+RC_D2 -> RC_D3: 30, ...)
+
+--> Switch to file based output for all the outputs.
+
+And the mapping (conversion) must be applied before using the
+fragility functions (so that we have the aggregated mapped taxonomy as
+the base for keeping track of the transitions).
+
+Still computing on the geocell level, so that we can take care about
+the spatial pattern)
+
+## Compute Loss
+There should be also a service for computing the damage (it will get
+the geocells and the transitions (or a list of transitions for
+different events). This will compute the loss. (And it will be very
+important to care about the intermediate transitions).
+
+Maybe it can be integrated into deus, but there will be definitivly
+another service for this.
+
+## Test with supparsi (tsunami) fragility functions
+
+(The modelprop on the riesgos powerfolder has some data for the
+supparsi schema). 
