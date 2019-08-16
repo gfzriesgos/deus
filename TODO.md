@@ -14,6 +14,11 @@ because no data for the tsunami damage classes and the costs exists.)
 (+ First is the mapping of the taxonomy then the mapping of the damage
 classes; both are be independant from each other - at least what we
 assume).
+
+(maybe the mapping here is useful to match the taxonomy strings
+from the fragility with those from the exposure
+https://github.com/GFZ-Centre-for-Early-Warning/fuzzy_schemas/blob/master/schema_scripts/Valpo_test/Valpotest.ipynb
+)
 ## Add reading the name of the fragility schema
 ## Think about having columns for damage state
 (So that there is no _DXX at the end of the taxonomy).
