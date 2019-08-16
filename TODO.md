@@ -30,7 +30,8 @@ same as 3 to 5, but 2 to 5 should still use)
 match in this files).
 
 (The data from assetmaster, as they are at the moment, should be
-replaced against).
+replaced, so the exposure_new_2019_08_15.json file should not be taken
+into account).
 
 (+ in the riesgos powerfolder there are compatible versions of
 assetmaster and modelprop, so that the used taxonomies for the schemas
