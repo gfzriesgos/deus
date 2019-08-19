@@ -90,7 +90,7 @@ def main():
 
     args = argparser.parse_args()
 
-    intensity_provider = shakemap.Shakemap.from_file(
+    intensity_provider = shakemap.Shakemaps.from_file(
         args.intensity_file).to_intensity_provider()
     fragility_provider = fragility.Fragility.from_file(
         args.fragilty_file).to_fragility_provider()

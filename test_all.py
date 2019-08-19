@@ -14,6 +14,7 @@ import pandas as pd
 
 from shapely import wkt
 
+import shakemap
 import exposure
 import fragility
 from taxonomymapping import BuildingClassMapper, DamageStateMapper
@@ -468,7 +469,6 @@ class TestAll(unittest.TestCase):
 
         # the names and the data here are mostly
         # fantasy values
-        
         mapping_data = [
             {
                 'source_name': 'ems_98',
@@ -516,6 +516,32 @@ class TestAll(unittest.TestCase):
 
         self.assertLess(79.999, result_urm_ems_to_sup_rc.get_n_buildings())
         self.assertLess(result_urm_ems_to_sup_rc.get_n_buildings(), 81.001)
+
+    def test_read_shakemap(self):
+        '''
+        Reads a normal shakemap (as it is the output of shakyground.
+        '''
+        shake_map_eq = shakemap.Shakemaps.from_file(
+            './testinputs/shakemap.xml')
+        eq_provider = shake_map_eq.to_intensity_provider()
+
+        self.assertIsNotNone(eq_provider)
+
+        eq_intensity, eq_units = eq_provider.get_nearest(
+            lon=-71.2, lat=-32.65)
+
+        self.assertLess(0.06327, eq_intensity['PGA'])
+        self.assertLess(eq_intensity['PGA'], 0.06328)
+
+        shake_map_ts = shakemap.Shakemaps.from_file(
+            './testinputs/shakemap_tsunami.xml')
+        ts_provider = shake_map_ts.to_intensity_provider()
+
+        ts_intensity, ts_units = ts_provider.get_nearest(
+            lon=-71.547, lat=-32.803)
+
+        self.assertLess(3.5621, ts_intensity['mwh'])
+        self.assertLess(ts_intensity['mwh'], 3.5623)
 
 
 if __name__ == "__main__":

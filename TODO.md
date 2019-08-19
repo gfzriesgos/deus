@@ -1,6 +1,5 @@
 #TODO-List
 
-
 ## Mapping of taxonomies
 (Exposure should contain a schema).
 (Also one class can eventually be split up into several classes (for

@@ -5,6 +5,7 @@ This module contains classes to handle
 the access to shakemap data.
 '''
 
+import collections
 import io
 import tokenize
 
@@ -13,7 +14,61 @@ import numpy as np
 from scipy.spatial import cKDTree
 
 
-class Shakemap():
+class TsunamiShakemap():
+    '''
+    Shakemap implementation for the tsunamis.
+    '''
+
+    def __init__(self, root):
+        self._root = root
+
+    def _find_grid_fields(self):
+        grid_fields = self._root.find(
+            'event').findall(
+                'grid_field')
+        return [ShakemapGridField(x) for x in grid_fields]
+
+    def _find_grid_data(self):
+        grid_data = self._root.find(
+            'event').find(
+                'grid_data')
+        return ShakemapGridData(grid_data)
+
+    def to_intensity_provider(self):
+        '''
+        Returns an instance to access the data point
+        that is closest to a given location.
+        '''
+        grid_fields = self._find_grid_fields()
+        grid_data = self._find_grid_data()
+
+        return ShakemapIntensityProvider(
+            grid_fields, grid_data,
+            'longitude', 'latitude')
+
+
+class Shakemaps():
+    '''
+    Factory class for reading shakemaps.
+    '''
+    @staticmethod
+    def from_file(file_name):
+        '''
+        Read the shakemap from an xml file.
+        '''
+        xml = le.parse(file_name)
+        root = xml.getroot()
+
+        if Shakemaps._looks_like_tsunami_shakemap(root):
+            return TsunamiShakemap(root)
+        return EqShakemap(root)
+
+    @staticmethod
+    def _looks_like_tsunami_shakemap(root):
+        return root.get('shakemap_originator') == '_AWI_'
+
+
+class EqShakemap():
     '''
     Class to handle the xml access to
     the shakemap xml elements.
@@ -31,11 +86,6 @@ class Shakemap():
             '{http://earthquake.usgs.gov/eqcenter/shakemap}grid_data')
         return ShakemapGridData(grid_data)
 
-    def _find_grid_specification(self):
-        specification = self._root.find(
-            '{http://earthquake.usgs.gov/eqcenter/shakemap}grid_specification')
-        return ShakemapGridSpecification(specification)
-
     def to_intensity_provider(self):
         '''
         Returns an instance to access the data point
@@ -43,20 +93,9 @@ class Shakemap():
         '''
         grid_fields = self._find_grid_fields()
         grid_data = self._find_grid_data()
-        specification = self._find_grid_specification()
 
         return ShakemapIntensityProvider(
-            grid_fields, specification, grid_data)
-
-    @classmethod
-    def from_file(cls, file_name):
-        '''
-        Read the shakemap from an xml file.
-        '''
-        xml = le.parse(file_name)
-        root = xml.getroot()
-
-        return cls(root)
+            grid_fields, grid_data, 'LON', 'LAT')
 
 
 class ShakemapGridField():
@@ -86,29 +125,6 @@ class ShakemapGridField():
         return self._xml.get('units')
 
 
-class ShakemapGridSpecification():
-    '''
-    Class to give access to the grid specification
-    of the shakemap.
-    '''
-    def __init__(self, xml):
-        self._xml = xml
-
-    def get_n_lat(self):
-        '''
-        Returns the number of distinct latitude points
-        in the grid.
-        '''
-        return int(self._xml.get('nlat'))
-
-    def get_n_lon(self):
-        '''
-        Returns the number of distinct longitude points
-        in the grid.
-        '''
-        return int(self._xml.get('nlon'))
-
-
 class ShakemapGridData():
     '''
     Class for the xml element with the grid data.
@@ -130,35 +146,34 @@ class ShakemapIntensityProvider():
     Class to give access to the nearest value to a given
     location.
     '''
-    def __init__(self, grid_fields, grid_specification, grid_data):
+    def __init__(self, grid_fields, grid_data, lon_name, lat_name):
         names = [x.get_name() for x in grid_fields]
         units = {x.get_name(): x.get_units() for x in grid_fields}
-        data = {}
-        for name in names:
-            data[name] = np.zeros(
-                grid_specification.get_n_lon() *
-                grid_specification.get_n_lat())
+        data = collections.defaultdict(list)
         # it must be tokenized (because of xml processing the newlines
         # may not be consistent)
         tokens = tokenize.tokenize(
             io.BytesIO(
                 grid_data.get_text().encode('utf-8')).readline)
         index = 0
-        rowindex = 0
+        token_before = None
         for token in tokens:
             # 2 is number
             if token.type == 2:
                 if index >= len(names):
                     index = 0
-                    rowindex += 1
                 name = names[index]
-                data[name][rowindex] = float(token.string)
+                value = float(token.string)
+                if token_before is not None and token_before.string == '-':
+                    value = -1 * value
+                data[name].append(value)
                 index += 1
+            token_before = token
         coords = np.array(
             [
-                [data['LON'][i],
-                 data['LAT'][i]]
-                for i in range(len(data['LON']))])
+                [data[lon_name][i],
+                 data[lat_name][i]]
+                for i in range(len(data[lon_name]))])
         self._spatial_index = cKDTree(coords)
         self._names = names
         self._data = data
