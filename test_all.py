@@ -17,7 +17,8 @@ from shapely import wkt
 import shakemap
 import exposure
 import fragility
-from taxonomymapping import BuildingClassMapper, DamageStateMapper
+from taxonomymapping import BuildingClassMapper, \
+        DamageStateMapper, SchemaMapper
 from deus import update_exposure_cell
 
 
@@ -520,6 +521,7 @@ class TestAll(unittest.TestCase):
     def test_read_shakemap(self):
         '''
         Reads a normal shakemap (as it is the output of shakyground.
+        :return: None
         '''
         shake_map_eq = shakemap.Shakemaps.from_file(
             './testinputs/shakemap.xml')
@@ -542,6 +544,105 @@ class TestAll(unittest.TestCase):
 
         self.assertLess(3.5621, ts_intensity['mwh'])
         self.assertLess(ts_intensity['mwh'], 3.5623)
+
+    def test_schema_mapping(self):
+        '''
+        Maps a building class with damage states to other
+        building classes and damage states.
+        :return: None
+        '''
+
+        bc_mapping_data = [
+            {
+                'source_name': 'ems_98',
+                'target_name': 'sup_13',
+                'conv_matrix': {
+                    'URM': {
+                        'WOOD': 0.2,
+                        'RC': 0.8,
+                    },
+                },
+            }
+        ]
+
+        building_class_mapper = BuildingClassMapper(bc_mapping_data)
+
+        ds_mapping_data = [
+            {
+                'source_name': 'ems_98',
+                'target_name': 'sup_13',
+                'conv_matrix': {
+                    '5': {
+                        '5': 0.5,
+                        '6': 0.5,
+                    },
+                },
+            },
+        ]
+
+        damage_state_mapper = DamageStateMapper(ds_mapping_data)
+
+        schema_mapper = SchemaMapper(
+            building_class_mapper, damage_state_mapper)
+
+        result_mapping_in_schema = schema_mapper.map_schema(
+            source_building_class='URM',
+            source_damage_state=5,
+            source_name='ems_98',
+            target_name='ems_98',
+            n_buildings=100.0
+        )
+
+        self.assertEqual(1, len(result_mapping_in_schema))
+        self.assertEquals(
+            'URM',
+            result_mapping_in_schema[0].get_building_class())
+        self.assertEquals(5, result_mapping_in_schema[0].get_damage_state())
+
+        self.assertLess(99.9, result_mapping_in_schema[0].get_n_buildings())
+        self.assertLess(result_mapping_in_schema[0].get_n_buildings(), 100.1)
+
+        result_mapping_to_sup = schema_mapper.map_schema(
+            source_building_class='URM',
+            source_damage_state=5,
+            source_name='ems_98',
+            target_name='sup_13',
+            n_buildings=100.0
+        )
+
+        self.assertEquals(4, len(result_mapping_to_sup))
+
+        res_wood_5 = [
+            x for x in result_mapping_to_sup
+            if x.get_building_class() == 'WOOD'
+            and x.get_damage_state() == 5][0]
+
+        self.assertLess(9.9, res_wood_5.get_n_buildings())
+        self.assertLess(res_wood_5.get_n_buildings(), 10.1)
+
+        res_wood_6 = [
+            x for x in result_mapping_to_sup
+            if x.get_building_class() == 'WOOD'
+            and x.get_damage_state() == 6][0]
+
+        self.assertLess(9.9, res_wood_6.get_n_buildings())
+        self.assertLess(res_wood_6.get_n_buildings(), 10.1)
+
+        res_rc_5 = [
+            x for x in result_mapping_to_sup
+            if x.get_building_class() == 'RC'
+            and x.get_damage_state() == 5][0]
+
+        self.assertLess(39.9, res_rc_5.get_n_buildings())
+        self.assertLess(res_rc_5.get_n_buildings(), 40.1)
+
+        res_rc_6 = [
+            x for x in result_mapping_to_sup
+            if x.get_building_class() == 'RC'
+            and x.get_damage_state() == 6][0]
+
+        self.assertLess(39.9, res_rc_6.get_n_buildings())
+        self.assertLess(res_rc_6.get_n_buildings(), 40.1)
 
 
 if __name__ == "__main__":

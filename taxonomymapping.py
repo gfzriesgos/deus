@@ -8,6 +8,90 @@ for the mapping of the taxonomies.
 import json
 
 
+class SchemaMapper():
+    '''
+    This schema mapper combines the mapping of building classes
+    and of damage states into one class.
+    '''
+    def __init__(self, building_class_mapper, damage_state_mapper):
+        self._building_class_mapper = building_class_mapper
+        self._damage_state_mapper = damage_state_mapper
+
+    def map_schema(self,
+                   source_building_class,
+                   source_damage_state,
+                   source_name,
+                   target_name,
+                   n_buildings=1.0):
+        '''
+        Maps a building class with a damage state and n buildings
+        to another schema (with possible several damage states and
+        several different building classes).
+        '''
+        if source_name == target_name:
+            return [SchemaMapperResult(
+                building_class=source_building_class,
+                damage_state=source_damage_state,
+                n_buildings=n_buildings)]
+
+        result = []
+        building_class_mapping_results = \
+            self._building_class_mapper.map_building_class(
+                source_building_class=source_building_class,
+                source_name=source_name,
+                target_name=target_name,
+                n_buildings=n_buildings,
+            )
+
+        for bc_mapping in building_class_mapping_results:
+            damage_state_mapping_results = \
+                self._damage_state_mapper.map_damage_state(
+                    source_damage_state=source_damage_state,
+                    source_name=source_name,
+                    target_name=target_name,
+                    n_buildings=1.0
+                )
+
+            for ds_mapping in damage_state_mapping_results:
+                result.append(
+                    SchemaMapperResult(
+                        building_class=bc_mapping.get_building_class(),
+                        damage_state=ds_mapping.get_damage_state(),
+                        n_buildings=bc_mapping.get_n_buildings() *
+                        ds_mapping.get_n_buildings())
+                )
+        return result
+
+
+class SchemaMapperResult():
+    '''
+    Result class for the schema mapping.
+    '''
+    def __init__(self, building_class, damage_state, n_buildings):
+        self._building_class = building_class
+        self._damage_state = damage_state
+        self._n_buildings = n_buildings
+
+    def get_building_class(self):
+        '''
+        Returns the building class.
+        '''
+        return self._building_class
+
+    def get_damage_state(self):
+        '''
+        Returns the damage state.
+        '''
+        return self._damage_state
+
+    def get_n_buildings(self):
+        '''
+        Returns the number of buildings with the damage
+        state and the building class.
+        '''
+        return self._n_buildings
+
+
 class TaxonomyMapper():
     '''
     This class is the taxonomy mapper.
@@ -138,6 +222,7 @@ class DamageStateMapper():
                 data.append(single_data)
         return cls(data)
 
+
 class BuildingClassMapperResult():
     '''
     Class to represent the result building class
@@ -165,6 +250,7 @@ class BuildingClassMapperResult():
             'building_class={0}, n_buildings={1})'.format(
                 repr(self._building_class),
                 repr(self._n_buildings))
+
 
 class BuildingClassMapper():
     '''
@@ -208,4 +294,3 @@ class BuildingClassMapper():
                         target_building_class,
                         proportion*n_buildings))
         return result
-    
