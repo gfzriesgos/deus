@@ -521,8 +521,8 @@ class TestAll(unittest.TestCase):
         ts_intensity, ts_units = ts_provider.get_nearest(
             lon=-71.547, lat=-32.803)
 
-        self.assertLess(3.5621, ts_intensity['mwh'])
-        self.assertLess(ts_intensity['mwh'], 3.5623)
+        self.assertLess(3.5621, ts_intensity['MWH'])
+        self.assertLess(ts_intensity['MWH'], 3.5623)
 
     def test_schema_mapping(self):
         '''
@@ -714,7 +714,7 @@ class TestAll(unittest.TestCase):
         fragility_provider = fragility.Fragility(fragility_data).to_fragility_provider()
         intensity_provider = MockedIntensityProvider()
 
-        updated_exposure_cell = exposure_cell.update(intensity_provider, fragility_provider)
+        updated_exposure_cell, transition_cell = exposure_cell.update(intensity_provider, fragility_provider)
 
         self.assertEqual(updated_exposure_cell.get_schema(), exposure_cell.get_schema())
 
@@ -743,6 +743,42 @@ class TestAll(unittest.TestCase):
 
         self.assertLess(2.74, updated_series['ER_ETR_H1_2_D2'])
         self.assertLess(updated_series['ER_ETR_H1_2_D2'], 2.75)
+
+        transition_series = transition_cell.get_series()
+
+        self.assertEqual(updated_series['gc_id'], transition_series['gc_id'])
+        self.assertEqual(updated_series['geometry'], transition_series['geometry'])
+        self.assertEqual(updated_series['name'], transition_series['name'])
+
+        updates_mur_h1 = transition_series['MUR_H1']
+
+        updates_mur_h1_0_1 = [
+            x for x in updates_mur_h1
+            if x['from'] == 0
+            and x['to'] == 1][0]
+
+        self.assertLess(0.022, updates_mur_h1_0_1['n_buildings'])
+        self.assertLess(updates_mur_h1_0_1['n_buildings'], 0.023)
+
+        # the other mur updates are similar, not so fancy anyway
+
+        updates_er_etr_h1_2 = transition_series['ER_ETR_H1_2']
+
+        updates_er_etr_h1_2_2_3 = [
+            x for x in updates_er_etr_h1_2
+            if x['from'] == 2
+            and x['to'] == 3][0]
+
+        self.assertLess(43.87, updates_er_etr_h1_2_2_3['n_buildings'])
+        self.assertLess(updates_er_etr_h1_2_2_3['n_buildings'], 43.88)
+
+        updates_er_etr_h1_2_2_4 = [
+            x for x in updates_er_etr_h1_2
+            if x['from'] == 2
+            and x['to'] == 4][0]
+
+        self.assertLess(153.38, updates_er_etr_h1_2_2_4['n_buildings'])
+        self.assertLess(updates_er_etr_h1_2_2_4['n_buildings'], 153.39)
 
     def test_sorting_of_damage_states(self):
         ds1 = fragility.DamageState(taxonomy='xyz', from_state=1, to_state=2, intensity_field='xyz', intensity_unit='xyz', fragility_function=None)

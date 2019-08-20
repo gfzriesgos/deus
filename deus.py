@@ -41,6 +41,10 @@ def main():
         '--updated_exposure_output_file',
         default='updated_exposure.json',
         help='Filename for the output with the updated exposure data')
+    argparser.add_argument(
+        '--transition_output_file',
+        default='output_transitions.json',
+        help='Filename for the output with the transitions')
 
     args = argparser.parse_args()
 
@@ -69,14 +73,20 @@ def main():
                                                  damage_state_mapper)
 
     updated_exposure_cells = exposure.ExposureCellCollector()
+    transition_cells = exposure.TransitionCellCollector()
 
     for original_exposure_cell in exposure_cell_provider:
         mapped_exposure_cell = original_exposure_cell.map_schema(fragility_provider.get_schema(), schema_mapper)
-        single_updated_exposure_cell = mapped_exposure_cell.update(intensity_provider, fragility_provider)
+        single_updated_exposure_cell, single_transition_cell = mapped_exposure_cell.update(intensity_provider, fragility_provider)
+
         updated_exposure_cells.append(single_updated_exposure_cell)
+        transition_cells.append(single_transition_cell)
 
     with open(args.updated_exposure_output_file, 'wt') as output_file_for_exposure:
         print(updated_exposure_cells, file=output_file_for_exposure)
+
+    with open(args.transition_output_file, 'wt') as output_file_for_transitions:
+        print(transition_cells, file=output_file_for_transitions)
 
 
 if __name__ == '__main__':
