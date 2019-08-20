@@ -10,6 +10,7 @@ import argparse
 import glob
 import os
 
+import damage
 import exposure
 import fragility
 import shakemap
@@ -38,6 +39,9 @@ def main():
         'fragilty_file',
         help='File with the fragility function data')
     argparser.add_argument(
+        'damage_file',
+        help='File with the damage function data')
+    argparser.add_argument(
         '--updated_exposure_output_file',
         default='updated_exposure.json',
         help='Filename for the output with the updated exposure data')
@@ -45,6 +49,10 @@ def main():
         '--transition_output_file',
         default='output_transitions.json',
         help='Filename for the output with the transitions')
+    argparser.add_argument(
+        '--damage_output_file',
+        default='output_damage.json',
+        help='Filename for the output with the computed damage')
 
     args = argparser.parse_args()
 
@@ -54,6 +62,8 @@ def main():
         args.fragilty_file).to_fragility_provider()
     exposure_cell_provider = exposure.ExposureCellProvider.from_file(
         args.exposure_file, args.exposure_schema)
+    damage_provider = damage.DamageProvider.from_file(
+        args.damage_file)
 
     current_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -72,8 +82,10 @@ def main():
     schema_mapper = schemamapping.SchemaMapper(building_class_mapper,
                                                  damage_state_mapper)
 
+
     updated_exposure_cells = exposure.ExposureCellCollector()
     transition_cells = exposure.TransitionCellCollector()
+    damage_cells = damage.DamageCellCollector()
 
     for original_exposure_cell in exposure_cell_provider:
         mapped_exposure_cell = original_exposure_cell.map_schema(fragility_provider.get_schema(), schema_mapper)
@@ -82,11 +94,16 @@ def main():
         updated_exposure_cells.append(single_updated_exposure_cell)
         transition_cells.append(single_transition_cell)
 
+        damage_cells.append(single_transition_cell.to_damage_cell(damage_provider))
+
     with open(args.updated_exposure_output_file, 'wt') as output_file_for_exposure:
         print(updated_exposure_cells, file=output_file_for_exposure)
 
     with open(args.transition_output_file, 'wt') as output_file_for_transitions:
         print(transition_cells, file=output_file_for_transitions)
+
+    with open(args.damage_output_file, 'wt') as output_file_for_damage:
+        print(damage_cells, file=output_file_for_damage)
 
 
 if __name__ == '__main__':

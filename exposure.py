@@ -314,6 +314,27 @@ class TransitionCell():
             'n_buildings': n_buildings,
         })
 
+    def to_damage_cell(self, damage_provider):
+        series = pd.Series()
+
+        for field in ExposureCell.get_fields_to_copy():
+            series[field] = self._series[field]
+
+        damage_value = 0
+
+        for field in self._series.keys():
+            if field not in ExposureCell.get_fields_to_copy():
+                building_class = field
+                list_of_transitions = self._series[building_class]
+
+                for transition in list_of_transitions:
+                    damage_one_building = damage_provider.get_damage_for_transition(
+                        building_class, transition['from'], transition['to'])
+                    damage_n_buildings = damage_one_building * transition['n_buildings']
+                    damage_value += damage_n_buildings
+        series['damage'] = damage_value
+        return DamageCell(series)
+
 class TransitionCellCollector():
     def __init__(self):
         self._elements = []
@@ -324,3 +345,10 @@ class TransitionCellCollector():
     def __str__(self):
         gdf = gpd.GeoDataFrame([x.get_series() for x in self._elements])
         return gdf.to_json()
+
+class DamageCell():
+    def __init__(self, series):
+        self._series = series
+
+    def get_series(self):
+        return self._series

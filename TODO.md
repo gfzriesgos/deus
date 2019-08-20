@@ -19,12 +19,3 @@ so that should be in the imt field for the fragility files for supparsi.)
 (If it can't be used for this - so that it has another meaning and I'm
 just wrong with my idea to use it to read the intensity value -
 the code must be changed).
-
-## Compute Loss
-There should be also a service for computing the damage (it will get
-the geocells and the transitions (or a list of transitions for
-different events). This will compute the loss. (And it will be very
-important to care about the intermediate transitions).
-
-Maybe it can be integrated into deus, but there will be definitivly
-another service for this.

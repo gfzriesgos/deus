@@ -16,10 +16,11 @@ import pandas as pd
 
 from shapely import wkt
 
-import shakemap
+import damage
 import exposure
 import fragility
 import schemamapping
+import shakemap
 
 
 class TestAll(unittest.TestCase):
@@ -790,6 +791,34 @@ class TestAll(unittest.TestCase):
 
         self.assertEqual(3, ds_list[0].to_state)
         self.assertEqual(2, ds_list[1].to_state)
+    
+    def test_damage_computation(self):
+        damage_data = {
+                'data': [
+                    {
+                        'taxonomy': 'URM',
+                        'conv_matrix': {
+                            '0': {
+                                '1': 500,
+                                '2': 600,
+                                '3': 700,
+                                '4': 800,
+                            }
+                        }
+                    }
+                ]
+        }
+
+        damage_provider = damage.DamageProvider(damage_data)
+
+        damage_value = damage_provider.get_damage_for_transition(
+            building_class='URM',
+            from_damage_state=0,
+            to_damage_state=3
+        )
+
+        self.assertEqual(700, damage_value)
+
 
 class MockedIntensityProvider():
     '''Just a dummy implementation.'''
