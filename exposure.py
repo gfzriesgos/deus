@@ -16,20 +16,21 @@ class ExposureCellProvider():
     Class to give access to all of the
     exposure cells.
     '''
-    def __init__(self, gdf):
+    def __init__(self, gdf, schema):
         self._gdf = gdf
+        self._schema = schema
 
     def __iter__(self):
         for _, row in self._gdf.iterrows():
-            yield ExposureCell(row)
+            yield ExposureCell(row, self._schema)
 
     @classmethod
-    def from_file(cls, file_name):
+    def from_file(cls, file_name, schema):
         '''
         Read the data from a file.
         '''
         gdf = gpd.GeoDataFrame.from_file(file_name)
-        return cls(gdf)
+        return cls(gdf, schema)
 
 
 class ExposureCellCollector():
@@ -55,14 +56,18 @@ class ExposureCell():
     '''
     Class to represent an exposure cell.
     '''
-    def __init__(self, series):
+    def __init__(self, series, schema):
         self._series = series
+        self._schema = schema
 
     def get_series(self):
         '''
         Just returns the series as it is.
         '''
         return self._series
+
+    def get_schema(self):
+        return self._schema
 
     def get_lon_lat_of_centroid(self):
         '''
@@ -76,7 +81,7 @@ class ExposureCell():
 
         return lon, lat
 
-    def new_prototype(self):
+    def new_prototype(self, schema):
         '''
         Creates a new exposure cell that contains
         the same name and geometry as the base object,
@@ -86,7 +91,7 @@ class ExposureCell():
         series = pd.Series()
         for field in ExposureCell.get_fields_to_copy():
             series[field] = self._series[field]
-        return ExposureCell(series)
+        return ExposureCell(series, schema)
 
     def get_taxonomies(self):
         '''
@@ -101,7 +106,7 @@ class ExposureCell():
                     if math.isnan(count):
                         count = 0.0
                     name = field.replace(r'\/', '/')
-                    result.append(Taxonomy(name=name, count=count))
+                    result.append(Taxonomy(name=name, count=count, schema=self._schema))
         return result
 
     @staticmethod
@@ -131,6 +136,84 @@ class ExposureCell():
             self._series[exposure_to_set] = 0.0
         self._series[exposure_to_set] += count
 
+    def map_schema(self,
+            target_name,
+            schema_mapper):
+        mapped_cell = self.new_prototype(target_name)
+
+        for taxonomy in self.get_taxonomies():
+            building_class = taxonomy.get_building_class()
+            damage_state = taxonomy.get_damage_state()
+            count = taxonomy.get_count()
+
+            mapping_results = schema_mapper.map_schema(
+                source_building_class=building_class,
+                source_damage_state=damage_state,
+                source_name=self._schema,
+                target_name=target_name,
+                n_buildings=count
+            )
+
+            for res in mapping_results:
+                mapped_cell.add_n_for_damage_state(
+                        res.get_building_class(),
+                        res.get_damage_state(),
+                        res.get_n_buildings(),
+                )
+        return mapped_cell
+
+
+    def _update_taxonomy(self, old_taxonomy, intensity, units, fragility_provider):
+        building_class = old_taxonomy.get_building_class()
+        old_damage_state = old_taxonomy.get_damage_state()
+        old_count = old_taxonomy.get_count()
+
+        damage_states = fragility_provider.get_damage_states_for_taxonomy(
+            building_class)
+
+        damage_states_to_care = [
+            ds for ds in damage_states
+            if ds.from_state == old_damage_state
+            and ds.to_state > old_damage_state
+        ]
+
+        damage_states_to_care.sort(key=sort_by_to_damage_state_desc)
+
+        n_left = old_count
+
+        for single_damage_state in damage_states_to_care:
+            probability = single_damage_state.get_probability_for_intensity(
+                intensity, units)
+            n_buildings_in_damage_state = probability * n_left
+
+            n_left -= n_buildings_in_damage_state
+
+            self.add_n_for_damage_state(
+                building_class,
+                single_damage_state.to_state,
+                n_buildings_in_damage_state
+            )
+
+        self.add_n_for_damage_state(
+            building_class,
+            old_damage_state,
+            n_left
+        )
+
+    def update(self,
+            intensity_provider,
+            fragility_provider):
+        lon, lat = self.get_lon_lat_of_centroid()
+        intensity, units = intensity_provider.get_nearest(lon=lon, lat=lat)
+
+        updated_cell = self.new_prototype(self._schema)
+
+        for taxonomy in self.get_taxonomies():
+            updated_cell._update_taxonomy(taxonomy, intensity, units, fragility_provider)
+        return updated_cell
+
+def sort_by_to_damage_state_desc(damage_state):
+    return damage_state.to_state * -1
 
 def update_taxonomy_damage_state(taxonomy, new_damage_state):
     '''
@@ -146,31 +229,35 @@ def update_taxonomy_damage_state(taxonomy, new_damage_state):
     return re.sub(r'_D\d$', '_D' + str(new_damage_state), taxonomy)
 
 
-def get_damage_state_from_taxonomy(taxonomy):
+def get_damage_state_from_taxonomy(taxonomy_str):
     '''
     Returns the damage state from a given taxonomy string.
     For example for 'AA' the result is 0.
     For 'AA_D1' the result is 1.
     '''
 
-    match = re.search(r'D(\d)$', taxonomy)
+    match = re.search(r'D(\d)$', taxonomy_str)
     if match:
         return int(match.group(1))
     return 0
 
+def get_building_class_from_taxonomy(taxonomy_str):
+    return re.sub(r'_D\d+$', '', taxonomy_str)
 
 class Taxonomy():
     '''
     Class to handle the taxonomy of the exposure.
     '''
-    def __init__(self, name, count):
+    def __init__(self, name, count, schema):
         self._name = name
         self._count = count
+        self._schema = schema
 
     def __eq__(self, other):
         if isinstance(other, Taxonomy):
             return self._name == other.get_name() and \
-                    self._count == other.get_count()
+                    self._count == other.get_count() and \
+                    self._schema == other.get_schema()
         return False
 
     def get_damage_state(self):
@@ -178,6 +265,9 @@ class Taxonomy():
         Returns the damage state.
         '''
         return get_damage_state_from_taxonomy(self._name)
+
+    def get_building_class(self):
+        return get_building_class_from_taxonomy(self._name)
 
     def get_name(self):
         '''
@@ -190,3 +280,6 @@ class Taxonomy():
         Returns the given count of buildings in this class so far.
         '''
         return self._count
+
+    def get_schema(self):
+        return self._schema

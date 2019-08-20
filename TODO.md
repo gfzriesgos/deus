@@ -1,40 +1,25 @@
 #TODO-List
 
-## Mapping of taxonomies
-(Exposure should contain a schema).
-(Also one class can eventually be split up into several classes (for
-example 50%/50%)).
-
-(It stays that we only have to do the mapping to another schema before
-the fragility computation; maybe in a later stage when we have to
-compute costs we must do the back mapping to the earth quake schema,
-because no data for the tsunami damage classes and the costs exists.)
-
-(+ First is the mapping of the taxonomy then the mapping of the damage
-classes; both are be independant from each other - at least what we
-assume).
-
-(maybe the mapping here is useful to match the taxonomy strings
-from the fragility with those from the exposure
-https://github.com/GFZ-Centre-for-Early-Warning/fuzzy_schemas/blob/master/schema_scripts/Valpo_test/Valpotest.ipynb
-)
-## Add reading the name of the fragility schema
+## Add files to read the building class mappings between schemas
+(Should follow the same structure as the mapping files for the damage states).
+## Add name of input exposure taxonomy to exposure file (+ and to updated)
+(At best the very same name as the fragility files uses as ids).
 ## Think about having columns for damage state
-(So that there is no _DXX at the end of the taxonomy).
-## Check filling of damage state functions if there is one in middle
-(Say from damage state 3 to 5, but no 4 to 5, so it should use the
-same as 3 to 5, but 2 to 5 should still use)
-## Update the testinput data
-(Check assetmaster and modelprop for input data as taxonomy didn't
-match in this files).
+(So that there is no `_DXX` at the end of the taxonomy).
+## Check for updates in Assetmaster and Modelprop
+(Should be done from time to time to ensure that this service can still
+read the fragility data *AND* uses the same output format as the
+exposure data that is given as input).
+## Clear imt field in fragility files
+(At the moment I use them to read the correct value out of the shakemap,
+so that it is 'pga' for earth quakes.
+The tsunami shakemaps have the intensity as mwh - maximum wave height,
+so that should be in the imt field for the fragility files for supparsi.)
 
-(The data from assetmaster, as they are at the moment, should be
-replaced, so the exposure_new_2019_08_15.json file should not be taken
-into account).
+(If it can't be used for this - so that it has another meaning and I'm
+just wrong with my idea to use it to read the intensity value -
+the code must be changed).
 
-(+ in the riesgos powerfolder there are compatible versions of
-assetmaster and modelprop, so that the used taxonomies for the schemas
-match.  
 ## Keep track of the transitions
 (How many buildings go from one damage state to another).
 (Should be the transitions of the data *after* the mapping to another
@@ -60,8 +45,3 @@ important to care about the intermediate transitions).
 
 Maybe it can be integrated into deus, but there will be definitivly
 another service for this.
-
-## Test with supparsi (tsunami) fragility functions
-
-(The modelprop on the riesgos powerfolder has some data for the
-supparsi schema). 

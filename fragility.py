@@ -47,7 +47,7 @@ class DamageState():
 
         self.fragility_function = fragility_function
 
-    def get_probability_for_intensity(self, intesity, units):
+    def get_probability_for_intensity(self, intensity, units):
         '''
         Returns the probabilit value for the given
         intensity.
@@ -66,7 +66,7 @@ class DamageState():
         fragility function is not the expected one.
         '''
         field = self.intensity_field.upper()
-        value = intesity[field]
+        value = intensity[field]
         unit = units[field]
 
         if unit != self.intensity_unit:
@@ -151,7 +151,10 @@ class Fragility():
 
                 damage_states_by_taxonomy[taxonomy].append(damage_state)
         Fragility._add_damage_states_if_missing(damage_states_by_taxonomy)
-        return FragilityProvider(damage_states_by_taxonomy)
+
+        schema = self._data['meta']['id']
+
+        return FragilityProvider(damage_states_by_taxonomy, schema)
 
     @staticmethod
     def _add_damage_states_if_missing(damage_states_by_taxonomy):
@@ -203,8 +206,9 @@ class FragilityProvider():
     Class to give access to the taxonomies and
     the damage states with the fragility functions.
     '''
-    def __init__(self, damage_states_by_taxonomy):
+    def __init__(self, damage_states_by_taxonomy, schema):
         self._damage_states_by_taxonomy = damage_states_by_taxonomy
+        self._schema = schema
 
     def get_damage_states_for_taxonomy(self, taxonomy):
         '''
@@ -218,3 +222,6 @@ class FragilityProvider():
         Returns the taxonomies from the data.
         '''
         return self._damage_states_by_taxonomy.keys()
+
+    def get_schema(self):
+        return self._schema

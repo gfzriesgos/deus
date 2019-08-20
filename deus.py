@@ -13,60 +13,7 @@ import os
 import exposure
 import fragility
 import shakemap
-import taxonomymapping
-
-
-def update_exposure_cell(exposure_cell,
-                         intensity_provider,
-                         fragility_provider,
-                         taxonomy_mapper):
-    '''
-    Returns the updated exposure cell.
-    '''
-    lon, lat = exposure_cell.get_lon_lat_of_centroid()
-    intensity, units = intensity_provider.get_nearest(lon=lon, lat=lat)
-
-    updated_cell = exposure_cell.new_prototype()
-
-    for exposure_taxonomy in exposure_cell.get_taxonomies():
-        taxonomy = exposure_taxonomy.get_name()
-        count = exposure_taxonomy.get_count()
-        actual_damage_state = exposure_taxonomy.get_damage_state()
-
-        fragility_taxonomy, mapped_exposure_taxonomy, mapped_damage_state = \
-            taxonomy_mapper.find_fragility_taxonomy_and_new_exposure_taxonomy(
-                exposure_taxonomy=taxonomy,
-                actual_damage_state=actual_damage_state,
-                fragility_taxonomies=fragility_provider.get_taxonomies()
-            )
-
-        damage_states = fragility_provider.get_damage_states_for_taxonomy(
-            fragility_taxonomy)
-        damage_states_to_care = [
-            ds for ds in damage_states
-            if ds.from_state == mapped_damage_state
-            and ds.to_state > mapped_damage_state
-        ]
-
-        n_not_in_higher_damage_states = count
-        for single_damage_state in damage_states_to_care:
-            probability = single_damage_state.get_probability_for_intensity(
-                intensity, units)
-            n_buildings_in_damage_state = probability * count
-            n_not_in_higher_damage_states -= n_buildings_in_damage_state
-
-            updated_cell.add_n_for_damage_state(
-                mapped_exposure_taxonomy,
-                single_damage_state.to_state,
-                n_buildings_in_damage_state)
-
-        updated_cell.add_n_for_damage_state(
-            mapped_exposure_taxonomy,
-            actual_damage_state,
-            n_not_in_higher_damage_states)
-
-    return updated_cell
-
+import schemamapping
 
 def main():
     '''
@@ -85,8 +32,15 @@ def main():
         'exposure_file',
         help='File with the exposure data')
     argparser.add_argument(
+        'exposure_schema',
+        help='The actual schema for the exposure data')
+    argparser.add_argument(
         'fragilty_file',
         help='File with the fragility function data')
+    argparser.add_argument(
+        '--updated_exposure_output_file',
+        default='updated_exposure.json',
+        help='Filename for the output with the updated exposure data')
 
     args = argparser.parse_args()
 
@@ -95,29 +49,34 @@ def main():
     fragility_provider = fragility.Fragility.from_file(
         args.fragilty_file).to_fragility_provider()
     exposure_cell_provider = exposure.ExposureCellProvider.from_file(
-        args.exposure_file)
+        args.exposure_file, args.exposure_schema)
 
     current_dir = os.path.dirname(os.path.realpath(__file__))
+
+    pattern_to_search_for_bc_mappings = os.path.join(
+        current_dir, 'mapping_bc_*.json')
+    files_bc_mappings = glob.glob(pattern_to_search_for_bc_mappings)
+    building_class_mapper = schemamapping.BuildingClassMapper.from_files(
+        files_bc_mappings)
+    
     pattern_to_search_for_ds_mappings = os.path.join(
         current_dir, 'mapping_ds_*.json')
     files_ds_mappings = glob.glob(pattern_to_search_for_ds_mappings)
-    damage_state_mapper = taxonomymapping.DamageStateMapper.from_files(
+    damage_state_mapper = schemamapping.DamageStateMapper.from_files(
         files_ds_mappings)
 
-    taxonomy_mapper = taxonomymapping.TaxonomyMapper(damage_state_mapper)
+    schema_mapper = schemamapping.SchemaMapper(building_class_mapper,
+                                                 damage_state_mapper)
 
     updated_exposure_cells = exposure.ExposureCellCollector()
 
-    for exposure_cell in exposure_cell_provider:
-        single_updated_exposure_cell = update_exposure_cell(
-            exposure_cell=exposure_cell,
-            intensity_provider=intensity_provider,
-            fragility_provider=fragility_provider,
-            taxonomy_mapper=taxonomy_mapper,
-        )
+    for original_exposure_cell in exposure_cell_provider:
+        mapped_exposure_cell = original_exposure_cell.map_schema(fragility_provider.get_schema(), schema_mapper)
+        single_updated_exposure_cell = mapped_exposure_cell.update(intensity_provider, fragility_provider)
         updated_exposure_cells.append(single_updated_exposure_cell)
 
-    print(updated_exposure_cells)
+    with open(args.updated_exposure_output_file, 'wt') as output_file_for_exposure:
+        print(updated_exposure_cells, file=output_file_for_exposure)
 
 
 if __name__ == '__main__':

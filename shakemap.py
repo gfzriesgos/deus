@@ -44,7 +44,7 @@ class TsunamiShakemap():
 
         return ShakemapIntensityProvider(
             grid_fields, grid_data,
-            'longitude', 'latitude')
+            'longitude'.upper(), 'latitude'.upper())
 
 
 class Shakemaps():
@@ -147,8 +147,8 @@ class ShakemapIntensityProvider():
     location.
     '''
     def __init__(self, grid_fields, grid_data, lon_name, lat_name):
-        names = [x.get_name() for x in grid_fields]
-        units = {x.get_name(): x.get_units() for x in grid_fields}
+        names = [x.get_name().upper() for x in grid_fields]
+        units = {x.get_name().upper(): x.get_units() for x in grid_fields}
         data = collections.defaultdict(list)
         # it must be tokenized (because of xml processing the newlines
         # may not be consistent)

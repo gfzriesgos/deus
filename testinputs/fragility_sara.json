@@ -1,0 +1,651 @@
+{
+    "meta": {
+        "id": "SARA.0",
+        "assetCategory": "buildings",
+        "lossCategory": "structural",
+        "taxonomy_source": "GEM",
+        "damage_states": "SARA",
+        "format": "continuous",
+        "shape": "logncdf",
+        "description": "GEM-SARA Model, project RIESGOS",
+        "taxonomies": [
+            "MUR_H1",
+            "ER_ETR_H1_2",
+            "MUR_H1_3",
+            "MUR_ADO_H1_2",
+            "MUR_STRUB_H1_2",
+            "MR_H1_3_DUC",
+            "MCF_H1_3_DUC",
+            "MCF_H1_3_DNO",
+            "MR_H1_3_DNO",
+            "CR_LFM_H1_3_DUC",
+            "CR_LFLS_H1_3_DUC",
+            "CR_LFM_H4_7_DUC",
+            "CR_LFLS_H4_7_DUC",
+            "CR_LDUAL_H4_7_DUC",
+            "CR_LFLS_H1_3_DNO",
+            "CR_LFM_H1_3_DNO",
+            "CR_LFM_H4_7_DNO",
+             "CR_LFM_H1_3_DNO_SOS",
+            "CR_LFM_H4_7_DNO_SOS",
+            "CR_LFINF_H1_3_DUC",
+            "CR_LWAL_H1_3_DUC",
+            "CR_PC_LWAL_H1_3",
+            "CR_LFINF_H_4_7_DUC",
+            "CR_LWAL_H4_7_DUC",
+            "CR_LFINF_H1_3_DNO",
+            "CR_LWAL_H1_3_DNO",
+           "CR_LWAL_H4_7_DNO",
+           "CR_LDUAL_H8_19_DUC",
+           "CR_LWAL_H8_19_DUC",
+            "W_WLI_H1_3",
+            "W_WHE_H1_3",
+            "W_WS_H1_2",
+            "W_WBB_H1",
+            "UNK"
+        ],
+        
+        "limit_states": [
+            "D1",
+            "D2",
+            "D3",
+            "D4"
+        ]
+     
+    },
+    "data": [
+      {
+            "taxonomy": "MUR_H1",
+            "D1_mean": -1.418,
+            "D1_stddev": 0.31,
+            "D2_mean": -0.709,
+            "D2_stddev": 0.328,
+            "D3_mean": -0.496,
+            "D3_stddev": 0.322,
+            "D4_mean": -0.231,
+            "D4_stddev": 0.317,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.0
+        },
+        
+
+        
+        {
+            "taxonomy": "ER_ETR_H1_2",
+            "D1_mean": -1.418,
+            "D1_stddev": 0.31,
+            "D2_mean": -0.709,
+            "D2_stddev": 0.328,
+            "D3_mean": -0.496,
+            "D3_stddev": 0.322,
+            "D4_mean": -0.231,
+            "D4_stddev": 0.317,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.0
+        },
+        
+          {
+            "taxonomy": "MUR_H1_3",
+            "D1_mean": -1.418,
+            "D1_stddev": 0.31,
+            "D2_mean": -0.709,
+            "D2_stddev": 0.328,
+            "D3_mean": -0.496,
+            "D3_stddev": 0.322,
+            "D4_mean": -0.231,
+            "D4_stddev": 0.317,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.0
+        },
+        
+            
+          {
+            "taxonomy": "MUR_ADO_H1_2",
+            "D1_mean": -1.782,
+            "D1_stddev": 0.371,
+            "D2_mean": -0.894,
+            "D2_stddev": 0.326,
+            "D3_mean": -0.644,
+            "D3_stddev": 0.328,
+            "D4_mean": -0.335,
+            "D4_stddev": 0.346,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.0
+        },
+        
+        
+  
+          {
+            "taxonomy": "MUR_STRUB_H1_2",
+            "D1_mean": -1.502,
+            "D1_stddev": 0.295,
+            "D2_mean": -0.718,
+            "D2_stddev": 0.31,
+            "D3_mean": -0.492,
+            "D3_stddev": 0.311,
+            "D4_mean": -0.215,
+            "D4_stddev": 0.322,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.0
+        },
+        
+        
+        {
+            "taxonomy": "MR_DUC_H1_3",
+            "D1_mean": -0.532,
+            "D1_stddev": 0.407,
+            "D2_mean": 0.251,
+            "D2_stddev": 0.394,
+            "D3_mean": 0.364,
+            "D3_stddev": 0.377,
+            "D4_mean": 0.578,
+            "D4_stddev": 0.382,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.0
+        },
+        
+         {
+            "taxonomy": "MCF_DUC_H1_3",
+            "D1_mean": -0.532,
+            "D1_stddev": 0.407,
+            "D2_mean": 0.251,
+            "D2_stddev": 0.394,
+            "D3_mean": 0.364,
+            "D3_stddev": 0.377,
+            "D4_mean": 0.578,
+            "D4_stddev": 0.382,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.0
+        }, 
+        
+        
+      
+        
+         {
+            "taxonomy": "MCF_H1_3_DNO",
+            "D1_mean": -0.804,
+            "D1_stddev": 0.307,
+            "D2_mean": -0.046,
+            "D2_stddev": 0.32,
+            "D3_mean": 0.127,
+            "D3_stddev": 0.314,
+            "D4_mean": 0.386,
+            "D4_stddev": 0.367,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.0
+        },
+        
+         {
+            "taxonomy": "MR_H1_3_DNO",
+            "D1_mean": -0.804,
+            "D1_stddev": 0.307,
+            "D2_mean": -0.046,
+            "D2_stddev": 0.32,
+            "D3_mean": 0.127,
+            "D3_stddev": 0.314,
+            "D4_mean": 0.386,
+            "D4_stddev": 0.367,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.0
+        },
+        
+        
+        {
+            "taxonomy": "CR_LFM_H1_3_DUC",
+            "D1_mean": 0.088,
+            "D1_stddev": 0.348,
+            "D2_mean": 0.919,
+            "D2_stddev": 0.398,
+            "D3_mean": 1.179,
+            "D3_stddev": 0.381,
+            "D4_mean": 1.616,
+            "D4_stddev": 0.507,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":3.0
+        },
+        
+         {
+            "taxonomy": "CR_LFLS_H1_3_DUC",
+            "D1_mean": 0.088,
+            "D1_stddev": 0.348,
+            "D2_mean": 0.919,
+            "D2_stddev": 0.398,
+            "D3_mean": 1.179,
+            "D3_stddev": 0.381,
+            "D4_mean": 1.616,
+            "D4_stddev": 0.507,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":3.0
+        },
+        
+        {
+            "taxonomy": "CR_LFM_H4_7_DUC",
+            "D1_mean": -1.257,
+            "D1_stddev": 0.327,
+            "D2_mean": -0.419,
+            "D2_stddev": 0.35,
+            "D3_mean": -0.058,
+            "D3_stddev": 0.404,
+            "D4_mean": 0.436,
+            "D4_stddev": 0.525,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.2
+        },
+        
+         {
+            "taxonomy": "CR_LFLS_H4_7_DUC",
+            "D1_mean": -1.257,
+            "D1_stddev": 0.327,
+            "D2_mean": -0.419,
+            "D2_stddev": 0.35,
+            "D3_mean": -0.058,
+            "D3_stddev": 0.404,
+            "D4_mean": 0.436,
+            "D4_stddev": 0.525,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.2
+        },
+        
+         {
+            "taxonomy": "CR_LDUAL_H4_7_DUC",
+            "D1_mean": -1.257,
+            "D1_stddev": 0.327,
+            "D2_mean": -0.419,
+            "D2_stddev": 0.35,
+            "D3_mean": -0.058,
+            "D3_stddev": 0.404,
+            "D4_mean": 0.436,
+            "D4_stddev": 0.525,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.2
+        },
+        
+        
+        {
+            "taxonomy": "CR_LFLS_H1_3_DNO",
+            "D1_mean": -0.785,
+            "D1_stddev": 0.333,
+            "D2_mean": -0.006,
+            "D2_stddev": 0.319,
+            "D3_mean": -0.256,
+            "D3_stddev": 0.372,
+            "D4_mean": -0.643,
+            "D4_stddev": 0.437,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":3.0
+        },
+        
+          {
+            "taxonomy": "CR_LFM_H1_3_DNO",
+            "D1_mean": -0.785,
+            "D1_stddev": 0.333,
+            "D2_mean": -0.006,
+            "D2_stddev": 0.319,
+            "D3_mean": -0.256,
+            "D3_stddev": 0.372,
+            "D4_mean": -0.643,
+            "D4_stddev": 0.437,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":3.0
+        },
+        
+        {
+            "taxonomy": "CR_LFM_H4_7_DNO",
+            "D1_mean": -1.841,
+            "D1_stddev": 0.292,
+            "D2_mean": -1.068,
+            "D2_stddev": 0.403,
+            "D3_mean": -0.717,
+            "D3_stddev": 0.474,
+            "D4_mean": -0.195,
+            "D4_stddev": 0.591,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.2
+        },
+        {
+            "taxonomy": "CR_LFM_H1_3_DNO_SOS",
+            "D1_mean": 0.82,
+            "D1_stddev": 0.317,
+            "D2_mean": 0.054,
+            "D2_stddev": 0.334,
+            "D3_mean": 0.205,
+            "D3_stddev": 0.383,
+            "D4_mean": 0.582,
+            "D4_stddev": 0.469,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.0
+        },
+        {
+            "taxonomy": "CR_LFM_H4_7_DNO_SOS",
+            "D1_mean": -1.715,
+            "D1_stddev": 0.342,
+            "D2_mean":-1.187,
+            "D2_stddev": 0.423,
+            "D3_mean": -0.977,
+            "D3_stddev": 0.48,
+            "D4_mean": -0.638,
+            "D4_stddev": 0.566,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.2
+        },
+        {
+            "taxonomy": "CR_LFINF_H1_3_DUC",
+            "D1_mean": -0.401,
+            "D1_stddev": 0.41,
+            "D2_mean": 0.482,
+            "D2_stddev": 0.391,
+            "D3_mean": 0.694,
+            "D3_stddev": 0.364,
+            "D4_mean": 0.973,
+            "D4_stddev": 0.406,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.0
+        },
+        
+        
+         {
+            "taxonomy": "CR_LWAL_H1_3_DUC",
+            "D1_mean": -0.401,
+            "D1_stddev": 0.41,
+            "D2_mean": 0.482,
+            "D2_stddev": 0.391,
+            "D3_mean": 0.694,
+            "D3_stddev": 0.364,
+            "D4_mean": 0.973,
+            "D4_stddev": 0.406,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.0
+        },
+        
+         {
+            "taxonomy": "CR_PC_LWAL_H1_3",
+            "D1_mean": -0.401,
+            "D1_stddev": 0.41,
+            "D2_mean": 0.482,
+            "D2_stddev": 0.391,
+            "D3_mean": 0.694,
+            "D3_stddev": 0.364,
+            "D4_mean": 0.973,
+            "D4_stddev": 0.406,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.0
+        },
+        
+        {
+            "taxonomy": "CR_LFINF_H_4_7_DUC",
+            "D1_mean": -2.023,
+            "D1_stddev": 0.465,
+            "D2_mean": -0.827,
+            "D2_stddev": 0.589,
+            "D3_mean": -0.307,
+            "D3_stddev": 0.617,
+            "D4_mean": 0.288,
+            "D4_stddev": 0.636,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.2
+        },
+        
+         {
+            "taxonomy": "CR_LWAL_H4_7_DUC",
+            "D1_mean": -2.023,
+            "D1_stddev": 0.465,
+            "D2_mean": -0.827,
+            "D2_stddev": 0.589,
+            "D3_mean": -0.307,
+            "D3_stddev": 0.617,
+            "D4_mean": 0.288,
+            "D4_stddev": 0.636,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.2
+        },
+        
+        {
+            "taxonomy": "CR_LFINF_H1_3_DNO",
+            "D1_mean": -1.126,
+            "D1_stddev": 0.363,
+            "D2_mean": -0.33,
+            "D2_stddev": 0.35,
+            "D3_mean": -0.119,
+            "D3_stddev": 0.331,
+            "D4_mean": 0.162,
+            "D4_stddev": 0.4,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.0
+        },
+        
+        {
+            "taxonomy": "CR_LWAL_H1_3_DNO",
+            "D1_mean": -1.126,
+            "D1_stddev": 0.363,
+            "D2_mean": -0.33,
+            "D2_stddev": 0.35,
+            "D3_mean": -0.119,
+            "D3_stddev": 0.331,
+            "D4_mean": 0.162,
+            "D4_stddev": 0.4,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.0
+        },
+        
+        {
+            "taxonomy": "CR_LWAL_H4_7_DNO",
+            "D1_mean": -2.401,
+            "D1_stddev": 0.362,
+            "D2_mean": -1.4,
+            "D2_stddev": 0.43,
+            "D3_mean": -0.981,
+            "D3_stddev": 0.444,
+            "D4_mean": -0.402,
+            "D4_stddev": 0.548,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.2
+        },
+      
+        
+         {
+            "taxonomy": "CR_LDUAL_H8_19_DUC",
+            "D1_mean": -0.816,
+            "D1_stddev": 0.294,
+            "D2_mean": -0.26,
+            "D2_stddev": 0.361,
+            "D3_mean": -0.012,
+            "D3_stddev": 0.391,
+            "D4_mean": 0.371,
+            "D4_stddev": 0.49,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.2
+        },
+        
+         {
+            "taxonomy": "CR_LWAL_H8_19_DUC",
+            "D1_mean": -0.816,
+            "D1_stddev": 0.294,
+            "D2_mean": -0.26,
+            "D2_stddev": 0.361,
+            "D3_mean": -0.012,
+            "D3_stddev": 0.391,
+            "D4_mean": 0.371,
+            "D4_stddev": 0.49,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":1.2
+        },
+        
+        
+           
+        
+         {
+            "taxonomy": "W_WLI_H1_3",
+            "D1_mean": 0.107,
+            "D1_stddev": 0.403,
+            "D2_mean": 0.853,
+            "D2_stddev": 0.45,
+            "D3_mean": 1.144,
+            "D3_stddev": 0.449,
+            "D4_mean": 1.594,
+            "D4_stddev": 0.573,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":3.0
+        },
+        
+          {
+            "taxonomy": "W_WHE_H1_3",
+            "D1_mean": 0.107,
+            "D1_stddev": 0.403,
+            "D2_mean": 0.853,
+            "D2_stddev": 0.45,
+            "D3_mean": 1.144,
+            "D3_stddev": 0.449,
+            "D4_mean": 1.594,
+            "D4_stddev": 0.573,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":3.0
+        },
+        
+     
+        
+           {
+            "taxonomy": "W_WBB_H1",
+            "D1_mean": 0.107,
+            "D1_stddev": 0.403,
+            "D2_mean": 0.853,
+            "D2_stddev": 0.45,
+            "D3_mean": 1.144,
+            "D3_stddev": 0.449,
+            "D4_mean": 1.594,
+            "D4_stddev": 0.573,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":3.0
+        },
+        
+           {
+            "taxonomy": "W_WS_H1_2",
+            "D1_mean": 0.107,
+            "D1_stddev": 0.403,
+            "D2_mean": 0.853,
+            "D2_stddev": 0.45,
+            "D3_mean": 1.144,
+            "D3_stddev": 0.449,
+            "D4_mean": 1.594,
+            "D4_stddev": 0.573,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":3.0
+        },
+        
+             {
+            "taxonomy": "UNK",
+            "D1_mean": -0.877,
+            "D1_stddev": 0.36,
+            "D2_mean": -0.143,
+            "D2_stddev": 0.401,
+            "D3_mean": 0.151,
+            "D3_stddev": 0.362,
+            "D4_mean": 0.489,
+            "D4_stddev": 0.378,
+			"id":"unique_id",
+			"imt":"pga",
+			"imu":"g",
+			"im_min":0.0,
+			"im_max":3.0
+        }
+        
+    ]
+}

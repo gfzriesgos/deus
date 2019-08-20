@@ -294,3 +294,17 @@ class BuildingClassMapper():
                         target_building_class,
                         proportion*n_buildings))
         return result
+
+    @classmethod
+    def from_files(cls, files):
+        '''
+        Reads the data from a list of files.
+        '''
+        data = []
+        for single_file in files:
+            with open(single_file, 'rt') as input_file:
+                single_data = json.load(input_file)
+                single_data['conv_matrix'] = json.loads(
+                    single_data['conv_matrix'])
+                data.append(single_data)
+        return cls(data)
