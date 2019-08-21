@@ -67,6 +67,9 @@ class ExposureCell():
         return self._series
 
     def get_schema(self):
+        '''
+        Returns the schema of the exposur cell.
+        '''
         return self._schema
 
     def get_lon_lat_of_centroid(self):
@@ -94,6 +97,9 @@ class ExposureCell():
         return ExposureCell(series, schema)
 
     def new_transition_cell(self):
+        '''
+        Creates a cell to insert the transitions.
+        '''
         series = pd.Series()
         for field in ExposureCell.get_fields_to_copy():
             series[field] = self._series[field]
@@ -112,7 +118,10 @@ class ExposureCell():
                     if math.isnan(count):
                         count = 0.0
                     name = field.replace(r'\/', '/')
-                    result.append(Taxonomy(name=name, count=count, schema=self._schema))
+                    result.append(Taxonomy(
+                        name=name,
+                        count=count,
+                        schema=self._schema))
         return result
 
     @staticmethod
@@ -142,9 +151,13 @@ class ExposureCell():
             self._series[exposure_to_set] = 0.0
         self._series[exposure_to_set] += count
 
-    def map_schema(self,
+    def map_schema(
+            self,
             target_name,
             schema_mapper):
+        '''
+        Maps the exposure cell to use the other schema.
+        '''
         mapped_cell = self.new_prototype(target_name)
 
         for taxonomy in self.get_taxonomies():
@@ -162,17 +175,17 @@ class ExposureCell():
 
             for res in mapping_results:
                 mapped_cell.add_n_for_damage_state(
-                        res.get_building_class(),
-                        res.get_damage_state(),
-                        res.get_n_buildings(),
+                    res.get_building_class(),
+                    res.get_damage_state(),
+                    res.get_n_buildings(),
                 )
         return mapped_cell
 
-
-    def _update_taxonomy(self, old_taxonomy, intensity, units, fragility_provider, transition_cell):
-        building_class = old_taxonomy.get_building_class()
-        old_damage_state = old_taxonomy.get_damage_state()
-        old_count = old_taxonomy.get_count()
+    @staticmethod
+    def _get_sorted_damage_states(
+            fragility_provider,
+            building_class,
+            old_damage_state):
 
         damage_states = fragility_provider.get_damage_states_for_taxonomy(
             building_class)
@@ -185,7 +198,26 @@ class ExposureCell():
 
         damage_states_to_care.sort(key=sort_by_to_damage_state_desc)
 
-        n_left = old_count
+        return damage_states_to_care
+
+    def update_taxonomy(
+            self,
+            old_taxonomy,
+            intensity_with_units,
+            fragility_provider,
+            transition_cell):
+        '''
+        Updates the exposure cell for the given taxonomy.
+        '''
+        building_class = old_taxonomy.get_building_class()
+        intensity, units = intensity_with_units
+
+        damage_states_to_care = ExposureCell._get_sorted_damage_states(
+            fragility_provider,
+            building_class,
+            old_taxonomy.get_damage_state())
+
+        n_left = old_taxonomy.get_count()
 
         for single_damage_state in damage_states_to_care:
             probability = single_damage_state.get_probability_for_intensity(
@@ -209,25 +241,40 @@ class ExposureCell():
 
         self.add_n_for_damage_state(
             building_class,
-            old_damage_state,
+            old_taxonomy.get_damage_state(),
             n_left
         )
 
-    def update(self,
+    def update(
+            self,
             intensity_provider,
             fragility_provider):
+        '''
+        Updates the damage states of the exposure cell.
+        Returns the updated exposure cell and a transition cell.
+        '''
         lon, lat = self.get_lon_lat_of_centroid()
-        intensity, units = intensity_provider.get_nearest(lon=lon, lat=lat)
+        intensity_with_units = intensity_provider.get_nearest(lon=lon, lat=lat)
 
         updated_cell = self.new_prototype(self._schema)
         transiton_cell = self.new_transition_cell()
 
         for taxonomy in self.get_taxonomies():
-            updated_cell._update_taxonomy(taxonomy, intensity, units, fragility_provider, transiton_cell)
+            updated_cell.update_taxonomy(
+                taxonomy,
+                intensity_with_units,
+                fragility_provider,
+                transiton_cell)
         return updated_cell, transiton_cell
 
+
 def sort_by_to_damage_state_desc(damage_state):
+    '''
+    Function to sort the damage states by to_damage_state
+    desc.
+    '''
     return damage_state.to_state * -1
+
 
 def update_taxonomy_damage_state(taxonomy, new_damage_state):
     '''
@@ -255,8 +302,13 @@ def get_damage_state_from_taxonomy(taxonomy_str):
         return int(match.group(1))
     return 0
 
+
 def get_building_class_from_taxonomy(taxonomy_str):
+    '''
+    Returns just the building class without the damage state.
+    '''
     return re.sub(r'_D\d+$', '', taxonomy_str)
+
 
 class Taxonomy():
     '''
@@ -281,6 +333,9 @@ class Taxonomy():
         return get_damage_state_from_taxonomy(self._name)
 
     def get_building_class(self):
+        '''
+        Returns the building class (no damage state part).
+        '''
         return get_building_class_from_taxonomy(self._name)
 
     def get_name(self):
@@ -296,16 +351,36 @@ class Taxonomy():
         return self._count
 
     def get_schema(self):
+        '''
+        Returns the schema of the taxonomy.
+        '''
         return self._schema
 
+
 class TransitionCell():
+    '''
+    Cell for inserting all the transitions.
+    Contains also the same geometry as the exposure cells.
+    '''
     def __init__(self, series):
         self._series = series
 
     def get_series(self):
+        '''
+        Returns the inner series with the values.
+        '''
         return self._series
 
-    def add_n_for_damage_state(self, building_class, from_damage_state, to_damage_state, n_buildings):
+    def add_n_for_damage_state(
+            self,
+            building_class,
+            from_damage_state,
+            to_damage_state,
+            n_buildings):
+        '''
+        Add the transition of n buildings of a building class
+        from one damage state to another.
+        '''
         if building_class not in self._series.keys():
             self._series[building_class] = list()
         self._series[building_class].append({
@@ -315,6 +390,10 @@ class TransitionCell():
         })
 
     def to_damage_cell(self, damage_provider):
+        '''
+        Creates the damage cell (so with the computed loss).
+        with the same geometry.
+        '''
         series = pd.Series()
 
         for field in ExposureCell.get_fields_to_copy():
@@ -328,27 +407,57 @@ class TransitionCell():
                 list_of_transitions = self._series[building_class]
 
                 for transition in list_of_transitions:
-                    damage_one_building = damage_provider.get_damage_for_transition(
-                        building_class, transition['from'], transition['to'])
-                    damage_n_buildings = damage_one_building * transition['n_buildings']
+                    damage_n_buildings = _compute_loss_transition(
+                        building_class, transition, damage_provider)
                     damage_value += damage_n_buildings
         series['damage'] = damage_value
         return DamageCell(series)
 
+
+def _compute_loss_transition(
+        building_class,
+        transition,
+        damage_provider):
+    damage_one_building = damage_provider.get_damage_for_transition(
+        building_class, transition['from'], transition['to'])
+    damage_n_buildings = damage_one_building * transition['n_buildings']
+    return damage_n_buildings
+
+
 class TransitionCellCollector():
+    '''
+    Collector to add the transition cells to.
+    '''
     def __init__(self):
         self._elements = []
 
     def append(self, transition_cell):
+        '''
+        Adds one transition cell.
+        '''
         self._elements.append(transition_cell)
 
     def __str__(self):
         gdf = gpd.GeoDataFrame([x.get_series() for x in self._elements])
         return gdf.to_json()
 
+
 class DamageCell():
+    '''
+    Cell with the computed damage (loss) over all the transitions
+    of damage states in the polygon.
+    '''
     def __init__(self, series):
         self._series = series
 
     def get_series(self):
+        '''
+        Returns the inner series.
+        '''
         return self._series
+
+    def get_total_damage(self):
+        '''
+        Returns the total damage for the cell.
+        '''
+        return self._series['damage']
