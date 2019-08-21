@@ -12,8 +12,8 @@ class DamageProvider():
         tax_candidates = [x for x in self._data['data'] if x['taxonomy'] == building_class]
         if not tax_candidates:
             pdb.set_trace()
-        conv_matrix = tax_candidates[0]['conv_matrix']
-        return conv_matrix[str(from_damage_state)][str(to_damage_state)]
+        loss_matrix = tax_candidates[0]['loss_matrix']
+        return loss_matrix[str(from_damage_state)][str(to_damage_state)]
 
     @classmethod
     def from_file(cls, json_file):

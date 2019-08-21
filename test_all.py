@@ -797,7 +797,7 @@ class TestAll(unittest.TestCase):
                 'data': [
                     {
                         'taxonomy': 'URM',
-                        'conv_matrix': {
+                        'loss_matrix': {
                             '0': {
                                 '1': 500,
                                 '2': 600,
