@@ -19,3 +19,11 @@ so that should be in the imt field for the fragility files for supparsi.)
 (If it can't be used for this - so that it has another meaning and I'm
 just wrong with my idea to use it to read the intensity value -
 the code must be changed).
+## Add unit handling for loss computation
+(At the moment this are just numbers (all zeros), but there should be
+meaningful values *and units*)
+## Update readme
+- purpose of deus
+- installation
+- example files
+- usage
