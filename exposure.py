@@ -413,6 +413,7 @@ class TransitionCell():
         series['damage'] = damage_value
         return DamageCell(series)
 
+
 def _compute_loss_transition(
         building_class,
         transition,

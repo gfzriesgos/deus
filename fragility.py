@@ -136,8 +136,9 @@ class Fragility():
                     from_state = 0
 
                 mean = dataset[damage_state_mean_key]
-                stddev_key = damage_state_mean_key.replace('_mean', '_stddev')
-                stddev = dataset[stddev_key]
+                stddev = dataset[
+                    damage_state_mean_key.replace(
+                        '_mean', '_stddev')]
 
                 damage_state = DamageState(
                     taxonomy=taxonomy,
@@ -224,4 +225,7 @@ class FragilityProvider():
         return self._damage_states_by_taxonomy.keys()
 
     def get_schema(self):
+        '''
+        Returns the schema of the fragility data.
+        '''
         return self._schema
