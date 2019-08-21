@@ -92,7 +92,7 @@ def main():
             fragility_provider.get_schema(), schema_mapper)
         single_updated_exposure_cell, single_transition_cell = \
             mapped_exposure_cell.update(
-                    intensity_provider, fragility_provider)
+                intensity_provider, fragility_provider)
 
         updated_exposure_cells.append(single_updated_exposure_cell)
         transition_cells.append(single_transition_cell)
