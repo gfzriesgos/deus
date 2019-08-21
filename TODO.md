@@ -27,3 +27,8 @@ meaningful values *and units*)
 - installation
 - example files
 - usage
+## Clear loss data file
+Either use one loss data file that the user provides by herself or
+integrate several for all the supported schemas and just integrate
+them in the repository itself (as the files for the conversion between
+damage states and building classes).
