@@ -190,19 +190,28 @@ class TestAll(unittest.TestCase):
         Test exposure taxonomy damage state
         :return: None
         """
-        tax1 = exposure.Taxonomy(name=r'MCF\/DNO\/_1', count=6, schema='SARA.0')
+        tax1 = exposure.Taxonomy(
+            name=r'MCF\/DNO\/_1',
+            count=6,
+            schema='SARA.0')
 
         ds1 = tax1.get_damage_state()
 
         self.assertEqual(ds1, 0)
 
-        tax2 = exposure.Taxonomy(name=r'MCF\/DNO\/_1_D1', count=6, schema='SARA.0')
+        tax2 = exposure.Taxonomy(
+            name=r'MCF\/DNO\/_1_D1',
+            count=6,
+            schema='SARA.0')
 
         ds2 = tax2.get_damage_state()
 
         self.assertEqual(ds2, 1)
 
-        tax3 = exposure.Taxonomy(name=r'MCF\/DNO\/_1_D5', count=6, schema='SARA.0')
+        tax3 = exposure.Taxonomy(
+            name=r'MCF\/DNO\/_1_D5',
+            count=6,
+            schema='SARA.0')
 
         ds3 = tax3.get_damage_state()
 
@@ -218,109 +227,6 @@ class TestAll(unittest.TestCase):
 
         updated2 = exposure.update_taxonomy_damage_state(r'MCF\/DNO\/_1_D0', 1)
         self.assertEqual(updated2, r'MCF\/DNO\/_1_D1')
-
-    #def test_update_exposure_cell(self):
-    #    '''
-    #    Test the update of one exposure cell.
-    #    :return: None
-    #    '''
-
-    #    exposure_cell = get_example_exposure_cell()
-
-    #    fragility_data = {
-    #        'meta': {
-    #            'shape': 'logncdf',
-    #            'id': 'SARA.0',
-    #        },
-    #        'data': [
-    #            {
-    #                'taxonomy': 'URM1',
-    #                'D_0_1_mean': 5.9,
-    #                'D_0_1_stddev': 0.8,
-    #                'D_0_2_mean': 6.7,
-    #                'D_0_2_stddev': 0.8,
-    #                'D_1_2_mean': 9.8,
-    #                'D_1_2_stddev': 1.0,
-    #                'imt': 'pga',
-    #                'imu': 'g',
-    #            },
-    #        ],
-    #    }
-
-    #    frag = fragility.Fragility(fragility_data)
-    #    fragprov = frag.to_fragility_provider()
-
-
-    #    intensity_provider = MockedIntensityProvider()
-
-
-    #    schema_mapper = MockedSchemaMapper()
-
-    #    updated_exposure_cell = update_exposure_cell(
-    #        exposure_cell,
-    #        intensity_provider,
-    #        fragprov,
-    #        schema_mapper)
-
-    #    self.assertIsNotNone(update_exposure_cell)
-
-    #    series = updated_exposure_cell.get_series()
-
-    #    # we don't have anymore 6 buildings in damage state 0
-    #    self.assertIn('MCF/DNO/_1_D0', series.keys())
-    #    buildings_d0 = series['MCF/DNO/_1_D0']
-    #    self.assertLess(buildings_d0, 5.7)
-    #    self.assertLess(5.6, buildings_d0)
-
-    #    # a small amount in damage state 1
-    #    self.assertIn('MCF/DNO/_1_D1', series.keys())
-    #    buildings_d1 = series['MCF/DNO/_1_D1']
-    #    self.assertLess(buildings_d1, 0.32)
-    #    self.assertLess(0.31, buildings_d1)
-
-    #    # and an even smaller amount in damage state 2
-    #    self.assertIn('MCF/DNO/_1_D2', series.keys())
-    #    buildings_d2 = series['MCF/DNO/_1_D2']
-    #    self.assertLess(buildings_d2, 0.03)
-    #    self.assertLess(0.02, buildings_d2)
-
-    #    # all togehter are still the overall 6 buildings
-    #    buildings_all = buildings_d0 + buildings_d1 + buildings_d2
-    #    self.assertLess(buildings_all, 6.0001)
-    #    self.assertLess(5.9999, buildings_all)
-
-    #    # and we can run the update procedure again
-
-    #    again_updated_exposure_cell = update_exposure_cell(
-    #        updated_exposure_cell,
-    #        intensity_provider,
-    #        fragprov,
-    #        taxonomy_mapper)
-
-    #    series_again_updated = again_updated_exposure_cell.get_series()
-
-    #    buildings_again_updated_d0 = series_again_updated['MCF/DNO/_1_D0']
-    #    buildings_again_updated_d1 = series_again_updated['MCF/DNO/_1_D1']
-    #    buildings_again_updated_d2 = series_again_updated['MCF/DNO/_1_D2']
-
-    #    # as we run the same event again
-    #    # there should be less buildings in damage state 0
-    #    self.assertLess(buildings_again_updated_d0, buildings_d0)
-    #    # it depends on the fragility functions
-    #    # if we have more in damage state 1 (as they were not damaged
-    #    # in the first run) or less (as most of the damage state 1 buildings
-    #    # are now even stronger damaged, so that they are in damage state 2)
-    #    # however as damage state 2 is our highest damage state here
-    #    # we will have more buildings in this state
-    #    self.assertLess(buildings_d2, buildings_again_updated_d2)
-    #    # and all of the damage state buildings should are around the
-    #    # overall count of buildings here too
-    #    buildings_again_updated_all = buildings_again_updated_d0 + \
-    #        buildings_again_updated_d1 + \
-    #        buildings_again_updated_d2
-
-    #    self.assertLess(buildings_again_updated_all, 6.0001)
-    #    self.assertLess(5.9999, buildings_again_updated_all)
 
     def test_damage_state_mapping(self):
         '''
@@ -545,7 +451,8 @@ class TestAll(unittest.TestCase):
             }
         ]
 
-        building_class_mapper = schemamapping.BuildingClassMapper(bc_mapping_data)
+        building_class_mapper = schemamapping.BuildingClassMapper(
+            bc_mapping_data)
 
         ds_mapping_data = [
             {
@@ -629,14 +536,16 @@ class TestAll(unittest.TestCase):
         Reads the schema from the fragility file.
         '''
 
-        fr_file = fragility.Fragility.from_file('./testinputs/fragility_sara.json')
+        fr_file = fragility.Fragility.from_file(
+            './testinputs/fragility_sara.json')
         fr_provider = fr_file.to_fragility_provider()
 
         schema = fr_provider.get_schema()
 
         self.assertEqual('SARA.0', schema)
 
-        fr_file2 = fragility.Fragility.from_file('./testinputs/fragility_supparsi.json')
+        fr_file2 = fragility.Fragility.from_file(
+            './testinputs/fragility_supparsi.json')
         fr_provider2 = fr_file2.to_fragility_provider()
 
         schema2 = fr_provider2.get_schema()
@@ -648,7 +557,8 @@ class TestAll(unittest.TestCase):
 
         schema_mapper = get_schema_mapper_for_sara_to_supparsi()
 
-        mapped_exposure_cell = exposure_cell.map_schema('SUPPARSI_2013.0', schema_mapper)
+        mapped_exposure_cell = exposure_cell.map_schema(
+            'SUPPARSI_2013.0', schema_mapper)
 
         new_schema = mapped_exposure_cell.get_schema()
 
@@ -712,12 +622,16 @@ class TestAll(unittest.TestCase):
             ],
         }
 
-        fragility_provider = fragility.Fragility(fragility_data).to_fragility_provider()
+        fragility_provider = fragility.Fragility(
+            fragility_data).to_fragility_provider()
         intensity_provider = MockedIntensityProvider()
 
-        updated_exposure_cell, transition_cell = exposure_cell.update(intensity_provider, fragility_provider)
+        updated_exposure_cell, transition_cell = exposure_cell.update(
+            intensity_provider, fragility_provider)
 
-        self.assertEqual(updated_exposure_cell.get_schema(), exposure_cell.get_schema())
+        self.assertEqual(
+            updated_exposure_cell.get_schema(),
+            exposure_cell.get_schema())
 
         updated_series = updated_exposure_cell.get_series()
 
@@ -748,8 +662,12 @@ class TestAll(unittest.TestCase):
         transition_series = transition_cell.get_series()
 
         self.assertEqual(updated_series['gc_id'], transition_series['gc_id'])
-        self.assertEqual(updated_series['geometry'], transition_series['geometry'])
-        self.assertEqual(updated_series['name'], transition_series['name'])
+        self.assertEqual(
+            updated_series['geometry'],
+            transition_series['geometry'])
+        self.assertEqual(
+            updated_series['name'],
+            transition_series['name'])
 
         updates_mur_h1 = transition_series['MUR_H1']
 
@@ -782,8 +700,20 @@ class TestAll(unittest.TestCase):
         self.assertLess(updates_er_etr_h1_2_2_4['n_buildings'], 153.39)
 
     def test_sorting_of_damage_states(self):
-        ds1 = fragility.DamageState(taxonomy='xyz', from_state=1, to_state=2, intensity_field='xyz', intensity_unit='xyz', fragility_function=None)
-        ds2 = fragility.DamageState(taxonomy='xyz', from_state=1, to_state=3, intensity_field='xyz', intensity_unit='xyz', fragility_function=None)
+        ds1 = fragility.DamageState(
+            taxonomy='xyz',
+            from_state=1,
+            to_state=2,
+            intensity_field='xyz',
+            intensity_unit='xyz',
+            fragility_function=None)
+        ds2 = fragility.DamageState(
+            taxonomy='xyz',
+            from_state=1,
+            to_state=3,
+            intensity_field='xyz',
+            intensity_unit='xyz',
+            fragility_function=None)
 
         ds_list = [ds1, ds2]
 
@@ -791,7 +721,7 @@ class TestAll(unittest.TestCase):
 
         self.assertEqual(3, ds_list[0].to_state)
         self.assertEqual(2, ds_list[1].to_state)
-    
+
     def test_damage_computation(self):
         damage_data = {
                 'data': [
@@ -826,6 +756,7 @@ class MockedIntensityProvider():
         '''Also a dummy implementation.'''
         return {'PGA': 1}, {'PGA': 'g'}
 
+
 class MockedSchemaMapper():
     def map_schema(
             self,
@@ -835,6 +766,7 @@ class MockedSchemaMapper():
             target_name,
             n_buildings):
         return [SchemaMapperResult(building_class, damage_state, n_buildings)]
+
 
 def get_example_exposure_cell():
     data = pd.DataFrame({
@@ -859,10 +791,12 @@ def get_exposure_cell_for_sara():
         'MUR_H1': [100.0],
         'ER_ETR_H1_2_D2': [200.0]
     }))
-    exposure_cell_data['geometry'] = exposure_cell_data['geometry'].apply(wkt.loads)
+    exposure_cell_data['geometry'] = exposure_cell_data['geometry'].apply(
+        wkt.loads)
     exposure_cell_series = exposure_cell_data.iloc[0]
 
     return exposure.ExposureCell(exposure_cell_series, 'SARA.0')
+
 
 def get_schema_mapper_for_sara_to_supparsi():
     bc_mapping_data = [
@@ -912,7 +846,8 @@ def get_schema_mapper_for_sara_to_supparsi():
 
     damage_state_mapper = schemamapping.DamageStateMapper(ds_mapping_data)
 
-    return schemamapping.SchemaMapper(building_class_mapper, damage_state_mapper)
+    return schemamapping.SchemaMapper(
+        building_class_mapper, damage_state_mapper)
 
 
 if __name__ == "__main__":
