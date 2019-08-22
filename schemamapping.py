@@ -17,6 +17,18 @@ class SchemaMapper():
         self._building_class_mapper = building_class_mapper
         self._damage_state_mapper = damage_state_mapper
 
+    def get_building_class_mapper(self):
+        '''
+        Returns the building class mapper.
+        '''
+        return self._building_class_mapper
+
+    def get_damage_state_mapper(self):
+        '''
+        Returns the damage state mapper.
+        '''
+        return self._damage_state_mapper
+
     def map_schema(self,
                    source_building_class,
                    source_damage_state,
