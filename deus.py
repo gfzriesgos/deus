@@ -17,6 +17,27 @@ import shakemap
 import schemamapping
 
 
+def create_schema_mapper(current_dir):
+    '''
+    Creates and returns a schema mapper
+    using local mapping files.
+    '''
+    pattern_to_search_for_bc_mappings = os.path.join(
+        current_dir, 'mapping_bc_*.json')
+    files_bc_mappings = glob.glob(pattern_to_search_for_bc_mappings)
+    building_class_mapper = schemamapping.BuildingClassMapper.from_files(
+        files_bc_mappings)
+
+    pattern_to_search_for_ds_mappings = os.path.join(
+        current_dir, 'mapping_ds_*.json')
+    files_ds_mappings = glob.glob(pattern_to_search_for_ds_mappings)
+    damage_state_mapper = schemamapping.DamageStateMapper.from_files(
+        files_ds_mappings)
+
+    return schemamapping.SchemaMapper(building_class_mapper,
+                                      damage_state_mapper)
+
+
 def main():
     '''
     Runs the main method, which reads from
@@ -68,20 +89,7 @@ def main():
 
     current_dir = os.path.dirname(os.path.realpath(__file__))
 
-    pattern_to_search_for_bc_mappings = os.path.join(
-        current_dir, 'mapping_bc_*.json')
-    files_bc_mappings = glob.glob(pattern_to_search_for_bc_mappings)
-    building_class_mapper = schemamapping.BuildingClassMapper.from_files(
-        files_bc_mappings)
-
-    pattern_to_search_for_ds_mappings = os.path.join(
-        current_dir, 'mapping_ds_*.json')
-    files_ds_mappings = glob.glob(pattern_to_search_for_ds_mappings)
-    damage_state_mapper = schemamapping.DamageStateMapper.from_files(
-        files_ds_mappings)
-
-    schema_mapper = schemamapping.SchemaMapper(building_class_mapper,
-                                               damage_state_mapper)
+    schema_mapper = create_schema_mapper(current_dir)
 
     updated_exposure_cells = exposure.ExposureCellCollector()
     transition_cells = exposure.TransitionCellCollector()
@@ -100,15 +108,44 @@ def main():
         damage_cells.append(single_transition_cell.to_damage_cell(
             damage_provider))
 
-    updated_exposure_output_file = args.updated_exposure_output_file
+    write_updated_exposure(
+        args.updated_exposure_output_file,
+        updated_exposure_cells)
+    write_transitions(
+        args.transition_output_file,
+        transition_cells)
+    write_damage(
+        args.damage_file,
+        damage_cells)
+
+
+def write_updated_exposure(
+        updated_exposure_output_file,
+        updated_exposure_cells):
+    '''
+    Write the updated exposure.
+    '''
     with open(updated_exposure_output_file, 'wt') as output_file_for_exposure:
         print(updated_exposure_cells, file=output_file_for_exposure)
 
-    transition_output_file = args.transition_output_file
+
+def write_transitions(
+        transition_output_file,
+        transition_cells):
+    '''
+    Write the transition between damage states.
+    '''
     with open(transition_output_file, 'wt') as output_file_for_transitions:
         print(transition_cells, file=output_file_for_transitions)
 
-    with open(args.damage_output_file, 'wt') as output_file_for_damage:
+
+def write_damage(
+        damage_output_file,
+        damage_cells):
+    '''
+    Write the damage (loss) cells.
+    '''
+    with open(damage_output_file, 'wt') as output_file_for_damage:
         print(damage_cells, file=output_file_for_damage)
 
 
