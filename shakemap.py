@@ -182,6 +182,20 @@ class ShakemapIntensityProvider():
             max_dist):
         names = [x.get_name().upper() for x in grid_fields]
         units = {x.get_name().upper(): x.get_units() for x in grid_fields}
+        data = ShakemapIntensityProvider._read_data(grid_data, names)
+        coords = np.array(
+            [
+                [data[lon_name][i],
+                 data[lat_name][i]]
+                for i in range(len(data[lon_name]))])
+        self._spatial_index = cKDTree(coords)
+        self._names = names
+        self._data = data
+        self._units = units
+        self._max_dist = max_dist
+
+    @staticmethod
+    def _read_data(grid_data, names):
         data = collections.defaultdict(list)
         # it must be tokenized (because of xml processing the newlines
         # may not be consistent)
@@ -202,16 +216,7 @@ class ShakemapIntensityProvider():
                 data[name].append(value)
                 index += 1
             token_before = token
-        coords = np.array(
-            [
-                [data[lon_name][i],
-                 data[lat_name][i]]
-                for i in range(len(data[lon_name]))])
-        self._spatial_index = cKDTree(coords)
-        self._names = names
-        self._data = data
-        self._units = units
-        self._max_dist = max_dist
+        return data
 
     def get_nearest(self, lon, lat):
         '''
