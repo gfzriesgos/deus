@@ -115,7 +115,7 @@ def main():
         args.transition_output_file,
         transition_cells)
     write_damage(
-        args.damage_file,
+        args.damage_output_file,
         damage_cells)
 
 
