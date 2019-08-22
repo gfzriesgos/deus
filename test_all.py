@@ -9,8 +9,6 @@ import math
 import os
 import unittest
 
-import pdb
-
 import geopandas as gpd
 import pandas as pd
 
@@ -418,6 +416,8 @@ class TestAll(unittest.TestCase):
         eq_intensity, eq_units = eq_provider.get_nearest(
             lon=-71.2, lat=-32.65)
 
+        self.assertEqual('g', eq_units['PGA'])
+
         self.assertLess(0.06327, eq_intensity['PGA'])
         self.assertLess(eq_intensity['PGA'], 0.06328)
 
@@ -427,6 +427,8 @@ class TestAll(unittest.TestCase):
 
         ts_intensity, ts_units = ts_provider.get_nearest(
             lon=-71.547, lat=-32.803)
+
+        self.assertEqual('m', ts_units['MWH'])
 
         self.assertLess(3.5621, ts_intensity['MWH'])
         self.assertLess(ts_intensity['MWH'], 3.5623)
@@ -553,6 +555,11 @@ class TestAll(unittest.TestCase):
         self.assertEqual('SUPPARSI_2013.0', schema2)
 
     def test_cell_mapping(self):
+        '''
+        Tests the schema mapping with a exposure
+        cell.
+        :return: None
+        '''
         exposure_cell = get_exposure_cell_for_sara()
 
         schema_mapper = get_schema_mapper_for_sara_to_supparsi()
@@ -585,6 +592,11 @@ class TestAll(unittest.TestCase):
         self.assertLess(new_series['STEEL_D3'], 50.1)
 
     def test_cell_update(self):
+        '''
+        Tests the update of the damage states for
+        a exposure cell.
+        :return: None
+        '''
         exposure_cell = get_exposure_cell_for_sara()
 
         fragility_data = {
@@ -700,6 +712,11 @@ class TestAll(unittest.TestCase):
         self.assertLess(updates_er_etr_h1_2_2_4['n_buildings'], 153.39)
 
     def test_sorting_of_damage_states(self):
+        '''
+        Tests the sorting of damage states
+        data according to their to state.
+        :return: None
+        '''
         ds1 = fragility.DamageState(
             taxonomy='xyz',
             from_state=1,
@@ -723,20 +740,24 @@ class TestAll(unittest.TestCase):
         self.assertEqual(2, ds_list[1].to_state)
 
     def test_damage_computation(self):
+        '''
+        Test for the damage computation.
+        :return: None
+        '''
         damage_data = {
-                'data': [
-                    {
-                        'taxonomy': 'URM',
-                        'loss_matrix': {
-                            '0': {
-                                '1': 500,
-                                '2': 600,
-                                '3': 700,
-                                '4': 800,
-                            }
+            'data': [
+                {
+                    'taxonomy': 'URM',
+                    'loss_matrix': {
+                        '0': {
+                            '1': 500,
+                            '2': 600,
+                            '3': 700,
+                            '4': 800,
                         }
                     }
-                ]
+                }
+            ]
         }
 
         damage_provider = damage.DamageProvider(damage_data)
@@ -757,18 +778,11 @@ class MockedIntensityProvider():
         return {'PGA': 1}, {'PGA': 'g'}
 
 
-class MockedSchemaMapper():
-    def map_schema(
-            self,
-            building_class,
-            damage_state,
-            source_name,
-            target_name,
-            n_buildings):
-        return [SchemaMapperResult(building_class, damage_state, n_buildings)]
-
-
 def get_example_exposure_cell():
+    '''
+    Returns an example exposure cell.
+    :return: None
+    '''
     data = pd.DataFrame({
         'geometry': ['POINT(12.0 15.0)'],
         'name': ['example point1'],
@@ -783,6 +797,10 @@ def get_example_exposure_cell():
 
 
 def get_exposure_cell_for_sara():
+    '''
+    Returns an example cell with sara
+    schema.
+    '''
 
     exposure_cell_data = gpd.GeoDataFrame(pd.DataFrame({
         'geometry': ['POINT(12.0 15.0)'],
@@ -799,6 +817,9 @@ def get_exposure_cell_for_sara():
 
 
 def get_schema_mapper_for_sara_to_supparsi():
+    '''
+    Returns the mapper from sara to supparsi.
+    '''
     bc_mapping_data = [
         {
             'source_name': 'SARA.0',
