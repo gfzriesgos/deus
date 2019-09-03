@@ -14,6 +14,7 @@ import pandas as pd
 
 from shapely import wkt
 
+import intensity
 import damage
 import exposure
 import fragility
@@ -770,6 +771,40 @@ class TestAll(unittest.TestCase):
 
         self.assertEqual(700, damage_value)
 
+    def test_intensity_provider(self):
+        '''
+        Tests a overall intensity provider.
+        '''
+
+        data = pd.DataFrame({
+            'geometry': [
+                'POINT(-71.5473 -32.8026)',
+                'POINT(-71.5473 -32.8022)',
+                'POINT(-71.5468 -32.803)',
+                'POINT(-71.5467 -32.8027)',
+            ],
+            'value_mwh': [
+                6.7135,
+                7.4765,
+                3.627,
+                3.5967
+            ],
+            'unit_mwh': [
+                'm',
+                'm',
+                'm',
+                'm',
+            ]
+        })
+        geodata = gpd.GeoDataFrame(data)
+        geodata['geometry'] = geodata['geometry'].apply(wkt.loads)
+
+        intensity_provider = intensity.IntensityProvider(geodata)
+
+        intensities, units = intensity_provider.get_nearest(lon=-71.5473, lat=-32.8025)
+        intensity_mwh = intensities['mwh']
+        self.assertLess(6.7134, intensity_mwh)
+        self.assertLess(intensity_mwh, 6.7136)
 
 class MockedIntensityProvider():
     '''Just a dummy implementation.'''
