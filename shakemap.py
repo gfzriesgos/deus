@@ -43,23 +43,9 @@ class TsunamiShakemap():
         grid_fields = self._find_grid_fields()
         grid_data = self._find_grid_data()
 
-        # I used the example shakemap that
-        # Alireza sent me
-        # I converted it into a point layer
-        # and estimated this distance
-        # to be distance after that
-        # there are at least two other points
-        # in that grid in between
-        # in that way it is possible to
-        # use the nearest values
-        # and we can still assume that we only take
-        # data where points are given in the
-        # irregular tsunami shakemaps
-        max_dist = 0.0003
         return ShakemapIntensityProvider(
             grid_fields, grid_data,
-            'longitude'.upper(), 'latitude'.upper(),
-            max_dist)
+            'longitude'.upper(), 'latitude'.upper())
 
 
 class Shakemaps():
@@ -119,10 +105,8 @@ class EqShakemap():
 
         lon_spacing, lat_spacing = self._find_lon_lat_spacing()
 
-        max_dist = 2.1 * math.sqrt(lon_spacing**2 + lat_spacing**2)
-
         return ShakemapIntensityProvider(
-            grid_fields, grid_data, 'LON', 'LAT', max_dist)
+            grid_fields, grid_data, 'LON', 'LAT')
 
 
 class ShakemapGridField():
@@ -178,8 +162,7 @@ class ShakemapIntensityProvider():
             grid_fields,
             grid_data,
             lon_name,
-            lat_name,
-            max_dist):
+            lat_name):
         names = [x.get_name().upper() for x in grid_fields]
         units = {x.get_name().upper(): x.get_units() for x in grid_fields}
         data = ShakemapIntensityProvider._read_data(grid_data, names)
@@ -188,11 +171,13 @@ class ShakemapIntensityProvider():
                 [data[lon_name][i],
                  data[lat_name][i]]
                 for i in range(len(data[lon_name]))])
+        self._lon_name = lon_name
+        self._lat_name = lat_name
         self._spatial_index = cKDTree(coords)
         self._names = names
         self._data = data
         self._units = units
-        self._max_dist = max_dist
+        self._max_dist = self._estimate_max_dist()
 
     @staticmethod
     def _read_data(grid_data, names):
@@ -238,3 +223,30 @@ class ShakemapIntensityProvider():
             data[name] = value
 
         return data, self._units
+
+    def _estimate_max_dist(self):
+        lons = self._data[self._lon_name]
+        lats = self._data[self._lat_name]
+
+        coords = [np.array([
+            x[0],
+            x[1]
+        ]) for x in zip(lons, lats)]
+
+        # in a regular grid
+        # the very first one will be the point itself (also in irregular grids)
+        # the next ones are right, left, below and up compared to the point that
+        # search for
+        # for irregular grids this is not the case anymore
+        # so we can use a value up to 5 to search for nearest
+        # irregular grid values
+        # but we will still get the very nearest ones in the regular grid
+        n_nearest_neighbours = 4
+
+        dists, _ = self._spatial_index.query(coords, k=n_nearest_neighbours)
+        # all but the nearest (which are the point themselves)
+        dists_without_nearests = dists[:, 1:]
+
+        # this way we make sure that at least n_nearest_neighbours - 1
+        # points are in the range
+        return np.max(dists_without_nearests)
