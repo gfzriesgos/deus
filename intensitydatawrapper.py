@@ -10,8 +10,13 @@ or using dataframes or others.
 
 import re
 
+
 class GeopandasDataFrameWrapper():
-    def __init__(self, gdf, prefix_value_columns='value_', prefix_unit_columns='unit_'):
+    def __init__(
+            self,
+            gdf,
+            prefix_value_columns='value_',
+            prefix_unit_columns='unit_'):
         self._gdf = gdf
         self._prefix_value_columns = prefix_value_columns
         self._prefix_unit_columns = prefix_unit_columns
@@ -28,7 +33,11 @@ class GeopandasDataFrameWrapper():
     def get_data_columns(self):
         for column in self._gdf.columns:
             if column.startswith(self._prefix_value_columns):
-                column_without_prefix = re.sub(r'^' + self._prefix_value_columns, '', column)
+                column_without_prefix = re.sub(
+                    r'^' + self._prefix_value_columns,
+                    '',
+                    column
+                )
                 yield column_without_prefix
 
     def get_value_for_column_and_index(self, column, index):
@@ -40,6 +49,7 @@ class GeopandasDataFrameWrapper():
         unit_column = self._prefix_unit_columns + column
         series = self._gdf.iloc[index]
         return series[unit_column]
+
 
 class DictWithListDataWrapper():
     def __init__(self, data, units, x_column, y_column):
@@ -65,4 +75,3 @@ class DictWithListDataWrapper():
 
     def get_unit_for_column_and_index(self, column, index):
         return self._units[column]
-

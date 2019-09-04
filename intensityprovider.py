@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 from scipy.spatial import cKDTree
 
+
 class IntensityProvider():
     '''
     Class for providing the intensities on
@@ -46,14 +47,21 @@ class IntensityProvider():
         units = {}
 
         for column in self._intensity_data.get_data_columns():
-            if dist < self._max_dist:
-                value = self._intensity_data.get_value_for_column_and_index(column, idx)
+            if dist <= self._max_dist:
+                value = self._intensity_data.get_value_for_column_and_index(
+                    column=column,
+                    index=idx
+                )
             else:
                 value = 0.0
-            unit = self._intensity_data.get_unit_for_column_and_index(column, idx)
+            unit = self._intensity_data.get_unit_for_column_and_index(
+                column=column,
+                index=idx
+            )
             intensities[column] = value
             units[column] = unit
         return intensities, units
+
 
 class StackedIntensityProvider():
     '''
@@ -69,7 +77,10 @@ class StackedIntensityProvider():
         units = {}
 
         for single_sub_intensity_provider in self._sub_intensity_providers:
-            sub_intens, sub_units = single_sub_intensity_provider.get_nearest(lon=lon, lat=lat)
+            sub_intens, sub_units = single_sub_intensity_provider.get_nearest(
+                lon=lon,
+                lat=lat
+            )
             intensities.update(sub_intens)
             units.update(sub_units)
         return intensities, units

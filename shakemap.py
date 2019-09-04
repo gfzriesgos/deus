@@ -56,6 +56,7 @@ class TsunamiShakemap():
 
         return intensityprovider.IntensityProvider(intensity_data=wrapped_data)
 
+
 class Shakemaps():
     '''
     Factory class for reading shakemaps.
@@ -163,6 +164,7 @@ class ShakemapGridData():
         grid fields).
         '''
         return self._xml.text
+
 
 def read_shakemap_data_and_units(grid_fields, grid_data):
     names = [x.get_name().upper() for x in grid_fields]

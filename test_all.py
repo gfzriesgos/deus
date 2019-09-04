@@ -804,7 +804,10 @@ class TestAll(unittest.TestCase):
         intensity_provider = intensityprovider.IntensityProvider(
             intensitydatawrapper.GeopandasDataFrameWrapper(geodata))
 
-        intensities, units = intensity_provider.get_nearest(lon=-71.5473, lat=-32.8025)
+        intensities, units = intensity_provider.get_nearest(
+            lon=-71.5473,
+            lat=-32.8025
+        )
         intensity_mwh = intensities['mwh']
         self.assertLess(6.7134, intensity_mwh)
         self.assertLess(intensity_mwh, 6.7136)
@@ -866,17 +869,23 @@ class TestAll(unittest.TestCase):
         intensity_provider2 = intensityprovider.IntensityProvider(
             intensitydatawrapper.GeopandasDataFrameWrapper(geodata2))
 
-        stacked_intensity_provider = intensityprovider.StackedIntensityProvider(
-            intensity_provider1,
-            intensity_provider2)
+        stacked_intensity_provider = \
+            intensityprovider.StackedIntensityProvider(
+                intensity_provider1,
+                intensity_provider2
+            )
 
-        intensities, units = stacked_intensity_provider.get_nearest(lon=-71.5473, lat=-32.8025)
+        intensities, units = stacked_intensity_provider.get_nearest(
+            lon=-71.5473,
+            lat=-32.8025
+        )
         intensity_mwh = intensities['mwh']
         self.assertLess(6.7134, intensity_mwh)
         self.assertLess(intensity_mwh, 6.7136)
         intensity_pga = intensities['pga']
         self.assertLess(0.7134, intensity_pga)
         self.assertLess(intensity_pga, 0.7136)
+
 
 class MockedIntensityProvider():
     '''Just a dummy implementation.'''
