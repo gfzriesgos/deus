@@ -56,8 +56,8 @@ class DictWithListDataWrapper():
 
     def get_data_columns(self):
         for column in self._data.keys():
-            if column != x_column:
-                if column != y_column:
+            if column != self._x_column:
+                if column != self._y_column:
                     yield column
 
     def get_value_for_column_and_index(self, column, index):
