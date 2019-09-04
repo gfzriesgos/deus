@@ -136,5 +136,4 @@ class DictWithListDataWrapper():
         Returns the unit for the column and the index.
         This implementation ignores the index.
         '''
-        #pylint: disable=unused-argument
         return self._units[column]

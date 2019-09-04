@@ -8,7 +8,6 @@ This is the module to
 '''
 
 import numpy as np
-import pandas as pd
 from scipy.spatial import cKDTree
 
 
@@ -27,9 +26,9 @@ class IntensityProvider():
         return cKDTree(coords)
 
     def _get_coords(self):
-        xs = self._intensity_data.get_list_x_coordinates()
-        ys = self._intensity_data.get_list_y_coordinates()
-        coords = np.array(list(zip(xs, ys)))
+        x_coordinates = self._intensity_data.get_list_x_coordinates()
+        y_coordinates = self._intensity_data.get_list_y_coordinates()
+        coords = np.array(list(zip(x_coordinates, y_coordinates)))
         return coords
 
     def _estimate_max_dist(self, n_nearest_neighbours=4):
@@ -40,6 +39,15 @@ class IntensityProvider():
         return np.max(dists_without_nearests)
 
     def get_nearest(self, lon, lat):
+        '''
+        Returns a dict with the values and a dict with the
+        units of the intensities that the provider has
+        on a given location (longitude, latitude).
+
+        It is possible that the point is to far away
+        from all of the intensity measurements, so
+        the value may be zero in that cases.
+        '''
         coord = np.array([lon, lat])
         dist, idx = self._spatial_index.query(coord, k=1)
 
@@ -73,6 +81,14 @@ class StackedIntensityProvider():
         self._sub_intensity_providers = sub_intensity_providers
 
     def get_nearest(self, lon, lat):
+        '''
+        Returns a dict with the values and a dict with the
+        units of the intensities that the provider has
+        on a given location (longitude, latitude).
+
+        This stacked intensity provider uses a list of
+        sub intensity providers to read all the datasets.
+        '''
         intensities = {}
         units = {}
 
