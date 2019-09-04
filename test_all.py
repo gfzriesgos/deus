@@ -14,7 +14,7 @@ import pandas as pd
 
 from shapely import wkt
 
-import intensity
+import intensityprovider
 import damage
 import exposure
 import fragility
@@ -800,7 +800,7 @@ class TestAll(unittest.TestCase):
         geodata = gpd.GeoDataFrame(data)
         geodata['geometry'] = geodata['geometry'].apply(wkt.loads)
 
-        intensity_provider = intensity.IntensityProvider(geodata)
+        intensity_provider = intensityprovider.IntensityProvider(geodata)
 
         intensities, units = intensity_provider.get_nearest(lon=-71.5473, lat=-32.8025)
         intensity_mwh = intensities['mwh']
@@ -835,7 +835,7 @@ class TestAll(unittest.TestCase):
         geodata1 = gpd.GeoDataFrame(data1)
         geodata1['geometry'] = geodata1['geometry'].apply(wkt.loads)
 
-        intensity_provider1 = intensity.IntensityProvider(geodata1)
+        intensity_provider1 = intensityprovider.IntensityProvider(geodata1)
 
         data2 = pd.DataFrame({
             'geometry': [
@@ -860,9 +860,9 @@ class TestAll(unittest.TestCase):
         geodata2 = gpd.GeoDataFrame(data2)
         geodata2['geometry'] = geodata2['geometry'].apply(wkt.loads)
 
-        intensity_provider2 = intensity.IntensityProvider(geodata2)
+        intensity_provider2 = intensityprovider.IntensityProvider(geodata2)
 
-        stacked_intensity_provider = intensity.StackedIntensityProvider(
+        stacked_intensity_provider = intensityprovider.StackedIntensityProvider(
             intensity_provider1,
             intensity_provider2)
 
