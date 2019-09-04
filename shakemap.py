@@ -7,12 +7,9 @@ the access to shakemap data.
 
 import collections
 import io
-import math
 import tokenize
 
 import lxml.etree as le
-import numpy as np
-from scipy.spatial import cKDTree
 
 import intensitydatawrapper
 import intensityprovider
@@ -167,6 +164,11 @@ class ShakemapGridData():
 
 
 def read_shakemap_data_and_units(grid_fields, grid_data):
+    '''
+    Function to read the grid_data and the grid fields.
+    Returns a dict with the values (in lists) and a dict
+    with units for the different fields.
+    '''
     names = [x.get_name().upper() for x in grid_fields]
     units = {x.get_name().upper(): x.get_units() for x in grid_fields}
     data = collections.defaultdict(list)
