@@ -774,6 +774,7 @@ class TestAll(unittest.TestCase):
     def test_intensity_provider(self):
         '''
         Tests a overall intensity provider.
+        :return: None
         '''
 
         data = pd.DataFrame({
@@ -805,6 +806,73 @@ class TestAll(unittest.TestCase):
         intensity_mwh = intensities['mwh']
         self.assertLess(6.7134, intensity_mwh)
         self.assertLess(intensity_mwh, 6.7136)
+
+    def test_stacked_intensity_provider(self):
+        '''
+        Tests the stacked intensity provider.
+        :return: None
+        '''
+        data1 = pd.DataFrame({
+            'geometry': [
+                'POINT(-71.5473 -32.8026)',
+                'POINT(-71.5473 -32.8022)',
+                'POINT(-71.5468 -32.803)',
+                'POINT(-71.5467 -32.8027)',
+            ],
+            'value_mwh': [
+                6.7135,
+                7.4765,
+                3.627,
+                3.5967
+            ],
+            'unit_mwh': [
+                'm',
+                'm',
+                'm',
+                'm',
+            ]
+        })
+        geodata1 = gpd.GeoDataFrame(data1)
+        geodata1['geometry'] = geodata1['geometry'].apply(wkt.loads)
+
+        intensity_provider1 = intensity.IntensityProvider(geodata1)
+
+        data2 = pd.DataFrame({
+            'geometry': [
+                'POINT(-71.5473 -32.8026)',
+                'POINT(-71.5473 -32.8022)',
+                'POINT(-71.5468 -32.803)',
+                'POINT(-71.5467 -32.8027)',
+            ],
+            'value_pga': [
+                0.7135,
+                0.4765,
+                0.627,
+                0.5967
+            ],
+            'unit_pga': [
+                'g',
+                'g',
+                'g',
+                'g',
+            ]
+        })
+        geodata2 = gpd.GeoDataFrame(data2)
+        geodata2['geometry'] = geodata2['geometry'].apply(wkt.loads)
+
+        intensity_provider2 = intensity.IntensityProvider(geodata2)
+
+        stacked_intensity_provider = intensity.StackedIntensityProvider(
+            intensity_provider1,
+            intensity_provider2)
+
+        intensities, units = stacked_intensity_provider.get_nearest(lon=-71.5473, lat=-32.8025)
+        intensity_mwh = intensities['mwh']
+        self.assertLess(6.7134, intensity_mwh)
+        self.assertLess(intensity_mwh, 6.7136)
+        intensity_pga = intensities['pga']
+        self.assertLess(0.7134, intensity_pga)
+        self.assertLess(intensity_pga, 0.7136)
 
 class MockedIntensityProvider():
     '''Just a dummy implementation.'''

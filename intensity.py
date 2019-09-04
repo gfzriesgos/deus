@@ -63,3 +63,22 @@ class IntensityProvider():
                 intensities[column_without_prefix] = value
                 units[column_without_prefix] = unit
         return intensities, units
+
+class StackedIntensityProvider():
+    '''
+    Class for combining several intensity providers
+    into one single instance.
+    '''
+
+    def __init__(self, *sub_intensity_providers):
+        self._sub_intensity_providers = sub_intensity_providers
+
+    def get_nearest(self, lon, lat):
+        intensities = {}
+        units = {}
+
+        for single_sub_intensity_provider in self._sub_intensity_providers:
+            sub_intens, sub_units = single_sub_intensity_provider.get_nearest(lon=lon, lat=lat)
+            intensities.update(sub_intens)
+            units.update(sub_units)
+        return intensities, units
