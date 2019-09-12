@@ -6,6 +6,173 @@ for the mapping of the taxonomies.
 '''
 
 import json
+import re
+
+
+class TargetAndConvMatrix():
+    '''
+    Intermediate class for holding the target schema
+    and building class as well as the conversion matrix
+    for mapping to other damate states.
+    '''
+    def __init__(self, target_schema_and_building_class, conv_matrix):
+        self._target_schema_and_building_class = \
+            target_schema_and_building_class
+        self._conv_matrix = conv_matrix
+
+    def get_target_schema_and_building_class(self):
+        '''
+        Returns the target schema and builidng class in a format
+        schema_building_class as in
+        'Supparsi_2013_RC1' for the schema Supparsi_2013 and the
+        building class RC1.
+        '''
+        return self._target_schema_and_building_class
+
+    def get_conv_matrix(self):
+        '''
+        Returns the conversion matrix for the damage states.
+        '''
+        return self._conv_matrix
+
+    def get_building_class(self, schema):
+        '''
+        Returns the building class name.
+        '''
+        return re.sub(
+            r'^' + schema + '_',
+            '',
+            self._target_schema_and_building_class
+        )
+
+    def is_for_schema(self, schema):
+        '''
+        True if the target data is for the given schema.
+        '''
+        return self._target_schema_and_building_class.startswith(schema)
+
+
+class BuildingClassSpecificDamageStateMapper():
+    '''
+    This is a schema mapper that contains data for
+    mapping the building classes and damage states.
+    The specific part here is that also the damage state
+    mapping is building class specific.
+    '''
+
+    def __init__(self, mapping_data):
+        self._mapping_data = mapping_data
+
+    def map_schema(self,
+                   source_building_class,
+                   source_damage_state,
+                   source_name,
+                   target_name,
+                   n_buildings=1.0):
+        '''
+        Maps a building class with a damage state and n buildings
+        to another schema (with possible several damage states and
+        several different building classes).
+        Here it uses the data for damage state mappings that is
+        specific for each building class.
+        '''
+        if source_name == target_name:
+            return [SchemaMapperResult(
+                building_class=source_building_class,
+                damage_state=source_damage_state,
+                n_buildings=n_buildings)]
+
+        result = []
+
+        from_schema_and_building_class = \
+            source_name + '_' + source_building_class
+
+        if from_schema_and_building_class not in self._mapping_data.keys():
+            raise Exception('There is no data to map from {0}'.format(
+                from_schema_and_building_class
+            ))
+
+        target_list = self._mapping_data[from_schema_and_building_class]
+
+        target_list_with_target_schema = [
+            x for x in target_list
+            if x.is_for_schema(target_name)
+        ]
+
+        for target_data in target_list_with_target_schema:
+            target_building_class = target_data.get_building_class(target_name)
+            conv_matrix = target_data.get_conv_matrix()[
+                str(source_damage_state)
+            ]
+
+            for target_damage_state in conv_matrix.keys():
+                result.append(
+                    BuildingClassSpecificDamageStateMapper
+                    ._map_damage_state_to_result(
+                        conv_matrix,
+                        target_building_class,
+                        target_damage_state,
+                        n_buildings
+                    )
+                )
+        return result
+
+    @staticmethod
+    def _map_damage_state_to_result(
+            conv_matrix,
+            target_building_class,
+            target_damage_state,
+            n_buildings):
+        '''
+        Compute the number of buildings for the damage states
+        and return the SchemaMapperResult.
+        '''
+        mapping_value = conv_matrix[
+            target_damage_state
+        ]
+        n_buildings_in_damage_state = mapping_value * n_buildings
+
+        return SchemaMapperResult(
+            building_class=target_building_class,
+            damage_state=target_damage_state,
+            n_buildings=n_buildings_in_damage_state
+        )
+
+    @classmethod
+    def from_files(cls, files):
+        '''
+        Reads the data from a list of files.
+        '''
+        data = []
+        for single_file in files:
+            with open(single_file, 'rt') as input_file:
+                single_data = json.load(input_file)
+                single_data['conv_matrix'] = json.loads(
+                    single_data['conv_matrix']
+                )
+                data.append(single_data)
+        return cls.from_list_of_dicts(data)
+
+    @classmethod
+    def from_list_of_dicts(cls, list_of_dicts):
+        '''
+        Reads the data from a list of files.
+        '''
+        mapping_data = {}
+
+        for single_dict in list_of_dicts:
+            from_schema_and_building_class = single_dict['source_name']
+            to_schema_and_building_class = single_dict['target_name']
+            conv_matrix = single_dict['conv_matrix']
+
+            if from_schema_and_building_class not in mapping_data.keys():
+                mapping_data[from_schema_and_building_class] = []
+
+            mapping_data[from_schema_and_building_class].append(
+                TargetAndConvMatrix(to_schema_and_building_class, conv_matrix)
+            )
+
+        return cls(mapping_data)
 
 
 class SchemaMapper():
