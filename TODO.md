@@ -1,7 +1,7 @@
 #TODO-List
 
 ## Add files to read the building class mappings between schemas
-(Should follow the same structure as the mapping files for the damage states).
+(We want to provide additional files for other schemas.)
 ## Add name of input exposure taxonomy to exposure file (+ and to updated)
 (At best the very same name as the fragility files uses as ids).
 ## Think about having columns for damage state
@@ -32,3 +32,7 @@ Either use one loss data file that the user provides by herself or
 integrate several for all the supported schemas and just integrate
 them in the repository itself (as the files for the conversion between
 damage states and building classes).
+## Raster handling
+The current version of reading the raster cells is really slow.
+We should make sure that we can run much faster (without the conversion
+to a geopandas dataframe).

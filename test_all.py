@@ -10,6 +10,7 @@ import os
 import unittest
 
 import geopandas as gpd
+import georasters as gr
 import pandas as pd
 
 from shapely import wkt
@@ -997,6 +998,42 @@ class TestAll(unittest.TestCase):
         self.assertLess(intensity_mwh, 6.7136)
 
         self.assertEqual(units['mwh'], 'm')
+
+    def test_read_lahar_data(self):
+        '''
+        Test the intensity provider of the lahar data.
+        '''
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        raster = gr.from_file(os.path.join(
+            current_dir,
+            'testinputs',
+            'fixedDEM_S_VEI_60mio_HYDRO_v10_EROSION_1600_0015_25res_4mom_25000s_MaxPressure_smaller.asc'
+        ))
+
+        print('DONE - read raster')
+
+        intensity_data = intensitydatawrapper.RasterDataWrapper(
+            raster=raster,
+            value_name='max_pressure',
+            unit='p', # check the unit; for testing it is ok to assume that it is p
+            input_epsg_code='epsg:24877',
+            usage_epsg_code='epsg:4326'
+        )
+
+        print('DONE - intensity data')
+
+        intensity_provider = intensityprovider.IntensityProvider(intensity_data)
+
+        print('DONE - intensity provider')
+
+        intensities, units = intensity_provider.get_nearest(lon=-78.48187327247078, lat=-0.7442986459402828)
+
+        intensity_max_pressure = intensities['max_pressure']
+
+        self.assertLess(11156.0, intensity_max_pressure)
+        self.assertLess(intensity_max_pressure, 11156.2)
+
+        self.assertEqual('p', units['max_pressure'])
 
     def test_stacked_intensity_provider(self):
         '''

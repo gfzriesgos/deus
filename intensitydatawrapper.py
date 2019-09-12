@@ -28,6 +28,7 @@ The commom protocol is to support the following methods:
 
 import re
 
+import geopandas as gpd
 
 class GeopandasDataFrameWrapper():
     '''
@@ -89,6 +90,70 @@ class GeopandasDataFrameWrapper():
         unit_column = self._prefix_unit_columns + column
         series = self._gdf.iloc[index]
         return series[unit_column]
+
+class RasterDataWrapper():
+    '''
+    This is a wrapper to read the data from
+    raster.
+    The raster for the data is assumed to be
+    created using the georasters package
+    and the load_file function.
+
+    It works by converting the raster to a dataframe
+    and using the wrapper that exists therefore.
+
+    In case that we get utm coordinates we may
+    have to reproject the data to wgs84 in order to
+    work property with it (as in the same way as
+    with the shakemaps).
+    '''
+    def __init__(self, raster, value_name, unit, input_epsg_code=None, usage_epsg_code='epsg:4326'):
+        dataframe = raster.to_pandas()
+        geodataframe = gpd.GeoDataFrame(
+            dataframe,
+            geometry=gpd.points_from_xy(dataframe.x, dataframe.y)
+        )
+        if input_epsg_code is not None:
+            geodataframe.crs = {
+                'init': input_epsg_code
+            }
+            geodataframe = geodataframe.to_crs({
+                'init': usage_epsg_code
+            })
+        geodataframe['value_' + value_name] = geodataframe['value']
+        geodataframe['unit_' + value_name] = unit
+        self._inner_data_wrapper = GeopandasDataFrameWrapper(geodataframe)
+
+    def get_list_x_coordinates(self):
+        '''
+        Returns a list / series / array of the x coordinates.
+        '''
+        return self._inner_data_wrapper.get_list_x_coordinates()
+
+    def get_list_y_coordinates(self):
+        '''
+        Returns a list / series / array of the y coordinates.
+        '''
+        return self._inner_data_wrapper.get_list_y_coordinates()
+
+    def get_data_columns(self):
+        '''
+        Returns a generator to go over all of the
+        data columns for the intensity data.
+        '''
+        return self._inner_data_wrapper.get_data_columns()
+
+    def get_value_for_column_and_index(self, column, index):
+        '''
+        Returns the value for the column and the index.
+        '''
+        return self._inner_data_wrapper.get_value_for_column_and_index(column, index)
+
+    def get_unit_for_column_and_index(self, column, index):
+        '''
+        Returns the unit for the column and the index.
+        '''
+        return self._inner_data_wrapper.get_unit_for_column_and_index(column, index)
 
 
 class DictWithListDataWrapper():
