@@ -22,21 +22,10 @@ def create_schema_mapper(current_dir):
     Creates and returns a schema mapper
     using local mapping files.
     '''
-    pattern_to_search_for_bc_mappings = os.path.join(
-        current_dir, 'mapping_bc_*.json')
-    files_bc_mappings = glob.glob(pattern_to_search_for_bc_mappings)
-    building_class_mapper = schemamapping.BuildingClassMapper.from_files(
-        files_bc_mappings)
-
-    pattern_to_search_for_ds_mappings = os.path.join(
-        current_dir, 'mapping_ds_*.json')
-    files_ds_mappings = glob.glob(pattern_to_search_for_ds_mappings)
-    damage_state_mapper = schemamapping.DamageStateMapper.from_files(
-        files_ds_mappings)
-
-    return schemamapping.SchemaMapper(building_class_mapper,
-                                      damage_state_mapper)
-
+    pattern_to_search_for_files = os.path.join(
+        current_dir, 'schema_mapping_data', '*.json')
+    mapping_files = glob.glob(pattern_to_search_for_files)
+    return schemamapping.BuildingClassSpecificDamageStateMapper.from_files(mapping_files)
 
 def main():
     '''
@@ -73,7 +62,7 @@ def main():
         help='Filename for the output with the transitions')
     argparser.add_argument(
         '--damage_output_file',
-        default='output_damage.json',
+        default='output_loss.json',
         help='Filename for the output with the computed damage')
 
     args = argparser.parse_args()
