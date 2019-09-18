@@ -30,6 +30,7 @@ import re
 
 import geopandas as gpd
 
+
 class GeopandasDataFrameWrapper():
     '''
     Wraps a geopandas data frame
@@ -91,6 +92,7 @@ class GeopandasDataFrameWrapper():
         series = self._gdf.iloc[index]
         return series[unit_column]
 
+
 class RasterDataWrapper():
     '''
     This is a wrapper to read the data from
@@ -107,7 +109,13 @@ class RasterDataWrapper():
     work property with it (as in the same way as
     with the shakemaps).
     '''
-    def __init__(self, raster, value_name, unit, input_epsg_code=None, usage_epsg_code='epsg:4326'):
+    def __init__(
+            self,
+            raster,
+            value_name,
+            unit,
+            input_epsg_code=None,
+            usage_epsg_code='epsg:4326'):
         dataframe = raster.to_pandas()
         geodataframe = gpd.GeoDataFrame(
             dataframe,
@@ -147,13 +155,19 @@ class RasterDataWrapper():
         '''
         Returns the value for the column and the index.
         '''
-        return self._inner_data_wrapper.get_value_for_column_and_index(column, index)
+        return self._inner_data_wrapper.get_value_for_column_and_index(
+            column,
+            index,
+        )
 
     def get_unit_for_column_and_index(self, column, index):
         '''
         Returns the unit for the column and the index.
         '''
-        return self._inner_data_wrapper.get_unit_for_column_and_index(column, index)
+        return self._inner_data_wrapper.get_unit_for_column_and_index(
+            column,
+            index
+        )
 
 
 class DictWithListDataWrapper():

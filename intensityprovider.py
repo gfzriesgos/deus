@@ -11,13 +11,50 @@ import numpy as np
 from scipy.spatial import cKDTree
 
 
+class RasterIntensityProvider():
+    '''
+    Class to provide the intensities on
+    an location by reading from a raster.
+    '''
+
+    def __init__(self, raster_wrapper, kind, unit, na_value=0.0):
+        self._raster_wrapper = raster_wrapper
+        self._kind = kind
+        self._unit = unit
+        self._na_value = na_value
+
+    def get_nearest(self, lon, lat):
+        '''
+        Returns a dict with the values and a dict with the
+        units of the intensities that the provider has
+        on a given location (longitude, latitude).
+
+        It is possible that the point is outside of
+        the raster coverage, so
+        the value may be zero in that cases.
+        '''
+        try:
+            if self._raster_wrapper.is_loaction_in_bbox(lon, lat):
+                value = self._raster_wrapper.get_sample(lon, lat)
+            else:
+                value = self._na_value
+        except IndexError:
+            value = self._na_value
+
+        intensities = {self._kind: value}
+        units = {self._kind: self._unit}
+
+        return intensities, units
+
+
 class IntensityProvider():
     '''
     Class for providing the intensities on
     a location.
     '''
-    def __init__(self, intensity_data):
+    def __init__(self, intensity_data, na_value=0.0):
         self._intensity_data = intensity_data
+        self._na_value = na_value
         self._spatial_index = self._build_spatial_index()
         self._max_dist = self._estimate_max_dist()
 
@@ -61,7 +98,7 @@ class IntensityProvider():
                     index=idx
                 )
             else:
-                value = 0.0
+                value = self._na_value
             unit = self._intensity_data.get_unit_for_column_and_index(
                 column=column,
                 index=idx

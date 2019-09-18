@@ -25,7 +25,10 @@ def create_schema_mapper(current_dir):
     pattern_to_search_for_files = os.path.join(
         current_dir, 'schema_mapping_data', '*.json')
     mapping_files = glob.glob(pattern_to_search_for_files)
-    return schemamapping.BuildingClassSpecificDamageStateMapper.from_files(mapping_files)
+    return (schemamapping
+            .BuildingClassSpecificDamageStateMapper
+            .from_files(mapping_files))
+
 
 def main():
     '''

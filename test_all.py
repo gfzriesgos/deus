@@ -21,6 +21,7 @@ import damage
 import exposure
 import fragility
 import schemamapping
+import rasterwrapper
 import shakemap
 
 
@@ -999,6 +1000,40 @@ class TestAll(unittest.TestCase):
 
         self.assertEqual(units['mwh'], 'm')
 
+    def test_raster(self):
+        '''
+        Test for reading from a raster directly.
+        '''
+
+        test_df = pd.DataFrame({
+            'lon': [14, 15, 16, 14, 15, 16, 14, 15, 16],
+            'lat': [50, 50, 50, 51, 51, 51, 52, 52, 52],
+            'val': [11, 12, 13, 14, 15, 16, 17, 18, 19],
+        })
+
+        test_raster = gr.from_pandas(test_df, value='val', x='lon', y='lat')
+        test_raster_wrapper = rasterwrapper.RasterWrapper(test_raster)
+
+        intensity_provider = intensityprovider.RasterIntensityProvider(
+            test_raster_wrapper,
+            kind='testdata',
+            unit='unitless',
+        )
+
+        intensities, units = intensity_provider.get_nearest(lon=15, lat=51)
+
+        intensity_testdata = intensities['testdata']
+        self.assertLess(14.9, intensity_testdata)
+        self.assertLess(intensity_testdata, 15.1)
+
+        units_testdata = units['testdata']
+        self.assertEqual(units_testdata, 'unitless')
+
+        intensities2, units2 = intensity_provider.get_nearest(lon=13, lat=50)
+
+        self.assertEqual(intensities2['testdata'], 0.0)
+        self.assertEqual(units2['testdata'], 'unitless')
+
     def test_read_lahar_data(self):
         '''
         Test the intensity provider of the lahar data.
@@ -1007,26 +1042,27 @@ class TestAll(unittest.TestCase):
         raster = gr.from_file(os.path.join(
             current_dir,
             'testinputs',
-            'fixedDEM_S_VEI_60mio_HYDRO_v10_EROSION_1600_0015_25res_4mom_25000s_MaxPressure_smaller.asc'
+            'fixedDEM_S_VEI_60mio_HYDRO_v10_EROSION_1600_0015_' +
+            '25res_4mom_25000s_MaxPressure_smaller.asc'
         ))
-
-        print('DONE - read raster')
 
         intensity_data = intensitydatawrapper.RasterDataWrapper(
             raster=raster,
             value_name='max_pressure',
-            unit='p', # check the unit; for testing it is ok to assume that it is p
+            # check the unit; for testing it is ok to assume that it is p
+            unit='p',
             input_epsg_code='epsg:24877',
             usage_epsg_code='epsg:4326'
         )
 
-        print('DONE - intensity data')
+        intensity_provider = intensityprovider.IntensityProvider(
+            intensity_data
+        )
 
-        intensity_provider = intensityprovider.IntensityProvider(intensity_data)
-
-        print('DONE - intensity provider')
-
-        intensities, units = intensity_provider.get_nearest(lon=-78.48187327247078, lat=-0.7442986459402828)
+        intensities, units = intensity_provider.get_nearest(
+            lon=-78.48187327247078,
+            lat=-0.7442986459402828,
+        )
 
         intensity_max_pressure = intensities['max_pressure']
 
@@ -1108,6 +1144,8 @@ class TestAll(unittest.TestCase):
         intensity_pga = intensities['pga']
         self.assertLess(0.7134, intensity_pga)
         self.assertLess(intensity_pga, 0.7136)
+        self.assertEqual(units['mwh'], 'm')
+        self.assertEqual(units['pga'], 'g')
 
 
 class MockedIntensityProvider():
