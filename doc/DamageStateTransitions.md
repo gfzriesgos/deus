@@ -6,7 +6,7 @@ get the intensity file and the fragility functions.
 
 You can think of it as a table:
 
-| Building class | From damage state | To damage state | number of affected buildings |
+| Building class | From damage state | To damage state | Number of affected buildings |
 |----------------|-------------------|-----------------|------------------------------|
 | RC1            |                 0 |               1 |                          100 |
 | RC1            |                 0 |               2 |                           50 |

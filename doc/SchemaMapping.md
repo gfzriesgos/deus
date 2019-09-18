@@ -48,7 +48,6 @@ So the format is:
     ...
 },
 ...
-}
 ```
 
 We can add other supported schema mappings by just inserting new files in the `schema_mapping_data`
