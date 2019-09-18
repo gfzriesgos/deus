@@ -7,4 +7,4 @@ a couple of points with the maximum wave height.
 This is regarding that tsunami data for maximum wave height only makes
 sense for the costal zone, but not for the sea area or the backland.
 
-You can take a look to an [example file]{../testinputs/shakemap_tsunami.xml}.
+You can take a look to an [example file](../testinputs/shakemap_tsunami.xml).

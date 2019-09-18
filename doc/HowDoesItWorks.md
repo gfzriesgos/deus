@@ -2,13 +2,13 @@
 
 ## Input & Output
 Deus consists of 4 kinds of input datasets:
-- [intensity file]{IntensityFile.md}
-- [an existing exposure model]{ExposureModel.md}
-- [fragility functions]{FragilityFunctions.md}
-- [loss data]{LossData.md}
+- [intensity file](IntensityFile.md)
+- [an existing exposure model](ExposureModel.md)
+- [fragility functions](FragilityFunctions.md)
+- [loss data](LossData.md)
 
 It outputs the updated exposure model, a [list with all the
-damage state transitions]{DamageStateTransitions.md}
+damage state transitions](DamageStateTransitions.md)
 and a aggregated loss out of this
 conversions.
 
@@ -17,7 +17,7 @@ conversions.
 The pipeline of deus is the following:
 
 1. Iterate over all the cells in the exposure model
-2. [Map the taxonomy]{SchemaMapping.md} of the cell from the input schema to the
+2. [Map the taxonomy](SchemaMapping.md) of the cell from the input schema to the
    schema of the fragility functions
 3. Get the intensity on the centroid of the cell
 4. For each building class and damage state in the taxonomy
@@ -39,11 +39,11 @@ deus run.
 
 ## Supported hazards
 
-At the moment deus supports earth quake events via [shakemaps]{EarthQuakeShakemap.md} and
-tsunamis via [tsunami shakemaps]{TsunamiShakemap.md}.
+At the moment deus supports earth quake events via [shakemaps](EarthQuakeShakemap.md) and
+tsunamis via [tsunami shakemaps](TsunamiShakemap.md).
 
-You can include other hazards by implementing access to the [intensity data formats]{IntensityFile.md},
-the custom [fragility functions]{FragilityFunctions.md} and - if you want to apply it to exposure models
+You can include other hazards by implementing access to the [intensity data formats](IntensityFile.md),
+the custom [fragility functions](FragilityFunctions.md) and - if you want to apply it to exposure models
 of other hazards - [schema mapping files]{SchemaMapping.md}.
 
 ## Supported crs

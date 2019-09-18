@@ -5,7 +5,7 @@ state to get damaged even more and switch into a higher damage state.
 
 ## Example file
 
-You can take a look into an [example file]{../testinputs/fragility_sara.json}.
+You can take a look into an [example file](../testinputs/fragility_sara.json).
 
 ## The most important fields
 
@@ -124,7 +124,7 @@ own imt value.
 So if the fragility funciton will use the imt value 'pga' it will access
 the intensity in the following way:
 
-```
+```python
 imt = 'pga'
 intensities, units = intensity_provider.get_nearest(lon, lat)
 intensity = intensities[imt]

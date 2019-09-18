@@ -18,7 +18,7 @@ it the lon and lat values.
 All implementations should give back two dicts with the intensity values
 and the units of all the fields that are included in the file.
 
-```
+```python
 intensities, units = intensity_provider.get_nearest(lon=lon, lat=lat)
 ```
 

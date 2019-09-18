@@ -3,7 +3,7 @@
 The loss data is an input for aggregating the overall loss
 of all the transitions.
 
-You can take a look into the [example file]{../testinputs/loss_sara.json}.
+You can take a look into the [example file](../testinputs/loss_sara.json).
 At the moment all the values for the loss are zero in this file and there
 is no unit.
 

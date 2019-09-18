@@ -15,7 +15,7 @@ sudo apt-get install libgdal20
 
 
 Then you have to install the dependencies:
-```
+```shell
 pip install -r requirements.txt
 ```
 
@@ -27,4 +27,4 @@ python3 test_all.py
 
 All the tests should pass.
 
-You now can go one with an [example run]{RunExample.md} or read [how deus works]{HowDoesItWorks.md}.
+You now can go one with an [example run](RunExample.md) or read [how deus works](HowDoesItWorks.md).

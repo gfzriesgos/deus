@@ -15,13 +15,13 @@ with given fragility functions and intensity values.
 ## Documentation
 You can look up several documentation pages:
 
-- [Setup and installation]{doc/Setup.md}
-- [Example run]{doc/ExposureModel.md}
-- [Shakemaps]{doc/EarthQuakeShakemap.md} and [Intensity files]{doc/IntensityFile.md}
-- [Exposure models]{doc/ExposureModel.md}
-- [Fragility functions]{doc/FragilityFunctions.md}
-- [Loss]{doc/LossData.md}
-- [Schema mappings]{doc/SchemaMapping.md}
+- [Setup and installation](doc/Setup.md)
+- [Example run](doc/ExposureModel.md)
+- [Shakemaps](doc/EarthQuakeShakemap.md) and [Intensity files](doc/IntensityFile.md)
+- [Exposure models](doc/ExposureModel.md)
+- [Fragility functions](doc/FragilityFunctions.md)
+- [Loss](doc/LossData.md)
+- [Schema mappings](doc/SchemaMapping.md)
 
 ## Scope of deus
 
@@ -41,7 +41,7 @@ and already provides several implementations for some of them.
 Aims for the following development of deus is the support of more and more hazards with
 their intensity files, their fragility functions and their schemas.
 
-You can also take a look into the [TODOs]{TODO.m}.
+You can also take a look into the [TODOs](TODO.md).
 
 ## Will there only be one deus?
 

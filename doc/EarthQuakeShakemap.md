@@ -18,5 +18,5 @@ So something like this:
 ...
 ```
 
-You can take a look in to the [example shakemap file]{../testinputs/shakemap.xml}. 
-Also there is little different [file format for tsunami data]{../testinputs/shakemap_tsunami.xml}.
+You can take a look in to the [example shakemap file](../testinputs/shakemap.xml). 
+Also there is little different [file format for tsunami data](../testinputs/shakemap_tsunami.xml).

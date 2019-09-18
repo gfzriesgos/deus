@@ -17,7 +17,7 @@ Think it as the following:
 ## Schemas
 The building class belongs to a taxonomy of a given schema.
 Currently only some schemas are supported.
-You can take a look in the [documentation of the mapping]{SchemaMapping.md}.
+You can take a look in the [documentation of the mapping](SchemaMapping.md).
 
 
 ## Encoding of the damage states
