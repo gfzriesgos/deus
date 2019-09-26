@@ -104,7 +104,7 @@ class ExposureCell():
         return self._geometry
 
     def get_lon_lat_of_centroid(self):
-        centroid = self.get_geometry()
+        centroid = self.get_geometry().centroid
         lon = centroid.x
         lat = centroid.y
         return lon, lat

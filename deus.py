@@ -136,7 +136,7 @@ def write_result(
     '''
     if os.path.exists(output_file):
         os.unlink(output_file)
-    cells.to_dataframe().to_file(output_file)
+    cells.to_dataframe().to_file(output_file, 'GeoJSON')
 
 
 if __name__ == '__main__':
