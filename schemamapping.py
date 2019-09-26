@@ -64,10 +64,10 @@ class BuildingClassSpecificDamageStateMapper():
         self._mapping_data = mapping_data
 
     def map_schema(self,
-                   source_building_class,
+                   source_taxonomy,
                    source_damage_state,
-                   source_name,
-                   target_name,
+                   source_schema,
+                   target_schema,
                    n_buildings=1.0):
         '''
         Maps a building class with a damage state and n buildings
@@ -76,16 +76,16 @@ class BuildingClassSpecificDamageStateMapper():
         Here it uses the data for damage state mappings that is
         specific for each building class.
         '''
-        if source_name == target_name:
+        if source_schema == target_schema:
             return [SchemaMapperResult(
-                building_class=source_building_class,
+                taxonomy=source_taxonomy,
                 damage_state=source_damage_state,
                 n_buildings=n_buildings)]
 
         result = []
 
         from_schema_and_building_class = \
-            source_name + '_' + source_building_class
+            source_schema + '_' + source_taxonomy
 
         if from_schema_and_building_class not in self._mapping_data.keys():
             raise Exception('There is no data to map from {0}'.format(
@@ -96,11 +96,11 @@ class BuildingClassSpecificDamageStateMapper():
 
         target_list_with_target_schema = [
             x for x in target_list
-            if x.is_for_schema(target_name)
+            if x.is_for_schema(target_schema)
         ]
 
         for target_data in target_list_with_target_schema:
-            target_building_class = target_data.get_building_class(target_name)
+            target_building_class = target_data.get_building_class(target_schema)
             conv_matrix = target_data.get_conv_matrix()[
                 str(source_damage_state)
             ]
@@ -133,7 +133,7 @@ class BuildingClassSpecificDamageStateMapper():
         n_buildings_in_damage_state = mapping_value * n_buildings
 
         return SchemaMapperResult(
-            building_class=target_building_class,
+            taxonomy=target_building_class,
             damage_state=target_damage_state,
             n_buildings=n_buildings_in_damage_state
         )
@@ -197,28 +197,28 @@ class SchemaMapper():
         return self._damage_state_mapper
 
     def map_schema(self,
-                   source_building_class,
+                   source_taxonomy,
                    source_damage_state,
-                   source_name,
-                   target_name,
+                   source_schema,
+                   target_schema,
                    n_buildings=1.0):
         '''
         Maps a building class with a damage state and n buildings
         to another schema (with possible several damage states and
         several different building classes).
         '''
-        if source_name == target_name:
+        if source_schema == target_schema:
             return [SchemaMapperResult(
-                building_class=source_building_class,
+                taxonomy=source_taxonomy,
                 damage_state=source_damage_state,
                 n_buildings=n_buildings)]
 
         result = []
         building_class_mapping_results = \
             self._building_class_mapper.map_building_class(
-                source_building_class=source_building_class,
-                source_name=source_name,
-                target_name=target_name,
+                taxonomy=source_taxonomy,
+                source_schema=source_schema,
+                target_schema=target_schema,
                 n_buildings=n_buildings,
             )
 
@@ -226,15 +226,15 @@ class SchemaMapper():
             damage_state_mapping_results = \
                 self._damage_state_mapper.map_damage_state(
                     source_damage_state=source_damage_state,
-                    source_name=source_name,
-                    target_name=target_name,
+                    source_schema=source_schema,
+                    target_schema=target_schema,
                     n_buildings=1.0
                 )
 
             for ds_mapping in damage_state_mapping_results:
                 result.append(
                     SchemaMapperResult(
-                        building_class=bc_mapping.get_building_class(),
+                        taxonomy=bc_mapping.get_building_class(),
                         damage_state=ds_mapping.get_damage_state(),
                         n_buildings=bc_mapping.get_n_buildings() *
                         ds_mapping.get_n_buildings())
@@ -246,16 +246,16 @@ class SchemaMapperResult():
     '''
     Result class for the schema mapping.
     '''
-    def __init__(self, building_class, damage_state, n_buildings):
-        self._building_class = building_class
+    def __init__(self, taxonomy, damage_state, n_buildings):
+        self._taxonomy = taxonomy
         self._damage_state = damage_state
         self._n_buildings = n_buildings
 
-    def get_building_class(self):
+    def get_taxonomy(self):
         '''
         Returns the building class.
         '''
-        return self._building_class
+        return self._taxonomy
 
     def get_damage_state(self):
         '''
@@ -311,25 +311,25 @@ class DamageStateMapper():
     def map_damage_state(
             self,
             source_damage_state,
-            source_name,
-            target_name,
+            source_schema,
+            target_schema,
             n_buildings=1):
         '''
         Maps one damage state from one schema
         to other damage states.
         '''
-        if source_name == target_name:
+        if source_schema == target_schema:
             return [DamageStateMapperResult(
                 source_damage_state, n_buildings)]
         result = []
         possible_mappings = [
             entry for entry in self._data
-            if entry['source_name'] == source_name
-            and entry['target_name'] == target_name
+            if entry['source_name'] == source_schema
+            and entry['target_name'] == target_schema
         ]
         if not possible_mappings:
             raise Exception('There is no data to map from {0} to {1}'.format(
-                source_name, target_name))
+                source_schema, target_schema))
         conv_matrix = possible_mappings[0]['conv_matrix']
 
         settings_for_ds = conv_matrix[str(source_damage_state)]
@@ -398,29 +398,29 @@ class BuildingClassMapper():
 
     def map_building_class(
             self,
-            source_building_class,
-            source_name,
-            target_name,
+            taxonomy,
+            source_schema,
+            target_schema,
             n_buildings=1):
         '''
         Maps one building class from one schema
         to other building classes.
         '''
-        if source_name == target_name:
+        if source_schema == target_schema:
             return [BuildingClassMapperResult(
-                source_building_class, n_buildings)]
+                taxonomy, n_buildings)]
         result = []
         possible_mappings = [
             entry for entry in self._data
-            if entry['source_name'] == source_name
-            and entry['target_name'] == target_name
+            if entry['source_name'] == source_schema
+            and entry['target_name'] == target_schema
         ]
         if not possible_mappings:
             raise Exception('There is no data to map from {0} to {1}'.format(
-                source_name, target_name))
+                source_schema, target_schema))
         conv_matrix = possible_mappings[0]['conv_matrix']
 
-        settings_for_bc = conv_matrix[source_building_class]
+        settings_for_bc = conv_matrix[taxonomy]
 
         for target_building_class in settings_for_bc.keys():
             proportion = settings_for_bc[target_building_class]

@@ -18,7 +18,7 @@ from shapely import wkt
 import intensitydatawrapper
 import intensityprovider
 import damage
-import exposure
+import extendedexposure as exposure
 import fragility
 import schemamapping
 import rasterwrapper
@@ -168,7 +168,7 @@ class TestAll(unittest.TestCase):
         self.assertEqual(lon, 12.0)
         self.assertEqual(lat, 15.0)
 
-        empty_exposure_cell = exposure_cell.new_prototype('SARA.0')
+        empty_exposure_cell = exposure_cell.without_taxonomies(schema='SARA.0')
 
         lon2, lat2 = empty_exposure_cell.get_lon_lat_of_centroid()
 
@@ -176,59 +176,20 @@ class TestAll(unittest.TestCase):
         self.assertEqual(lat, lat2)
 
         self.assertEqual(
-            empty_exposure_cell.get_series()['name'],
+            empty_exposure_cell.get_name(),
             'example point1')
 
         taxonomies = exposure_cell.get_taxonomies()
 
-        self.assertIn(
-            # the backslashes are removed
-            exposure.Taxonomy(name=r'MCF/DNO/_1', count=6, schema='SARA.0'),
-            taxonomies
-        )
+        search_taxonomy = [
+            x for x in taxonomies
+            if x.get_schema() == 'SARA.0'
+            and x.get_taxonomy() == 'MCF/DNO/_1'
+            and x.get_n_buildings() == 6
+        ]
 
-    def test_exposure_taxonomy_damage_state(self):
-        """
-        Test exposure taxonomy damage state
-        :return: None
-        """
-        tax1 = exposure.Taxonomy(
-            name=r'MCF\/DNO\/_1',
-            count=6,
-            schema='SARA.0')
+        self.assertEqual(1, len(search_taxonomy))
 
-        ds1 = tax1.get_damage_state()
-
-        self.assertEqual(ds1, 0)
-
-        tax2 = exposure.Taxonomy(
-            name=r'MCF\/DNO\/_1_D1',
-            count=6,
-            schema='SARA.0')
-
-        ds2 = tax2.get_damage_state()
-
-        self.assertEqual(ds2, 1)
-
-        tax3 = exposure.Taxonomy(
-            name=r'MCF\/DNO\/_1_D5',
-            count=6,
-            schema='SARA.0')
-
-        ds3 = tax3.get_damage_state()
-
-        self.assertEqual(ds3, 5)
-
-    def test_update_damage_state(self):
-        """
-        Test update damage state
-        :return: None
-        """
-        updated = exposure.update_taxonomy_damage_state(r'MCF\/DNO\/_1', 0)
-        self.assertEqual(updated, r'MCF\/DNO\/_1_D0')
-
-        updated2 = exposure.update_taxonomy_damage_state(r'MCF\/DNO\/_1_D0', 1)
-        self.assertEqual(updated2, r'MCF\/DNO\/_1_D1')
 
     def test_damage_state_mapping(self):
         '''
@@ -294,8 +255,8 @@ class TestAll(unittest.TestCase):
 
         result_0_sup_to_sup = damage_state_mapper.map_damage_state(
             source_damage_state=0,
-            source_name='sup_13',
-            target_name='sup_13',
+            source_schema='sup_13',
+            target_schema='sup_13',
             n_buildings=100.0
         )
 
@@ -306,8 +267,8 @@ class TestAll(unittest.TestCase):
 
         result_0_sup_to_ems = damage_state_mapper.map_damage_state(
             source_damage_state=0,
-            source_name='sup_13',
-            target_name='ems_98',
+            source_schema='sup_13',
+            target_schema='ems_98',
             n_buildings=100.0
         )
 
@@ -318,8 +279,8 @@ class TestAll(unittest.TestCase):
 
         result_5_ems_to_sup = damage_state_mapper.map_damage_state(
             source_damage_state=5,
-            source_name='ems_98',
-            target_name='sup_13',
+            source_schema='ems_98',
+            target_schema='sup_13',
             n_buildings=100.0
         )
         self.assertEqual(2, len(result_5_ems_to_sup))
@@ -374,9 +335,9 @@ class TestAll(unittest.TestCase):
         building_class_mapper = schemamapping.BuildingClassMapper(mapping_data)
 
         result_urm_ems_to_ems = building_class_mapper.map_building_class(
-            source_building_class='URM',
-            source_name='ems_98',
-            target_name='ems_98',
+            taxonomy='URM',
+            source_schema='ems_98',
+            target_schema='ems_98',
             n_buildings=100.0
         )
 
@@ -386,9 +347,9 @@ class TestAll(unittest.TestCase):
         self.assertLess(result_urm_ems_to_ems[0].get_n_buildings(), 100.0001)
 
         result_urm_ems_to_sup = building_class_mapper.map_building_class(
-            source_building_class='URM',
-            source_name='ems_98',
-            target_name='sup_13',
+            taxonomy='URM',
+            source_schema='ems_98',
+            target_schema='sup_13',
             n_buildings=100.0
         )
 
@@ -479,27 +440,27 @@ class TestAll(unittest.TestCase):
             building_class_mapper, damage_state_mapper)
 
         result_mapping_in_schema = schema_mapper.map_schema(
-            source_building_class='URM',
+            source_taxonomy='URM',
             source_damage_state=5,
-            source_name='ems_98',
-            target_name='ems_98',
+            source_schema='ems_98',
+            target_schema='ems_98',
             n_buildings=100.0
         )
 
         self.assertEqual(1, len(result_mapping_in_schema))
         self.assertEqual(
             'URM',
-            result_mapping_in_schema[0].get_building_class())
+            result_mapping_in_schema[0].get_taxonomy())
         self.assertEqual(5, result_mapping_in_schema[0].get_damage_state())
 
         self.assertLess(99.9, result_mapping_in_schema[0].get_n_buildings())
         self.assertLess(result_mapping_in_schema[0].get_n_buildings(), 100.1)
 
         result_mapping_to_sup = schema_mapper.map_schema(
-            source_building_class='URM',
+            source_taxonomy='URM',
             source_damage_state=5,
-            source_name='ems_98',
-            target_name='sup_13',
+            source_schema='ems_98',
+            target_schema='sup_13',
             n_buildings=100.0
         )
 
@@ -507,7 +468,7 @@ class TestAll(unittest.TestCase):
 
         res_wood_5 = [
             x for x in result_mapping_to_sup
-            if x.get_building_class() == 'WOOD'
+            if x.get_taxonomy() == 'WOOD'
             and x.get_damage_state() == 5][0]
 
         self.assertLess(9.9, res_wood_5.get_n_buildings())
@@ -515,7 +476,7 @@ class TestAll(unittest.TestCase):
 
         res_wood_6 = [
             x for x in result_mapping_to_sup
-            if x.get_building_class() == 'WOOD'
+            if x.get_taxonomy() == 'WOOD'
             and x.get_damage_state() == 6][0]
 
         self.assertLess(9.9, res_wood_6.get_n_buildings())
@@ -523,7 +484,7 @@ class TestAll(unittest.TestCase):
 
         res_rc_5 = [
             x for x in result_mapping_to_sup
-            if x.get_building_class() == 'RC'
+            if x.get_taxonomy() == 'RC'
             and x.get_damage_state() == 5][0]
 
         self.assertLess(39.9, res_rc_5.get_n_buildings())
@@ -531,7 +492,7 @@ class TestAll(unittest.TestCase):
 
         res_rc_6 = [
             x for x in result_mapping_to_sup
-            if x.get_building_class() == 'RC'
+            if x.get_taxonomy() == 'RC'
             and x.get_damage_state() == 6][0]
 
         self.assertLess(39.9, res_rc_6.get_n_buildings())
@@ -575,7 +536,7 @@ class TestAll(unittest.TestCase):
 
         self.assertEqual('SUPPARSI_2013.0', new_schema)
 
-        new_series = mapped_exposure_cell.get_series()
+        new_series = mapped_exposure_cell.to_simple_series()
 
         self.assertLess(79.9, new_series['RC_H1_D0'])
         self.assertLess(new_series['RC_H1_D0'], 80.1)
@@ -733,7 +694,7 @@ class TestAll(unittest.TestCase):
             wkt.loads)
         exposure_cell_series = exposure_cell_data.iloc[0]
 
-        exposure_cell = exposure.ExposureCell(exposure_cell_series, 'SARA')
+        exposure_cell = exposure.ExposureCell.from_simple_series(series=exposure_cell_series, schema='SARA')
 
         mapped_exposure_cell = exposure_cell.map_schema(
             'Supparsi_2013',
@@ -742,7 +703,7 @@ class TestAll(unittest.TestCase):
 
         self.assertEqual('Supparsi_2013', mapped_exposure_cell.get_schema())
 
-        new_series = mapped_exposure_cell.get_series()
+        new_series = mapped_exposure_cell.to_simple_series()
         # there are only two aim building classes
         # (and both with same data for the mapping)
         # and the mappings here are picked randomly
@@ -833,7 +794,7 @@ class TestAll(unittest.TestCase):
             updated_exposure_cell.get_schema(),
             exposure_cell.get_schema())
 
-        updated_series = updated_exposure_cell.get_series()
+        updated_series = updated_exposure_cell.to_simple_series()
 
         self.assertLess(76.69, updated_series['MUR_H1_D4'])
         self.assertLess(updated_series['MUR_H1_D4'], 76.70)
@@ -859,9 +820,9 @@ class TestAll(unittest.TestCase):
         self.assertLess(2.74, updated_series['ER_ETR_H1_2_D2'])
         self.assertLess(updated_series['ER_ETR_H1_2_D2'], 2.75)
 
-        transition_series = transition_cell.get_series()
+        transition_series = transition_cell.to_series()
 
-        self.assertEqual(updated_series['gc_id'], transition_series['gc_id'])
+        self.assertEqual(updated_series['gc_id'], transition_series['gid'])
         self.assertEqual(
             updated_series['geometry'],
             transition_series['geometry'])
@@ -869,35 +830,34 @@ class TestAll(unittest.TestCase):
             updated_series['name'],
             transition_series['name'])
 
-        updates_mur_h1 = transition_series['MUR_H1']
-
         updates_mur_h1_0_1 = [
-            x for x in updates_mur_h1
-            if x['from'] == 0
-            and x['to'] == 1][0]
+            transition_series['transitions']['n_buildings'][i] for i in range(len(transition_series['transitions']['taxonomy']))
+            if transition_series['transitions']['from_damage_state'][i] == 0
+            and transition_series['transitions']['to_damage_state'][i] == 1
+            and transition_series['transitions']['taxonomy'][i] == 'MUR_H1'][0]
 
-        self.assertLess(0.022, updates_mur_h1_0_1['n_buildings'])
-        self.assertLess(updates_mur_h1_0_1['n_buildings'], 0.023)
+        self.assertLess(0.022, updates_mur_h1_0_1)
+        self.assertLess(updates_mur_h1_0_1, 0.023)
 
         # the other mur updates are similar, not so fancy anyway
 
-        updates_er_etr_h1_2 = transition_series['ER_ETR_H1_2']
-
         updates_er_etr_h1_2_2_3 = [
-            x for x in updates_er_etr_h1_2
-            if x['from'] == 2
-            and x['to'] == 3][0]
+            transition_series['transitions']['n_buildings'][i] for i in range(len(transition_series['transitions']['taxonomy']))
+            if transition_series['transitions']['from_damage_state'][i] == 2
+            and transition_series['transitions']['to_damage_state'][i] == 3
+            and transition_series['transitions']['taxonomy'][i] == 'ER_ETR_H1_2'][0]
 
-        self.assertLess(43.87, updates_er_etr_h1_2_2_3['n_buildings'])
-        self.assertLess(updates_er_etr_h1_2_2_3['n_buildings'], 43.88)
+        self.assertLess(43.87, updates_er_etr_h1_2_2_3)
+        self.assertLess(updates_er_etr_h1_2_2_3, 43.88)
 
         updates_er_etr_h1_2_2_4 = [
-            x for x in updates_er_etr_h1_2
-            if x['from'] == 2
-            and x['to'] == 4][0]
+            transition_series['transitions']['n_buildings'][i] for i in range(len(transition_series['transitions']['taxonomy']))
+            if transition_series['transitions']['from_damage_state'][i] == 2
+            and transition_series['transitions']['to_damage_state'][i] == 4
+            and transition_series['transitions']['taxonomy'][i] == 'ER_ETR_H1_2'][0]
 
-        self.assertLess(153.38, updates_er_etr_h1_2_2_4['n_buildings'])
-        self.assertLess(updates_er_etr_h1_2_2_4['n_buildings'], 153.39)
+        self.assertLess(153.38, updates_er_etr_h1_2_2_4)
+        self.assertLess(updates_er_etr_h1_2_2_4, 153.39)
 
     def test_sorting_of_damage_states(self):
         '''
@@ -1170,7 +1130,10 @@ def get_example_exposure_cell():
     geodata = gpd.GeoDataFrame(data)
     geodata['geometry'] = geodata['geometry'].apply(wkt.loads)
     series = geodata.iloc[0]
-    return exposure.ExposureCell(series, 'SARA.0')
+    return exposure.ExposureCell.from_simple_series(
+        series=series,
+        schema='SARA.0'
+    )
 
 
 def get_exposure_cell_for_sara():
@@ -1190,7 +1153,10 @@ def get_exposure_cell_for_sara():
         wkt.loads)
     exposure_cell_series = exposure_cell_data.iloc[0]
 
-    return exposure.ExposureCell(exposure_cell_series, 'SARA.0')
+    return exposure.ExposureCell.from_simple_series(
+        series=exposure_cell_series,
+        schema='SARA.0'
+    )
 
 
 def get_schema_mapper_for_sara_to_supparsi():
