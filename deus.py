@@ -17,6 +17,9 @@ import shakemap
 import schemamapping
 
 
+COMPUTE_LOSS = True
+
+
 def create_schema_mapper(current_dir):
     '''
     Creates and returns a schema mapper
@@ -52,9 +55,10 @@ def main():
     argparser.add_argument(
         'fragilty_file',
         help='File with the fragility function data')
-    argparser.add_argument(
-        'damage_file',
-        help='File with the damage function data')
+    if COMPUTE_LOSS:
+        argparser.add_argument(
+            'damage_file',
+            help='File with the damage function data')
     argparser.add_argument(
         '--updated_exposure_output_file',
         default='updated_exposure.json',
@@ -63,10 +67,11 @@ def main():
         '--transition_output_file',
         default='output_transitions.json',
         help='Filename for the output with the transitions')
-    argparser.add_argument(
-        '--damage_output_file',
-        default='output_loss.json',
-        help='Filename for the output with the computed damage')
+    if COMPUTE_LOSS:
+        argparser.add_argument(
+            '--damage_output_file',
+            default='output_loss.json',
+            help='Filename for the output with the computed damage')
 
     args = argparser.parse_args()
 
@@ -76,8 +81,9 @@ def main():
         args.fragilty_file).to_fragility_provider()
     exposure_cell_provider = exposure.ExposureCellProvider.from_file(
         args.exposure_file, args.exposure_schema)
-    damage_provider = damage.DamageProvider.from_file(
-        args.damage_file)
+    if COMPUTE_LOSS:
+        damage_provider = damage.DamageProvider.from_file(
+            args.damage_file)
 
     current_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -85,7 +91,8 @@ def main():
 
     updated_exposure_cells = exposure.ExposureCellCollector()
     transition_cells = exposure.TransitionCellCollector()
-    damage_cells = damage.DamageCellCollector()
+    if COMPUTE_LOSS:
+        damage_cells = damage.DamageCellCollector()
 
     for original_exposure_cell in exposure_cell_provider:
         mapped_exposure_cell = original_exposure_cell.map_schema(
@@ -97,8 +104,9 @@ def main():
         updated_exposure_cells.append(single_updated_exposure_cell)
         transition_cells.append(single_transition_cell)
 
-        damage_cells.append(single_transition_cell.to_damage_cell(
-            damage_provider))
+        if COMPUTE_LOSS:
+            damage_cells.append(single_transition_cell.to_damage_cell(
+                damage_provider))
 
     write_updated_exposure(
         args.updated_exposure_output_file,
@@ -106,9 +114,10 @@ def main():
     write_transitions(
         args.transition_output_file,
         transition_cells)
-    write_damage(
-        args.damage_output_file,
-        damage_cells)
+    if COMPUTE_LOSS:
+        write_damage(
+            args.damage_output_file,
+            damage_cells)
 
 
 def write_updated_exposure(
