@@ -79,22 +79,22 @@ def main():
         args.intensity_file).to_intensity_provider()
     fragility_provider = fragility.Fragility.from_file(
         args.fragilty_file).to_fragility_provider()
-    exposure_cell_provider = exposure.ExposureCellProvider.from_file(
+    exposure_cell_provider = exposure.ExposureCellList.from_file(
         file_name=args.exposure_file, schema=args.exposure_schema)
     if COMPUTE_LOSS:
         damage_provider = damage.DamageProvider.from_file(
-            args.damage_file)
+            args.loss_file)
 
     current_dir = os.path.dirname(os.path.realpath(__file__))
 
     schema_mapper = create_schema_mapper(current_dir)
 
-    updated_exposure_cells = exposure.ExposureCellList()
-    transition_cells = exposure.TransitionCellList()
+    updated_exposure_cells = exposure.ExposureCellList([])
+    transition_cells = exposure.TransitionCellList([])
     if COMPUTE_LOSS:
-        loss_cells = exposure.LossCellList()
+        loss_cells = exposure.LossCellList([])
 
-    for original_exposure_cell in exposure_cell_provider:
+    for original_exposure_cell in exposure_cell_provider.get_exposure_cells():
         mapped_exposure_cell = original_exposure_cell.map_schema(
             target_schema=fragility_provider.get_schema(), 
             schema_mapper=schema_mapper

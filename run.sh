@@ -1,9 +1,9 @@
 #!/bin/bash
 
 python3 deus.py \
-    --updated_exposure_output_file updated_exposure_output_file.json \
+    --updated_exposure_output_file updated_exposure_output.json \
     --transition_output_file transition_output.json \
-    --damage_output_file damage_output.json \
+    --loss_output_file loss_output.json \
     testinputs/shakemap.xml \
     testinputs/exposure_sara.json \
     'SARA.0' \

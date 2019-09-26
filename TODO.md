@@ -1,9 +1,13 @@
 #TODO-List
 
+
 This is more a scratch page to collect some ideas on what
 to do.
 It is not the definitive list of issues to fix.
 
+# Fix the handling of the multi polygone
+At the moment those multipolygons doesn't have a very simple centroid
+for the cell. 
 # Support new exposure model for input and output
 
 We have a different structure and different columns here.
