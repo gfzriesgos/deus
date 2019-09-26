@@ -4,6 +4,25 @@ This is more a scratch page to collect some ideas on what
 to do.
 It is not the definitive list of issues to fix.
 
+# Support new exposure model for input and output
+
+We have a different structure and different columns here.
+Maybe it makes most sense to do the work on json level.
+
+# Only include transitions with a real damage state conversion
+
+# Change the schema mapping files
+
+```
+{"source_schema": "SARA_v1.0",
+ "source_taxonomy": "CR_...",
+ "target_schema": "SUPPASRI2013_v2.0",
+ "target_taxonomy": "W",
+ "conv_matrix": { ...}}
+```
+
+(Will be done by Sim).
+
 ## Add files to read the building class mappings between schemas
 We want to provide additional files for other schemas.
 ## Add name of input exposure taxonomy to exposure file (+ and to updated)
