@@ -98,12 +98,12 @@ def main():
 
     for original_exposure_cell in exposure_cell_provider.get_exposure_cells():
         mapped_exposure_cell = original_exposure_cell.map_schema(
-            target_schema=fragility_provider.get_schema(), 
+            target_schema=fragility_provider.get_schema(),
             schema_mapper=schema_mapper
         )
         single_updated_exposure_cell, single_transition_cell = \
             mapped_exposure_cell.update(
-                intensity_provider=intensity_provider, 
+                intensity_provider=intensity_provider,
                 fragility_provider=fragility_provider
             )
 

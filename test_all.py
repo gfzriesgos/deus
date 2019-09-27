@@ -30,6 +30,7 @@ from test_loss import *
 from test_transition import *
 from test_cmdexecution import *
 
+
 class TestAll(unittest.TestCase):
     """
     Unit test class
@@ -194,7 +195,6 @@ class TestAll(unittest.TestCase):
         ]
 
         self.assertEqual(1, len(search_taxonomy))
-
 
     def test_damage_state_mapping(self):
         '''
@@ -699,7 +699,10 @@ class TestAll(unittest.TestCase):
             wkt.loads)
         exposure_cell_series = exposure_cell_data.iloc[0]
 
-        exposure_cell = exposure.ExposureCell.from_simple_series(series=exposure_cell_series, schema='SARA')
+        exposure_cell = exposure.ExposureCell.from_simple_series(
+            series=exposure_cell_series,
+            schema='SARA'
+        )
 
         mapped_exposure_cell = exposure_cell.map_schema(
             'Supparsi_2013',
@@ -835,32 +838,27 @@ class TestAll(unittest.TestCase):
             updated_series['name'],
             transition_series['name'])
 
-        updates_mur_h1_0_1 = [
-            transition_series['transitions']['n_buildings'][i] for i in range(len(transition_series['transitions']['taxonomy']))
-            if transition_series['transitions']['from_damage_state'][i] == 0
-            and transition_series['transitions']['to_damage_state'][i] == 1
-            and transition_series['transitions']['taxonomy'][i] == 'MUR_H1'][0]
+        def filter_transitions(from_damage_state, to_damage_state, taxonomy):
+            tst = transition_series['transitions']
+            result = [
+                tst['n_buildings'][i]
+                for i in range(len(tst['taxonomy']))
+                if tst['from_damage_state'][i] == from_damage_state
+                and tst['to_damage_state'][i] == to_damage_state
+                and tst['taxonomy'][i] == taxonomy][0]
+            return result
 
+        updates_mur_h1_0_1 = filter_transitions(0, 1, 'MUR_H1')
         self.assertLess(0.022, updates_mur_h1_0_1)
         self.assertLess(updates_mur_h1_0_1, 0.023)
 
         # the other mur updates are similar, not so fancy anyway
 
-        updates_er_etr_h1_2_2_3 = [
-            transition_series['transitions']['n_buildings'][i] for i in range(len(transition_series['transitions']['taxonomy']))
-            if transition_series['transitions']['from_damage_state'][i] == 2
-            and transition_series['transitions']['to_damage_state'][i] == 3
-            and transition_series['transitions']['taxonomy'][i] == 'ER_ETR_H1_2'][0]
-
+        updates_er_etr_h1_2_2_3 = filter_transitions(2, 3, 'ER_ETR_H1_2')
         self.assertLess(43.87, updates_er_etr_h1_2_2_3)
         self.assertLess(updates_er_etr_h1_2_2_3, 43.88)
 
-        updates_er_etr_h1_2_2_4 = [
-            transition_series['transitions']['n_buildings'][i] for i in range(len(transition_series['transitions']['taxonomy']))
-            if transition_series['transitions']['from_damage_state'][i] == 2
-            and transition_series['transitions']['to_damage_state'][i] == 4
-            and transition_series['transitions']['taxonomy'][i] == 'ER_ETR_H1_2'][0]
-
+        updates_er_etr_h1_2_2_4 = filter_transitions(2, 4, 'ER_ETR_H1_2')
         self.assertLess(153.38, updates_er_etr_h1_2_2_4)
         self.assertLess(updates_er_etr_h1_2_2_4, 153.39)
 

@@ -19,10 +19,25 @@ class DamageProvider():
     def __init__(self, data):
         self._data = data
 
-    def get_loss(self, schema, taxonomy, from_damage_state, to_damage_state):
-        return self.get_damage_for_transition(taxonomy, from_damage_state, to_damage_state)
+    def get_loss(
+            self,
+            schema,
+            taxonomy,
+            from_damage_state,
+            to_damage_state):
+        '''
+        Returns the loss for the transition.
+        '''
+        return self.get_damage_for_transition(
+            taxonomy,
+            from_damage_state,
+            to_damage_state
+        )
 
     def get_unit(self):
+        '''
+        Returns the unit of the loss.
+        '''
         return None
 
     def get_damage_for_transition(
