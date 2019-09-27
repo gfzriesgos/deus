@@ -4,6 +4,8 @@
 Module for all the loss related classes.
 '''
 
+import json
+
 import geopandas as gpd
 import pandas as pd
 
@@ -22,8 +24,7 @@ class LossCellList():
         return self._loss_cells
 
     def append(self, loss_cell):
-        '''
-        Append a loss cell.
+        ''' Append a loss cell.
         There is no logic to merge the cells.
         '''
         self._loss_cells.append(loss_cell)
@@ -118,3 +119,50 @@ class LossCell():
             loss_value=loss_value,
             loss_unit=loss_provider.get_unit()
         )
+
+
+class LossProvider():
+    '''
+    Class to access loss data depending
+    on the schema, the taxonomy, the from
+    and to damage states.
+
+    The current impl doesn't deal with
+    different schemas nor does it provides
+    a useful unit.
+    '''
+
+    def __init__(self, data, unit=None):
+        self._data = data
+        self._unit = unit
+
+    def get_loss(
+            self,
+            schema,
+            taxonomy,
+            from_damage_state,
+            to_damage_state):
+        '''
+        Returns the loss for the transition.
+        '''
+
+        tax_candidates = [
+            x for x in self._data['data']
+            if x['taxonomy'] == taxonomy]
+        loss_matrix = tax_candidates[0]['loss_matrix']
+        return loss_matrix[str(from_damage_state)][str(to_damage_state)]
+
+    def get_unit(self):
+        '''
+        Returns the unit of the loss.
+        '''
+        return self._unit
+
+    @classmethod
+    def from_file(cls, json_file, unit=None):
+        '''
+        Reads the loss data from a json file.
+        '''
+        with open(json_file, 'rt') as input_file:
+            data = json.load(input_file)
+        return cls(data, unit=unit)

@@ -15,13 +15,12 @@ import pandas as pd
 
 from shapely import wkt
 
-import intensitydatawrapper
-import intensityprovider
-import damage
 import exposure
 import fragility
-import schemamapping
+import intensitydatawrapper
+import intensityprovider
 import rasterwrapper
+import schemamapping
 import shakemap
 
 # import other test classes
@@ -889,37 +888,6 @@ class TestAll(unittest.TestCase):
 
         self.assertEqual(3, ds_list[0].to_state)
         self.assertEqual(2, ds_list[1].to_state)
-
-    def test_damage_computation(self):
-        '''
-        Test for the damage computation.
-        :return: None
-        '''
-        damage_data = {
-            'data': [
-                {
-                    'taxonomy': 'URM',
-                    'loss_matrix': {
-                        '0': {
-                            '1': 500,
-                            '2': 600,
-                            '3': 700,
-                            '4': 800,
-                        }
-                    }
-                }
-            ]
-        }
-
-        damage_provider = damage.DamageProvider(damage_data)
-
-        damage_value = damage_provider.get_damage_for_transition(
-            building_class='URM',
-            from_damage_state=0,
-            to_damage_state=3
-        )
-
-        self.assertEqual(700, damage_value)
 
     def test_intensity_provider(self):
         '''

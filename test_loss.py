@@ -73,6 +73,38 @@ class TestLoss(unittest.TestCase):
         self.assertEqual(10, loss_dataframe['loss_value'][0])
         self.assertEqual('$', loss_dataframe['loss_unit'][0])
 
+    def test_loss_computation(self):
+        '''
+        Test for the loss computation.
+        :return: None
+        '''
+        loss_data = {
+            'data': [
+                {
+                    'taxonomy': 'URM',
+                    'loss_matrix': {
+                        '0': {
+                            '1': 500,
+                            '2': 600,
+                            '3': 700,
+                            '4': 800,
+                        }
+                    }
+                }
+            ]
+        }
+
+        loss_provider = loss.LossProvider(loss_data)
+
+        loss_value = loss_provider.get_loss(
+            schema='SUPPASRI2013_v2.0',
+            taxonomy='URM',
+            from_damage_state=0,
+            to_damage_state=3
+        )
+
+        self.assertEqual(700, loss_value)
+
 
 if __name__ == '__main__':
     unittest.main()

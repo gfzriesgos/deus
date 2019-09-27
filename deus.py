@@ -10,7 +10,6 @@ import argparse
 import glob
 import os
 
-import damage
 import exposure
 import fragility
 import loss
@@ -84,7 +83,7 @@ def main():
     exposure_cell_provider = exposure.ExposureCellList.from_file(
         file_name=args.exposure_file, schema=args.exposure_schema)
     if COMPUTE_LOSS:
-        damage_provider = damage.DamageProvider.from_file(
+        loss_provider = loss.LossProvider.from_file(
             args.loss_file)
 
     current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -114,7 +113,7 @@ def main():
             loss_cells.append(
                 loss.LossCell.from_transition_cell(
                     single_transition_cell,
-                    damage_provider
+                    loss_provider
                 )
             )
 
