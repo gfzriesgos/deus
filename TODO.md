@@ -5,12 +5,6 @@ This is more a scratch page to collect some ideas on what
 to do.
 It is not the definitive list of issues to fix.
 
-# Support new exposure model for input and output
-
-We have a different structure and different columns here.
-Maybe it makes most sense to do the work on json level.
-
-# Only include transitions with a real damage state conversion
 
 # Change the schema mapping files
 
@@ -28,10 +22,6 @@ Maybe it makes most sense to do the work on json level.
 We want to provide additional files for other schemas.
 ## Add name of input exposure taxonomy to exposure file (+ and to updated)
 At best the very same name as the fragility files uses as ids.
-## Think about having columns for damage state
-So that there is no `_DXX` at the end of the taxonomy.
-At the moment is just more an idea because it would change the handling
-of the exposure models.
 ## Check for updates in Assetmaster and Modelprop
 Should be done from time to time to ensure that this service can still
 read the fragility data *AND* uses the same output format as the
