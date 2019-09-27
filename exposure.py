@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 '''
-Module for handling the exposure data.
+Module for the exposure related classes.
 '''
 
 import math
@@ -10,262 +10,634 @@ import re
 import pandas as pd
 import geopandas as gpd
 
+import transition
 
-class ExposureCellProvider():
+
+class ExposureCellList():
     '''
-    Class to give access to all of the
-    exposure cells.
+    List of exposure cells.
     '''
-    def __init__(self, gdf, schema):
-        self._gdf = gdf
-        self._schema = schema
+    def __init__(self, exposure_cells):
+        self._exposure_cells = exposure_cells
 
-    def __iter__(self):
-        for _, row in self._gdf.iterrows():
-            yield ExposureCell(row, self._schema)
-
-    @classmethod
-    def from_file(cls, file_name, schema):
+    def get_exposure_cells(self):
         '''
-        Read the data from a file.
+        Returns the list of exposure cells.
         '''
-        gdf = gpd.GeoDataFrame.from_file(file_name)
-        return cls(gdf, schema)
-
-
-class ExposureCellCollector():
-    '''
-    Class to collection all the (updated) exposure cells.
-    Used for output.
-    '''
-    def __init__(self):
-        self._elements = []
+        return self._exposure_cells
 
     def append(self, exposure_cell):
         '''
         Appends an exposure cell.
+        There is no logic to merge cells.
         '''
-        self._elements.append(exposure_cell)
+        self._exposure_cells.append(exposure_cell)
 
-    def __str__(self):
-        gdf = gpd.GeoDataFrame([x.get_series() for x in self._elements])
-        return gdf.to_json()
+    def map_schema(self, target_schema, schema_mapper):
+        '''
+        Maps one whole list to a different schema.
+        '''
+        elements = []
+        for exposure_cell in self._exposure_cells:
+            mapped_cell = exposure_cell.map_schema(
+                target_schema,
+                schema_mapper
+            )
+            elements.append(mapped_cell)
+        return ExposureCellList(elements)
+
+    @classmethod
+    def from_dataframe(cls, schema, dataframe):
+        '''
+        Reads the list from a dataframe.
+        '''
+        elements = []
+        for _, row in dataframe.iterrows():
+            exposure_cell = ExposureCell.from_series(
+                series=row,
+                schema=schema
+            )
+            elements.append(exposure_cell)
+        return cls(elements)
+
+    @classmethod
+    def from_simple_dataframe(cls, schema, dataframe):
+        '''
+        Reads the list from a more simple dataframe (with
+        the taxonomies in the rows).
+        '''
+        elements = []
+        for _, row in dataframe.iterrows():
+            exposure_cell = ExposureCell.from_simple_series(
+                series=row,
+                schema=schema
+            )
+            elements.append(exposure_cell)
+        return cls(elements)
+
+    @classmethod
+    def from_file(cls, schema, file_name):
+        '''
+        Reads the list from a file.
+        '''
+        gdf = gpd.GeoDataFrame.from_file(file_name)
+        if 'expo' in gdf.columns:
+            return cls.from_dataframe(schema, gdf)
+        return cls.from_simple_dataframe(schema, gdf)
+
+    def to_simple_dataframe(self):
+        '''
+        Converts the list to a simple dataframe (with
+        taxonomies as rows).
+        '''
+        series = [x.to_simple_series() for x in self._exposure_cells]
+        dataframe = pd.DataFrame(series)
+        return gpd.GeoDataFrame(dataframe, geometry=dataframe['geometry'])
+
+    def to_dataframe(self):
+        '''
+        Converts the list to a dataframe with subdataframes
+        for each cell (information about the taxonomies and
+        the damage states seperated).
+        '''
+        series = [x.to_series() for x in self._exposure_cells]
+        dataframe = pd.DataFrame(series)
+        return gpd.GeoDataFrame(dataframe, geometry=dataframe['geometry'])
 
 
 class ExposureCell():
     '''
-    Class to represent an exposure cell.
+    Spatial cell with the exposure data.
     '''
-    def __init__(self, series, schema):
-        self._series = series
+    def __init__(self, schema, gid, name, geometry, taxonomies):
         self._schema = schema
-
-    def get_series(self):
-        '''
-        Just returns the series as it is.
-        '''
-        return self._series
+        self._gid = gid
+        self._name = name
+        self._geometry = geometry
+        self._taxonomies = taxonomies
 
     def get_schema(self):
         '''
-        Returns the schema of the exposur cell.
+        Returns the schema.
         '''
         return self._schema
 
+    def get_gid(self):
+        '''
+        Returns the gid.
+        '''
+        return self._gid
+
+    def get_name(self):
+        '''
+        Returns the name.
+        '''
+        return self._name
+
+    def get_geometry(self):
+        '''
+        Returns the geometry of the cell.
+        '''
+        return self._geometry
+
     def get_lon_lat_of_centroid(self):
         '''
-        Returns the longitude and latitude of
-        the geometry as a tuple.
+        Returns the tuple of lon and lat
+        position.
         '''
-        geometry = self._series['geometry']
-        centroid = geometry.centroid
+        centroid = self.get_geometry().centroid
         lon = centroid.x
         lat = centroid.y
-
         return lon, lat
-
-    def new_prototype(self, schema):
-        '''
-        Creates a new exposure cell that contains
-        the same name and geometry as the base object,
-        but has no data about the count of buildings for
-        a taxonomy.
-        '''
-        series = pd.Series()
-        for field in ExposureCell.get_fields_to_copy():
-            series[field] = self._series[field]
-        return ExposureCell(series, schema)
-
-    def new_transition_cell(self):
-        '''
-        Creates a cell to insert the transitions.
-        '''
-        series = pd.Series()
-        for field in ExposureCell.get_fields_to_copy():
-            series[field] = self._series[field]
-        return TransitionCell(series)
 
     def get_taxonomies(self):
         '''
-        Returns all of the taxonomies that are given for the
-        exposure cell.
+        Returns the list of taxonomies.
         '''
-        result = []
-        for field in self._series.keys():
-            if field not in ExposureCell.get_fields_to_copy():
-                if field not in ExposureCell.get_fields_to_ignore():
-                    count = self._series[field]
-                    if math.isnan(count):
-                        count = 0.0
-                    name = field.replace(r'\/', '/')
-                    result.append(Taxonomy(
-                        name=name,
-                        count=count,
-                        schema=self._schema))
-        return result
+        return self._taxonomies
 
-    @staticmethod
-    def get_fields_to_copy():
+    def without_taxonomies(self, schema=None):
         '''
-        Returns the names of fields that should be copied
-        on creating a new exposure cell object.
+        New cell with the same name and geometry
+        but without the taxonomy data.
         '''
-        return 'name', 'geometry', 'gc_id'
+        if schema is None:
+            schema = self._schema
+        return ExposureCell(
+            schema=schema,
+            gid=self._gid,
+            name=self._name,
+            geometry=self._geometry,
+            taxonomies=[]
+        )
 
-    @staticmethod
-    def get_fields_to_ignore():
+    def add_taxonomy(self, taxonomy):
         '''
-        Returns the names of fields that should be ignored
-        on searching for the taxonomy fields.
+        Adds one taxonomy dataset.
+        Here is logic to merge with taxonomies that are
+        already included.
         '''
-        return 'index', 'id'
 
-    def add_n_for_damage_state(self, exposure_taxonomy, damage_state, count):
-        '''
-        Adds the number of buildings for the given taxonomy
-        and the given new damage state.
-        '''
-        exposure_to_set = update_taxonomy_damage_state(
-            exposure_taxonomy, damage_state)
-        if exposure_to_set not in self._series.keys():
-            self._series[exposure_to_set] = 0.0
-        self._series[exposure_to_set] += count
+        idx_to_insert = None
+        for idx, test_tax in enumerate(self._taxonomies):
+            if taxonomy.can_be_merged(test_tax):
+                idx_to_insert = idx
 
-    def map_schema(
+        if idx_to_insert is not None:
+            self._taxonomies[idx_to_insert].merge(taxonomy)
+        else:
+            self._taxonomies.append(taxonomy)
+
+    def update_single_taxonomy(
             self,
-            target_name,
-            schema_mapper):
-        '''
-        Maps the exposure cell to use the other schema.
-        '''
-        mapped_cell = self.new_prototype(target_name)
-
-        for taxonomy in self.get_taxonomies():
-            building_class = taxonomy.get_building_class()
-            damage_state = taxonomy.get_damage_state()
-            count = taxonomy.get_count()
-
-            mapping_results = schema_mapper.map_schema(
-                source_building_class=building_class,
-                source_damage_state=damage_state,
-                source_name=self._schema,
-                target_name=target_name,
-                n_buildings=count
-            )
-
-            for res in mapping_results:
-                mapped_cell.add_n_for_damage_state(
-                    res.get_building_class(),
-                    res.get_damage_state(),
-                    res.get_n_buildings(),
-                )
-        return mapped_cell
-
-    @staticmethod
-    def _get_sorted_damage_states(
-            fragility_provider,
-            building_class,
-            old_damage_state):
-
-        damage_states = fragility_provider.get_damage_states_for_taxonomy(
-            building_class)
-
-        damage_states_to_care = [
-            ds for ds in damage_states
-            if ds.from_state == old_damage_state
-            and ds.to_state > old_damage_state
-        ]
-
-        damage_states_to_care.sort(key=sort_by_to_damage_state_desc)
-
-        return damage_states_to_care
-
-    def update_taxonomy(
-            self,
-            old_taxonomy,
+            taxonomy_bag,
             intensity_with_units,
             fragility_provider,
             transition_cell):
         '''
-        Updates the exposure cell for the given taxonomy.
+        Updates the cell with a given taxonomy,
+        intensities and fragility functions.
+        Also updates the transition cell.
         '''
-        building_class = old_taxonomy.get_building_class()
+        taxonomy = taxonomy_bag.get_taxonomy()
+        old_damage_state = taxonomy_bag.get_damage_state()
+
         intensity, units = intensity_with_units
 
-        damage_states_to_care = ExposureCell._get_sorted_damage_states(
+        damage_states_to_care = get_sorted_damage_states(
             fragility_provider,
-            building_class,
-            old_taxonomy.get_damage_state())
+            taxonomy,
+            old_damage_state
+        )
 
-        n_left = old_taxonomy.get_count()
+        n_left = taxonomy_bag.get_n_buildings()
 
         for single_damage_state in damage_states_to_care:
             probability = single_damage_state.get_probability_for_intensity(
-                intensity, units)
+                intensity,
+                units
+            )
+
             n_buildings_in_damage_state = probability * n_left
 
             n_left -= n_buildings_in_damage_state
 
-            self.add_n_for_damage_state(
-                building_class,
-                single_damage_state.to_state,
-                n_buildings_in_damage_state
+            self.add_taxonomy(
+                taxonomy_bag.with_updated_mapping(
+                    schema=taxonomy_bag.get_schema(),
+                    taxonomy=taxonomy,
+                    damage_state=single_damage_state.to_state,
+                    n_buildings=n_buildings_in_damage_state
+                )
+            )
+            if n_buildings_in_damage_state > 0:
+                transition_cell.add_transition(
+                    transition.Transition(
+                        schema=taxonomy_bag.get_schema(),
+                        taxonomy=taxonomy,
+                        from_damage_state=single_damage_state.from_state,
+                        to_damage_state=single_damage_state.to_state,
+                        n_buildings=n_buildings_in_damage_state
+                    )
+                )
+        if n_left > 0:
+            self.add_taxonomy(
+                taxonomy_bag.with_updated_mapping(
+                    schema=taxonomy_bag.get_schema(),
+                    taxonomy=taxonomy,
+                    damage_state=taxonomy_bag.get_damage_state(),
+                    n_buildings=n_left
+                )
             )
 
-            transition_cell.add_n_for_damage_state(
-                building_class,
-                single_damage_state.from_state,
-                single_damage_state.to_state,
-                n_buildings_in_damage_state
-            )
-
-        self.add_n_for_damage_state(
-            building_class,
-            old_taxonomy.get_damage_state(),
-            n_left
-        )
-
-    def update(
-            self,
-            intensity_provider,
-            fragility_provider):
+    def update(self, intensity_provider, fragility_provider):
         '''
-        Updates the damage states of the exposure cell.
-        Returns the updated exposure cell and a transition cell.
+        Returns a new cell with the updated damage states
+        and a cell with the transitions.
         '''
         lon, lat = self.get_lon_lat_of_centroid()
         intensity_with_units = intensity_provider.get_nearest(lon=lon, lat=lat)
 
-        updated_cell = self.new_prototype(self._schema)
-        transiton_cell = self.new_transition_cell()
+        updated_cell = self.without_taxonomies()
+        transition_cell = transition.TransitionCell.from_exposure_cell(
+            updated_cell
+        )
 
-        for taxonomy in self.get_taxonomies():
-            updated_cell.update_taxonomy(
-                taxonomy,
+        for taxonomy_bag in self._taxonomies:
+            updated_cell.update_single_taxonomy(
+                taxonomy_bag,
                 intensity_with_units,
                 fragility_provider,
-                transiton_cell)
-        return updated_cell, transiton_cell
+                transition_cell,
+            )
+        return updated_cell, transition_cell
+
+    def map_schema(self, target_schema, schema_mapper):
+        '''
+        Returns an exposure cell mapped into a different
+        schema.
+        '''
+        mapped_cell = self.without_taxonomies(schema=target_schema)
+
+        for taxonomy_bag in self.get_taxonomies():
+            taxonomy = taxonomy_bag.get_taxonomy()
+            damage_state = taxonomy_bag.get_damage_state()
+            n_buildings = taxonomy_bag.get_n_buildings()
+
+            mapping_results = schema_mapper.map_schema(
+                source_taxonomy=taxonomy,
+                source_damage_state=damage_state,
+                source_schema=self._schema,
+                target_schema=target_schema,
+                n_buildings=n_buildings
+            )
+
+            for res in mapping_results:
+                new_taxonomy_bag = taxonomy_bag.with_updated_mapping(
+                    schema=target_schema,
+                    taxonomy=res.get_taxonomy(),
+                    damage_state=res.get_damage_state(),
+                    n_buildings=res.get_n_buildings()
+                )
+                mapped_cell.add_taxonomy(new_taxonomy_bag)
+        return mapped_cell
+
+    @classmethod
+    def from_simple_series(cls, schema, series):
+        '''
+        Read the exposure cell from a simple series.
+        '''
+        gid = series['gc_id']
+        name = series['name']
+        geometry = series['geometry']
+
+        taxonomies = []
+
+        keys_without_tax = set(['gc_id', 'name', 'geometry', 'index'])
+
+        for key in series.keys():
+            if key not in keys_without_tax:
+                taxonomy_bag = TaxonomyDataBag.from_simple_series(
+                    schema=schema,
+                    series=series,
+                    key=key
+                )
+                taxonomies.append(taxonomy_bag)
+        return cls(
+            schema=schema,
+            gid=gid,
+            name=name,
+            geometry=geometry,
+            taxonomies=taxonomies
+        )
+
+    def to_simple_series(self):
+        '''
+        Converts the exposure cell into a simple pandas
+        series.
+        '''
+        series = pd.Series({
+            'gc_id': self._gid,
+            'name': self._name,
+            'geometry': self._geometry,
+        })
+
+        for taxonomy_bag in self._taxonomies:
+            key = taxonomy_bag.get_taxonomy() + \
+                    '_D' + \
+                    str(taxonomy_bag.get_damage_state())
+            series[key] = taxonomy_bag.get_n_buildings()
+
+        return series
+
+    def to_series(self):
+        '''
+        Converts the exposure cell into a more complex
+        series structure with a table like appoach for
+        displaying the taxonomies, the damage states
+        and the affected buildings.
+        '''
+        series = pd.Series({
+            'gid': self._gid,
+            'name': self._name,
+            'geometry': self._geometry,
+            'expo': {
+                'Taxonomy': [x.get_taxonomy() for x in self._taxonomies],
+                'Damage': [
+                    'D' + str(x.get_damage_state())
+                    for x in self._taxonomies
+                ],
+                'Buildings': [x.get_n_buildings() for x in self._taxonomies],
+                'id': [x.get_area_id() for x in self._taxonomies],
+                'Region': [x.get_region() for x in self._taxonomies],
+                'Dwellings': [x.get_dwellings() for x in self._taxonomies],
+                'Repl_cost_USD/bdg': [
+                    x.get_repl_cost_usd_bdg()
+                    for x in self._taxonomies
+                ],
+                'Population': [x.get_population() for x in self._taxonomies],
+                'name': [x.get_name() for x in self._taxonomies],
+            }
+        })
+        return series
+
+    @classmethod
+    def from_series(cls, schema, series):
+        '''
+        Reads the exposure cell from a more complex series structure
+        with a table like approach in the expo field to
+        store taxonomies, damage states and the number of buildings.
+        '''
+        gid = series['gid']
+        name = series['name']
+        geometry = series['geometry']
+        expo = pd.DataFrame(series['expo'])
+
+        taxonomies = []
+
+        for _, taxonomy_dataset in expo.iterrows():
+            taxonomy_bag = TaxonomyDataBag.from_series(
+                schema=schema,
+                series=taxonomy_dataset
+            )
+            taxonomies.append(taxonomy_bag)
+
+        return cls(
+            schema=schema,
+            gid=gid,
+            name=name,
+            geometry=geometry,
+            taxonomies=taxonomies
+        )
+
+
+class TaxonomyDataBag():
+    '''
+    Data structure to store the taxonomy, the schema,
+    the damage state, the number of buildings and some other
+    data.
+    '''
+    def __init__(
+            self,
+            schema,
+            taxonomy,
+            damage_state,
+            n_buildings,
+            area_id=None,
+            region=None,
+            dwellings=None,
+            repl_cost_usd_bdg=None,
+            population=None,
+            name=None):
+        self._schema = schema
+        self._taxonomy = taxonomy
+        self._damage_state = damage_state
+        self._n_buildings = n_buildings
+
+        if math.isnan(self._n_buildings):
+            self._n_buildings = 0.0
+
+        self._area_id = area_id
+        self._region = region
+        self._dwellings = dwellings
+        self._repl_cost_usd_bdg = repl_cost_usd_bdg
+        self._population = population
+        self._name = name
+
+    def with_updated_mapping(
+            self,
+            schema,
+            taxonomy,
+            damage_state,
+            n_buildings):
+        '''
+        Returns a copy of this data but with updated
+        schema, taxonomy, damage state and number of buildings.
+        '''
+        return TaxonomyDataBag(
+            schema=schema,
+            taxonomy=taxonomy,
+            damage_state=damage_state,
+            n_buildings=n_buildings,
+            area_id=self._area_id,
+            region=self._region,
+            dwellings=self._dwellings,
+            repl_cost_usd_bdg=self._repl_cost_usd_bdg,
+            population=self._population,
+            name=self._name
+        )
+
+    def get_schema(self):
+        '''
+        Returns the schema.
+        '''
+        return self._schema
+
+    def get_taxonomy(self):
+        '''
+        Returns the taxonomy.
+        '''
+        return self._taxonomy
+
+    def get_damage_state(self):
+        '''
+        Returns the damage state.
+        '''
+        return self._damage_state
+
+    def get_n_buildings(self):
+        '''
+        Returns the number of buildings.
+        '''
+        return self._n_buildings
+
+    def get_area_id(self):
+        '''
+        Returns the area id data.
+        '''
+        return self._area_id
+
+    def get_region(self):
+        '''
+        Returns the region.
+        '''
+        return self._region
+
+    def get_dwellings(self):
+        '''
+        Returns the dwellings.
+        '''
+        return self._dwellings
+
+    def get_repl_cost_usd_bdg(self):
+        '''
+        Returns the replacement costs in usd per building.
+        '''
+        return self._repl_cost_usd_bdg
+
+    def get_population(self):
+        '''
+        Returns the population of the cell.
+        '''
+        return self._population
+
+    def get_name(self):
+        '''
+        Returns the name of the cell.
+        '''
+        return self._name
+
+    def can_be_merged(self, other_taxonomy):
+        '''
+        Tests if two taxonomy data bags for the same
+        cell can be merged.
+        '''
+        if self._schema != other_taxonomy.get_schema():
+            return False
+        if self._taxonomy != other_taxonomy.get_taxonomy():
+            return False
+        if self._damage_state != other_taxonomy.get_damage_state():
+            return False
+        return True
+
+    def merge(self, other_taxonomy):
+        '''
+        Adds the number of buildings.
+        Here is no check if the other taxonomy data bag
+        can be merged or not.
+        Use the can_be_merged method before.
+        '''
+        self._n_buildings += other_taxonomy.get_n_buildings()
+
+    @classmethod
+    def from_series(cls, series, schema):
+        '''
+        Reads the taxonomy data bag from a series.
+        '''
+        return cls(
+            schema=schema,
+            taxonomy=series['Taxonomy'],
+            damage_state=remove_prefix_d_for_damage_state(series['Damage']),
+            n_buildings=series['Buildings'],
+            area_id=series['id'],
+            region=series['Region'],
+            dwellings=series['Dwellings'],
+            repl_cost_usd_bdg=series['Repl_cost_USD/bdg'],
+            population=series['Population'],
+            name=series['name']
+        )
+
+    @classmethod
+    def from_simple_series(cls, series, key, schema):
+        '''
+        Reads the taxonomy data bag from a simple series.
+        '''
+        n_buildings = series[key]
+        key = key.replace(r'\/', '/')
+        damage_state = \
+            extract_damage_state_from_taxonomy_damage_state_string(key)
+
+        return cls(
+            schema=schema,
+            taxonomy=extract_taxonomy_from_taxonomy_damage_state_string(key),
+            damage_state=damage_state,
+            n_buildings=n_buildings,
+            name=series['name']
+        )
+
+
+def remove_prefix_d_for_damage_state(damage_state_with_prefix_d):
+    '''
+    Removes a prefix d before a damage state number.
+    '''
+    match = re.search(r'^D?(\d+)', damage_state_with_prefix_d)
+    return int(match.group(1))
+
+
+def extract_taxonomy_from_taxonomy_damage_state_string(
+        tax_damage_state_string):
+    '''
+    Extracts the taxonomy from a string with first the taxonomy and
+    then the damage state (W_D3 for example).
+    '''
+    return re.sub(r'_D(\d+)$', '', tax_damage_state_string)
+
+
+def extract_damage_state_from_taxonomy_damage_state_string(
+        tax_damage_state_string):
+    '''
+    Extracts the damage state from a string with first the taxonomy
+    and then the damage state (W_D3 for example).
+    Returns 0 if there is no explicit damage state.
+    '''
+    match = re.search(r'_D(\d+)$', tax_damage_state_string)
+    if match:
+        return int(match.group(1))
+    return 0
+
+
+def get_sorted_damage_states(
+        fragility_provider,
+        taxonomy,
+        old_damage_state):
+    '''
+    Returns the sorted damage states
+    that are above the the current one.
+    '''
+
+    damage_states = fragility_provider.get_damage_states_for_taxonomy(
+        taxonomy
+    )
+
+    damage_states_to_care = [
+        ds for ds in damage_states
+        if ds.from_state == old_damage_state
+        and ds.to_state > old_damage_state
+    ]
+
+    damage_states_to_care.sort(key=sort_by_to_damage_state_desc)
+
+    return damage_states_to_care
 
 
 def sort_by_to_damage_state_desc(damage_state):
@@ -274,190 +646,3 @@ def sort_by_to_damage_state_desc(damage_state):
     desc.
     '''
     return damage_state.to_state * -1
-
-
-def update_taxonomy_damage_state(taxonomy, new_damage_state):
-    '''
-    Returns the new taxonomy name for the new damage state.
-    For example from AA with new damage state 1 the result
-    is AA_D1.
-    For AA_D1 with new damage state 2 the result is
-    AA_D2.
-    '''
-    match = re.search(r'_D\d$', taxonomy)
-    if not match:
-        return taxonomy + '_D' + str(new_damage_state)
-    return re.sub(r'_D\d$', '_D' + str(new_damage_state), taxonomy)
-
-
-def get_damage_state_from_taxonomy(taxonomy_str):
-    '''
-    Returns the damage state from a given taxonomy string.
-    For example for 'AA' the result is 0.
-    For 'AA_D1' the result is 1.
-    '''
-
-    match = re.search(r'D(\d)$', taxonomy_str)
-    if match:
-        return int(match.group(1))
-    return 0
-
-
-def get_building_class_from_taxonomy(taxonomy_str):
-    '''
-    Returns just the building class without the damage state.
-    '''
-    return re.sub(r'_D\d+$', '', taxonomy_str)
-
-
-class Taxonomy():
-    '''
-    Class to handle the taxonomy of the exposure.
-    '''
-    def __init__(self, name, count, schema):
-        self._name = name
-        self._count = count
-        self._schema = schema
-
-    def __eq__(self, other):
-        if isinstance(other, Taxonomy):
-            return self._name == other.get_name() and \
-                    self._count == other.get_count() and \
-                    self._schema == other.get_schema()
-        return False
-
-    def get_damage_state(self):
-        '''
-        Returns the damage state.
-        '''
-        return get_damage_state_from_taxonomy(self._name)
-
-    def get_building_class(self):
-        '''
-        Returns the building class (no damage state part).
-        '''
-        return get_building_class_from_taxonomy(self._name)
-
-    def get_name(self):
-        '''
-        Returns the name of the taxonomy.
-        '''
-        return self._name
-
-    def get_count(self):
-        '''
-        Returns the given count of buildings in this class so far.
-        '''
-        return self._count
-
-    def get_schema(self):
-        '''
-        Returns the schema of the taxonomy.
-        '''
-        return self._schema
-
-
-class TransitionCell():
-    '''
-    Cell for inserting all the transitions.
-    Contains also the same geometry as the exposure cells.
-    '''
-    def __init__(self, series):
-        self._series = series
-
-    def get_series(self):
-        '''
-        Returns the inner series with the values.
-        '''
-        return self._series
-
-    def add_n_for_damage_state(
-            self,
-            building_class,
-            from_damage_state,
-            to_damage_state,
-            n_buildings):
-        '''
-        Add the transition of n buildings of a building class
-        from one damage state to another.
-        '''
-        if building_class not in self._series.keys():
-            self._series[building_class] = list()
-        self._series[building_class].append({
-            'from': from_damage_state,
-            'to': to_damage_state,
-            'n_buildings': n_buildings,
-        })
-
-    def to_damage_cell(self, damage_provider):
-        '''
-        Creates the damage cell (so with the computed loss).
-        with the same geometry.
-        '''
-        series = pd.Series()
-
-        for field in ExposureCell.get_fields_to_copy():
-            series[field] = self._series[field]
-
-        damage_value = 0
-
-        for field in self._series.keys():
-            if field not in ExposureCell.get_fields_to_copy():
-                building_class = field
-                list_of_transitions = self._series[building_class]
-
-                for transition in list_of_transitions:
-                    damage_n_buildings = _compute_loss_transition(
-                        building_class, transition, damage_provider)
-                    damage_value += damage_n_buildings
-        series['damage'] = damage_value
-        return DamageCell(series)
-
-
-def _compute_loss_transition(
-        building_class,
-        transition,
-        damage_provider):
-    damage_one_building = damage_provider.get_damage_for_transition(
-        building_class, transition['from'], transition['to'])
-    damage_n_buildings = damage_one_building * transition['n_buildings']
-    return damage_n_buildings
-
-
-class TransitionCellCollector():
-    '''
-    Collector to add the transition cells to.
-    '''
-    def __init__(self):
-        self._elements = []
-
-    def append(self, transition_cell):
-        '''
-        Adds one transition cell.
-        '''
-        self._elements.append(transition_cell)
-
-    def __str__(self):
-        gdf = gpd.GeoDataFrame([x.get_series() for x in self._elements])
-        return gdf.to_json()
-
-
-class DamageCell():
-    '''
-    Cell with the computed damage (loss) over all the transitions
-    of damage states in the polygon.
-    '''
-    def __init__(self, series):
-        self._series = series
-
-    def get_series(self):
-        '''
-        Returns the inner series.
-        '''
-        return self._series
-
-    def get_total_damage(self):
-        '''
-        Returns the total damage for the cell.
-        '''
-        return self._series['damage']

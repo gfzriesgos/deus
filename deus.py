@@ -11,10 +11,12 @@ import glob
 import os
 
 import damage
-import extendedexposure as exposure
+import exposure
 import fragility
-import shakemap
+import loss
 import schemamapping
+import shakemap
+import transition
 
 
 COMPUTE_LOSS = True
@@ -90,9 +92,9 @@ def main():
     schema_mapper = create_schema_mapper(current_dir)
 
     updated_exposure_cells = exposure.ExposureCellList([])
-    transition_cells = exposure.TransitionCellList([])
+    transition_cells = transition.TransitionCellList([])
     if COMPUTE_LOSS:
-        loss_cells = exposure.LossCellList([])
+        loss_cells = loss.LossCellList([])
 
     for original_exposure_cell in exposure_cell_provider.get_exposure_cells():
         mapped_exposure_cell = original_exposure_cell.map_schema(
@@ -110,7 +112,7 @@ def main():
 
         if COMPUTE_LOSS:
             loss_cells.append(
-                exposure.LossCell.from_transition_cell(
+                loss.LossCell.from_transition_cell(
                     single_transition_cell,
                     damage_provider
                 )

@@ -100,7 +100,9 @@ class BuildingClassSpecificDamageStateMapper():
         ]
 
         for target_data in target_list_with_target_schema:
-            target_building_class = target_data.get_building_class(target_schema)
+            target_building_class = target_data.get_building_class(
+                target_schema
+            )
             conv_matrix = target_data.get_conv_matrix()[
                 str(source_damage_state)
             ]

@@ -18,12 +18,17 @@ from shapely import wkt
 import intensitydatawrapper
 import intensityprovider
 import damage
-import extendedexposure as exposure
+import exposure
 import fragility
 import schemamapping
 import rasterwrapper
 import shakemap
 
+# import other test classes
+from test_exposure import *
+from test_loss import *
+from test_transition import *
+from test_cmdexecution import *
 
 class TestAll(unittest.TestCase):
     """

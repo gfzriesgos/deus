@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+
+'''
+Testclasses for the loss.
+'''
+
+import unittest
+
+import pandas as pd
+from shapely import wkt
+
+import exposure
+import loss
+import transition
+
+from testimplementations import AlwaysOneDollarPerTransitionLossProvider
+
+
+class TestLoss(unittest.TestCase):
+    '''
+    Test class for the loss.
+    '''
+
+    def test_exposure_to_loss_cell(self):
+        '''
+        Tests to create a loss cell
+        by using the exposure cell and
+        some transitions.
+        '''
+        geometry1 = wkt.loads('POINT(14 51)')
+        series1 = pd.Series({
+            'name': 'Colina',
+            'gc_id': 'CHL.14.1.1_1',
+            'geometry': geometry1,
+            'W+WS/H:1,2': 100.0,
+            'W+WS/H:1.2_D1': 50.0,
+        })
+        schema = 'SARA_v1.0'
+        exposure_cell1 = exposure.ExposureCell.from_simple_series(
+            schema=schema,
+            series=series1
+        )
+        transition_cell1 = transition.TransitionCell.from_exposure_cell(
+            exposure_cell1
+        )
+
+        transition_to_add = transition.Transition(
+            schema='SARA_v1.0',
+            taxonomy='W+WS/H:1,2',
+            from_damage_state=0,
+            to_damage_state=1,
+            n_buildings=10,
+        )
+
+        transition_cell1.add_transition(transition_to_add)
+        loss_cell1 = loss.LossCell.from_transition_cell(
+            transition_cell=transition_cell1,
+            loss_provider=AlwaysOneDollarPerTransitionLossProvider()
+        )
+
+        self.assertEqual('$', loss_cell1.get_loss_unit())
+        self.assertEqual(10, loss_cell1.get_loss_value())
+        self.assertEqual('Colina', loss_cell1.get_name())
+        self.assertEqual('CHL.14.1.1_1', loss_cell1.get_gid())
+        self.assertEqual(geometry1, loss_cell1.get_geometry())
+
+        loss_list = loss.LossCellList([loss_cell1])
+
+        loss_dataframe = loss_list.to_dataframe()
+
+        self.assertEqual(geometry1, loss_dataframe['geometry'][0])
+        self.assertEqual('Colina', loss_dataframe['name'][0])
+        self.assertEqual(10, loss_dataframe['loss_value'][0])
+        self.assertEqual('$', loss_dataframe['loss_unit'][0])
+
+
+if __name__ == '__main__':
+    unittest.main()
