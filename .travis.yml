@@ -1,6 +1,9 @@
 dist: bionic
 language: python
 
+python:
+  - "3.7"
+
 stages:
   - compile
   - pep8check
