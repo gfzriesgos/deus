@@ -4,6 +4,20 @@ language: python
 python:
   - "3.7"
 
+env:
+  global:
+    - CPLUS_INCLUDE_PATH=/usr/include/gdal
+    - C_INCLUDE_PATH=/usr/include/gdal
+
+before_install:
+  - sed -i -e '/GDAL==2.3.2/d' requirements.txt
+  - sudo apt-get install libgdal-dev python3-rtree
+  - echo "GDAL==$(gdal-config --version)" >> requirements.txt
+
+install:
+  - pip3 install wheel
+  - pip3 install -r requirements.txt
+
 stages:
   - compile
   - pep8check
