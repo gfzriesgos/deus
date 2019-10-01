@@ -10,11 +10,12 @@ import argparse
 import glob
 import os
 
-import damage
 import exposure
 import fragility
-import shakemap
+import loss
 import schemamapping
+import shakemap
+import transition
 
 
 COMPUTE_LOSS = True
@@ -57,11 +58,11 @@ def main():
         help='File with the fragility function data')
     if COMPUTE_LOSS:
         argparser.add_argument(
-            'damage_file',
-            help='File with the damage function data')
+            'loss_file',
+            help='File with the loss function data')
     argparser.add_argument(
         '--updated_exposure_output_file',
-        default='updated_exposure.json',
+        default='output_updated_exposure.json',
         help='Filename for the output with the updated exposure data')
     argparser.add_argument(
         '--transition_output_file',
@@ -69,9 +70,9 @@ def main():
         help='Filename for the output with the transitions')
     if COMPUTE_LOSS:
         argparser.add_argument(
-            '--damage_output_file',
+            '--loss_output_file',
             default='output_loss.json',
-            help='Filename for the output with the computed damage')
+            help='Filename for the output with the computed loss')
 
     args = argparser.parse_args()
 
@@ -79,75 +80,64 @@ def main():
         args.intensity_file).to_intensity_provider()
     fragility_provider = fragility.Fragility.from_file(
         args.fragilty_file).to_fragility_provider()
-    exposure_cell_provider = exposure.ExposureCellProvider.from_file(
-        args.exposure_file, args.exposure_schema)
+    exposure_cell_provider = exposure.ExposureCellList.from_file(
+        file_name=args.exposure_file, schema=args.exposure_schema)
     if COMPUTE_LOSS:
-        damage_provider = damage.DamageProvider.from_file(
-            args.damage_file)
+        loss_provider = loss.LossProvider.from_file(
+            args.loss_file)
 
     current_dir = os.path.dirname(os.path.realpath(__file__))
 
     schema_mapper = create_schema_mapper(current_dir)
 
-    updated_exposure_cells = exposure.ExposureCellCollector()
-    transition_cells = exposure.TransitionCellCollector()
+    updated_exposure_cells = exposure.ExposureCellList([])
+    transition_cells = transition.TransitionCellList([])
     if COMPUTE_LOSS:
-        damage_cells = damage.DamageCellCollector()
+        loss_cells = loss.LossCellList([])
 
-    for original_exposure_cell in exposure_cell_provider:
+    for original_exposure_cell in exposure_cell_provider.get_exposure_cells():
         mapped_exposure_cell = original_exposure_cell.map_schema(
-            fragility_provider.get_schema(), schema_mapper)
+            target_schema=fragility_provider.get_schema(),
+            schema_mapper=schema_mapper
+        )
         single_updated_exposure_cell, single_transition_cell = \
             mapped_exposure_cell.update(
-                intensity_provider, fragility_provider)
+                intensity_provider=intensity_provider,
+                fragility_provider=fragility_provider
+            )
 
         updated_exposure_cells.append(single_updated_exposure_cell)
         transition_cells.append(single_transition_cell)
 
         if COMPUTE_LOSS:
-            damage_cells.append(single_transition_cell.to_damage_cell(
-                damage_provider))
+            loss_cells.append(
+                loss.LossCell.from_transition_cell(
+                    single_transition_cell,
+                    loss_provider
+                )
+            )
 
-    write_updated_exposure(
+    write_result(
         args.updated_exposure_output_file,
         updated_exposure_cells)
-    write_transitions(
+    write_result(
         args.transition_output_file,
         transition_cells)
     if COMPUTE_LOSS:
-        write_damage(
-            args.damage_output_file,
-            damage_cells)
+        write_result(
+            args.loss_output_file,
+            loss_cells)
 
 
-def write_updated_exposure(
-        updated_exposure_output_file,
-        updated_exposure_cells):
+def write_result(
+        output_file,
+        cells):
     '''
     Write the updated exposure.
     '''
-    with open(updated_exposure_output_file, 'wt') as output_file_for_exposure:
-        print(updated_exposure_cells, file=output_file_for_exposure)
-
-
-def write_transitions(
-        transition_output_file,
-        transition_cells):
-    '''
-    Write the transition between damage states.
-    '''
-    with open(transition_output_file, 'wt') as output_file_for_transitions:
-        print(transition_cells, file=output_file_for_transitions)
-
-
-def write_damage(
-        damage_output_file,
-        damage_cells):
-    '''
-    Write the damage (loss) cells.
-    '''
-    with open(damage_output_file, 'wt') as output_file_for_damage:
-        print(damage_cells, file=output_file_for_damage)
+    if os.path.exists(output_file):
+        os.unlink(output_file)
+    cells.to_dataframe().to_file(output_file, 'GeoJSON')
 
 
 if __name__ == '__main__':

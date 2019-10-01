@@ -5,14 +5,40 @@ in various building classes.
 
 Think it as the following:
 
-|        Area |    Building class | Damage state | Number of buildings |
-|-------------|-------------------|--------------|---------------------|
-| Casa Blanca | CR_LFINF_H1_3_DUC |            0 |                 100 |
-| Casa Blanca |   CR_LFM_H1_3_DNO |            0 |                  80 |
-|         ... |               ... |          ... |                 ... |
-|     Quilpue |   CR_LFM_H1_3_DNO |            0 |                 120 |
-|         ... |               ... |          ... |                 ... |
+|        name |  expo | gid |          geometry |
+|-------------|-------|-----|-------------------|
+| Casa Blanca | {...} | CH1 | MULTIPOLYGON(...) |
+|     Quilpue | {...} | CH2 | MULTIPOLYGON(...) |
+|         ... |  ...  | ... |              ...  |
 
+
+The inner expo dataset is itself an table like structure:
+
+|           id | Region | Taxonomy | ... | Buildings | ... | Damage |
+|--------------|--------|----------|-----|-----------|-----|--------|
+| AREA # 13301 | Colina |        W | ... |     100.0 | ... |     D0 |
+| AREA # 13301 | Colina |        W | ... |      50.0 | ... |     D1 |
+|          ... |    ... |      ... | ... |       ... | ... |    ... |
+| AREA # 13301 | Colina |        S | ... |     200.0 | ... |     D0 |
+| AREA # 13301 | Colina |        S | ... |      20.0 | ... |     D1 |
+|          ... |    ... |      ... | ... |       ... | ... |    ... |
+
+The most important fields for deus are taxonomy, damage and buildings (number of buildings in
+this cell, for this taxonomy and damage state).
+
+Other included fields are:
+- Dwellings
+- `Repl_cost_USD/bdg`
+- Population
+- name
+
+Some of the fields are all the same for the spatial cell, some differ
+per taxonomy and damage state combination.
+
+CAUTION: Currently is there no proper handling of the replacement costs
+per buildings, as this is schema, taxonomy and damage state dependent.
+We can't use them here because we may map to a different schema and
+increase the damage states.
 
 ## Schemas
 The building class belongs to a taxonomy of a given schema.
@@ -41,3 +67,24 @@ The updated exposure model is identical to the input exposure model after two pr
   and the intensity file makes it necessary
 - The buildings are transfered from one damage state to a higher one according to the intensity
   and the fragility functions.
+
+## Transition output
+
+We also write a transition file out with all the increases of damage states in the deus run.
+
+The model follows the one of the exposure model, but instead of the expo element we have a
+transitions element with a tabular structure.
+
+| taxonomy | from damage state | to damage state | n buildings |
+|----------|-------------------|-----------------|-------------|
+|        W |                 0 |               1 |       100.0 |
+|        W |                 0 |               2 |        50.0 |
+|        W |                 0 |               3 |        20.0 |
+|      ... |               ... |             ... |         ... |
+|        W |                 1 |               2 |        40.0 |
+|      ... |               ... |             ... |         ... |
+|        S |                 0 |               1 |       200.0 |
+|      ... |               ... |             ... |         ... |
+
+As this table is specific for each spatial cell, we can also compute the overall loss
+on cell level later.
