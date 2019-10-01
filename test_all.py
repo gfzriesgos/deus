@@ -43,7 +43,7 @@ class TestAll(unittest.TestCase):
         data = {
             'meta': {
                 'shape': 'logncdf',
-                'id': 'SARA.0',
+                'id': 'SARA_v1.0',
             },
             'data': [
                 {
@@ -71,7 +71,7 @@ class TestAll(unittest.TestCase):
         fragprov = frag.to_fragility_provider()
         schema = fragprov.get_schema()
 
-        self.assertEqual('SARA.0', schema)
+        self.assertEqual('SARA_v1.0', schema)
         taxonomy_data_urm1 = fragprov.get_damage_states_for_taxonomy('URM1')
 
         self.assertIsNotNone(taxonomy_data_urm1)
@@ -103,7 +103,7 @@ class TestAll(unittest.TestCase):
         data = {
             'meta': {
                 'shape': 'logncdf',
-                'id': 'SARA.0',
+                'id': 'SARA_v1.0',
             },
             'data': [
                 {
@@ -173,7 +173,9 @@ class TestAll(unittest.TestCase):
         self.assertEqual(lon, 12.0)
         self.assertEqual(lat, 15.0)
 
-        empty_exposure_cell = exposure_cell.without_taxonomies(schema='SARA.0')
+        empty_exposure_cell = exposure_cell.without_taxonomies(
+            schema='SARA_v1.0'
+        )
 
         lon2, lat2 = empty_exposure_cell.get_lon_lat_of_centroid()
 
@@ -188,7 +190,7 @@ class TestAll(unittest.TestCase):
 
         search_taxonomy = [
             x for x in taxonomies
-            if x.get_schema() == 'SARA.0'
+            if x.get_schema() == 'SARA_v1.0'
             and x.get_taxonomy() == 'MCF/DNO/_1'
             and x.get_n_buildings() == 6
         ]
@@ -203,8 +205,8 @@ class TestAll(unittest.TestCase):
 
         mapping_data = [
             {
-                'source_name': 'sup_13',
-                'target_name': 'ems_98',
+                'source_schema': 'sup_13',
+                'target_schema': 'ems_98',
                 'conv_matrix': {
                     '0': {
                         '0': 1,
@@ -230,8 +232,8 @@ class TestAll(unittest.TestCase):
                 },
             },
             {
-                'source_name': 'ems_98',
-                'target_name': 'sup_13',
+                'source_schema': 'ems_98',
+                'target_schema': 'sup_13',
                 'conv_matrix': {
                     '0': {
                         '0': 1,
@@ -325,8 +327,8 @@ class TestAll(unittest.TestCase):
         # fantasy values
         mapping_data = [
             {
-                'source_name': 'ems_98',
-                'target_name': 'sup_13',
+                'source_schema': 'ems_98',
+                'target_schema': 'sup_13',
                 'conv_matrix': {
                     'URM': {
                         'WOOD': 0.2,
@@ -411,8 +413,8 @@ class TestAll(unittest.TestCase):
 
         bc_mapping_data = [
             {
-                'source_name': 'ems_98',
-                'target_name': 'sup_13',
+                'source_schema': 'ems_98',
+                'target_schema': 'sup_13',
                 'conv_matrix': {
                     'URM': {
                         'WOOD': 0.2,
@@ -427,8 +429,8 @@ class TestAll(unittest.TestCase):
 
         ds_mapping_data = [
             {
-                'source_name': 'ems_98',
-                'target_name': 'sup_13',
+                'source_schema': 'ems_98',
+                'target_schema': 'sup_13',
                 'conv_matrix': {
                     '5': {
                         '5': 0.5,
@@ -513,7 +515,7 @@ class TestAll(unittest.TestCase):
 
         schema = fr_provider.get_schema()
 
-        self.assertEqual('SARA.0', schema)
+        self.assertEqual('SARA_v1.0', schema)
 
         fr_file2 = fragility.Fragility.from_file(
             './testinputs/fragility_supparsi.json')
@@ -569,8 +571,8 @@ class TestAll(unittest.TestCase):
 
         mapping_data = [
             {
-                "source_name": "SARA_CR_LDUAL_DUC_H_8_19",
-                "target_name": "Supparsi_2013_RC2",
+                "source_schema": "SARA_CR_LDUAL_DUC_H_8_19",
+                "target_schema": "Supparsi_2013_RC2",
                 "source_damage_states": [0, 1, 2, 3, 4],
                 "target_damage_states": [0, 1, 2, 3, 4, 5, 6],
                 "conv_matrix": {
@@ -626,8 +628,8 @@ class TestAll(unittest.TestCase):
                 }
             },
             {
-                "source_name": "SARA_CR_LDUAL_DUC_H_8_19",
-                "target_name": "Supparsi_2013_RC1",
+                "source_schema": "SARA_CR_LDUAL_DUC_H_8_19",
+                "target_schema": "Supparsi_2013_RC1",
                 "source_damage_states": [0, 1, 2, 3, 4],
                 "target_damage_states": [0, 1, 2, 3, 4, 5, 6],
                 "conv_matrix": {
@@ -758,7 +760,7 @@ class TestAll(unittest.TestCase):
         fragility_data = {
             'meta': {
                 'shape': 'logncdf',
-                'id': 'SARA.0',
+                'id': 'SARA_v1.0',
             },
             'data': [
                 {
@@ -1103,7 +1105,7 @@ def get_example_exposure_cell():
     series = geodata.iloc[0]
     return exposure.ExposureCell.from_simple_series(
         series=series,
-        schema='SARA.0'
+        schema='SARA_v1.0'
     )
 
 
@@ -1126,7 +1128,7 @@ def get_exposure_cell_for_sara():
 
     return exposure.ExposureCell.from_simple_series(
         series=exposure_cell_series,
-        schema='SARA.0'
+        schema='SARA_v1.0'
     )
 
 
@@ -1136,8 +1138,8 @@ def get_schema_mapper_for_sara_to_supparsi():
     '''
     bc_mapping_data = [
         {
-            'source_name': 'SARA.0',
-            'target_name': 'SUPPARSI_2013.0',
+            'source_schema': 'SARA_v1.0',
+            'target_schema': 'SUPPARSI_2013.0',
             'conv_matrix': {
                 'MUR_H1': {
                     'RC_H1': 0.8,
@@ -1155,8 +1157,8 @@ def get_schema_mapper_for_sara_to_supparsi():
 
     ds_mapping_data = [
         {
-            'source_name': 'SARA.0',
-            'target_name': 'SUPPARSI_2013.0',
+            'source_schema': 'SARA_v1.0',
+            'target_schema': 'SUPPARSI_2013.0',
             'conv_matrix': {
                 '0': {
                     '0': 1.0,

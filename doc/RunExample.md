@@ -11,7 +11,7 @@ python3 deus.py \
     --damage_output_file damage_output.json \
     testinputs/shakemap.xml \
     testinputs/exposure_sara.json \
-    'SARA.0' \
+    'SARA_v1.0' \
     testinputs/fragility_sara.json \
     testinputs/loss_sara.json
 ```

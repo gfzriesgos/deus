@@ -371,7 +371,7 @@ class ExposureCell():
                 'id': [x.get_area_id() for x in self._taxonomies],
                 'Region': [x.get_region() for x in self._taxonomies],
                 'Dwellings': [x.get_dwellings() for x in self._taxonomies],
-                'Repl_cost_USD/bdg': [
+                'Repl-cost-USD-bdg': [
                     x.get_repl_cost_usd_bdg()
                     for x in self._taxonomies
                 ],
@@ -562,7 +562,7 @@ class TaxonomyDataBag():
             area_id=series['id'],
             region=series['Region'],
             dwellings=series['Dwellings'],
-            repl_cost_usd_bdg=series['Repl_cost_USD/bdg'],
+            repl_cost_usd_bdg=series['Repl-cost-USD-bdg'],
             population=series['Population'],
             name=series['name']
         )
