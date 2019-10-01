@@ -1,0 +1,58 @@
+{
+    "title": "DeusProcess",
+    "imageId": "gfzriesgos/deus:20190822",
+    "workingDirectory": "/usr/share/git/deus",
+    "commandToExecute": "python3 deus.py --updated_exposure_output_file updated_exposure_output_file.json --transition_output_file transition_output.json --loss_output_file damage_output.json shakemap_input.xml",
+    "exitValueHandler": "logging",
+    "stderrHandler": "pythonTraceback",
+    "input": [
+        {
+            "title": "intensity",
+            "useAs": "file",
+            "type": "shakemap",
+            "schema": "http://earthquake.usgs.gov/eqcenter/shakemap",
+            "path": "shakemap_input.xml"
+        },
+        {
+            "title": "exposure",
+            "useAs": "commandLineArgument",
+            "type": "json"
+        },
+        {
+            "title": "schema",
+            "useAs": "commandLineArgument",
+            "type": "string"
+        },
+        {
+            "title": "fragility",
+            "useAs": "commandLineArgument",
+            "type": "json"
+        },
+        {
+            "title": "loss",
+            "useAs": "commandLineArgument",
+            "type": "string",
+            "default": "testinputs/loss_sara.json"
+        }
+    ],
+    "output": [
+        {
+            "title": "updated_exposure",
+            "readFrom": "file",
+            "path": "updated_exposure_output_file.json",
+            "type": "json"
+        },
+        {
+            "title": "transition",
+            "readFrom": "file",
+            "path": "transition_output.json",
+            "type": "json"
+        },
+        {
+            "title": "damage",
+            "readFrom": "file",
+            "path": "damage_output.json",
+            "type": "json"
+        }
+    ]
+}
