@@ -17,7 +17,7 @@ class TestCmdExecution(unittest.TestCase):
         '''
         Runs deus two times (update the updated exposure model).
         '''
-        schema = 'SARA.0'
+        schema = 'SARA_v1.0'
 
         current_dir = os.path.dirname(os.path.abspath(__file__))
 

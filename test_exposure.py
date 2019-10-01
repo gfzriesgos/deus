@@ -78,7 +78,7 @@ class TestExposure(unittest.TestCase):
                     'Taxonomy': ['W+WS/H:1,2', 'W+WS/H:1,2'],
                     'Dwellings': [107.5, 107.5],
                     'Buildings': [100.0, 50.0],
-                    'Repl_cost_USD/bdg': [360000, 450000],
+                    'Repl-cost-USD-bdg': [360000, 450000],
                     'Population': [446.5, 446.5],
                     'name': ['Colina', 'Colina'],
                     'Damage': ['D0', 'D1']
@@ -89,7 +89,7 @@ class TestExposure(unittest.TestCase):
                     'Taxonomy': ['W+WS/H:1,2', 'W+WS/H:1,2'],
                     'Dwellings': [107.5, 107.5],
                     'Buildings': [80.0, 55.0],
-                    'Repl_cost_USD/bdg': [360000, 450000],
+                    'Repl-cost-USD-bdg': [360000, 450000],
                     'Population': [446.5, 446.5],
                     'name': ['Quilpue', 'Quilpue'],
                     'Damage': ['D0', 'D1']
@@ -206,7 +206,7 @@ class TestExposure(unittest.TestCase):
                 'Taxonomy': ['W+WS/H:1,2', 'W+WS/H:1,2'],
                 'Dwellings': [107.5, 107.5],
                 'Buildings': [100.0, 50.0],
-                'Repl_cost_USD/bdg': [360000, 450000],
+                'Repl-cost-USD-bdg': [360000, 450000],
                 'Population': [446.5, 446.5],
                 'name': ['Colina', 'Colina'],
                 'Damage': ['D0', 'D1']
@@ -355,7 +355,7 @@ class TestExposure(unittest.TestCase):
             'Taxonomy': 'W+WS/H:1,2',
             'Dwellings': 107.5,
             'Buildings': 100.0,
-            'Repl_cost_USD/bdg': 360000,
+            'Repl-cost-USD-bdg': 360000,
             'Population': 446.5,
             'name': 'Colina',
             'Damage': 'D0'

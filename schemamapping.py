@@ -149,9 +149,6 @@ class BuildingClassSpecificDamageStateMapper():
         for single_file in files:
             with open(single_file, 'rt') as input_file:
                 single_data = json.load(input_file)
-                single_data['conv_matrix'] = json.loads(
-                    single_data['conv_matrix']
-                )
                 data.append(single_data)
         return cls.from_list_of_dicts(data)
 
@@ -163,8 +160,8 @@ class BuildingClassSpecificDamageStateMapper():
         mapping_data = {}
 
         for single_dict in list_of_dicts:
-            from_schema_and_building_class = single_dict['source_name']
-            to_schema_and_building_class = single_dict['target_name']
+            from_schema_and_building_class = single_dict['source_schema']
+            to_schema_and_building_class = single_dict['target_schema']
             conv_matrix = single_dict['conv_matrix']
 
             if from_schema_and_building_class not in mapping_data.keys():
@@ -326,8 +323,8 @@ class DamageStateMapper():
         result = []
         possible_mappings = [
             entry for entry in self._data
-            if entry['source_name'] == source_schema
-            and entry['target_name'] == target_schema
+            if entry['source_schema'] == source_schema
+            and entry['target_schema'] == target_schema
         ]
         if not possible_mappings:
             raise Exception('There is no data to map from {0} to {1}'.format(
@@ -414,8 +411,8 @@ class BuildingClassMapper():
         result = []
         possible_mappings = [
             entry for entry in self._data
-            if entry['source_name'] == source_schema
-            and entry['target_name'] == target_schema
+            if entry['source_schema'] == source_schema
+            and entry['target_schema'] == target_schema
         ]
         if not possible_mappings:
             raise Exception('There is no data to map from {0} to {1}'.format(
