@@ -12,61 +12,52 @@ of the assetmaster script) and update the building and damage classes
 with given fragility functions and intensity values.
 
 
-## Inputs
+## Documentation
+You can look up several documentation pages:
 
-### Intensity Map
+- [Setup and installation](doc/Setup.md)
+- [Example run](doc/ExposureModel.md)
+- [Shakemaps](doc/EarthQuakeShakemap.md) and [Intensity files](doc/IntensityFile.md)
+- [Exposure models](doc/ExposureModel.md)
+- [Fragility functions](doc/FragilityFunctions.md)
+- [Loss](doc/LossData.md)
+- [Schema mappings](doc/SchemaMapping.md)
 
-The intensity map should be given in a format of a USGS shakemap.
-It contains a regular grid for a given area and the intensity values
-(the PGA) for each cell value. It can also contain heights in case of
-a tsunami simulation.
+## Scope of deus
 
-### Exposure Model
+Deus was created in the riesgos project for working in multi risk scenarios.
+It should be provided as a web processing service by the GFZ.
 
-The exposure model can be treated like a table.
-It lists spatial cells with the different building classes and the
-number of buildings in each class.
+## You still have questions
 
-| Class | n   |
-|-------|-----|
-| URM   | 100 |
-| RC    | 50  |
-| W     | 179 |
-| ...   | ... |
+If we don't cover important things in the documentation, please feel free to create an issue
+or send a mail at <nils.brinckmann@gfz-potsdam.de> or <pittore@gfz-potsdam.de>.
 
-### Fragility Functions
+## Can I use deus for xyz?
 
-The fragility functions define the probability of a specific damage
-state for a building class on a given intensity (so they are specific
-to the building class and the damage class).
+Yes! But you may have to code a bit yourself. The code is written against interfaces
+and already provides several implementations for some of them.
 
+Aims for the following development of deus is the support of more and more hazards with
+their intensity files, their fragility functions and their schemas.
 
-## Output
+You can also take a look into the [TODOs](TODO.md).
 
-The output is the updated exposure model.
-The spatial cells remain but the number of buildings are now splitted
-into damage states:
+## Will there only be one deus?
 
-| Class with damage state | n   |
-|-------------------------|-----|
-| URM D0                  | 60  |
-| URM D1                  | 25  |
-| URM D2                  | 15  |
-| RC D0                   | 30  |
-| RC D1                   | 15  |
-| RC D2                   | 5   |
-| ...                     | ... |
+The current version of the code has only one deus and one main function.
+However as other hazards don't provide intensity masures in the shakemap
+formats it may be necessary to combine different files for one intensity provider.
+There is already a class for that (StackedIntenityProvider), but there is no main
+function that uses this.
 
-
-The output is also meant to be input for another loop through this
-update process. This is important to support the option to compute the
-damages of several earthquakes / tsunamis / ...
+I think it will be possible to work with several deui (damage exposure update implementations),
+one for each kind of hazard.
+So, something like:
+- deus of earth quakes
+- deus of tsunamis
+- deus of lahars
+- deus of ashfalls
+...
 
 
-## Supported hazards
-
-This service is meant to not just to support earthquakes, but also to
-support tsunamis or other hazards as long as they provide a shakemap
-object as input for the intensities and a predefined way to convert
-the building classes with damage states from one schema to another (if
-the hazard fragility functions use a different schema).

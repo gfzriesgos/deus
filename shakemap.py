@@ -7,12 +7,12 @@ the access to shakemap data.
 
 import collections
 import io
-import math
 import tokenize
 
 import lxml.etree as le
-import numpy as np
-from scipy.spatial import cKDTree
+
+import intensitydatawrapper
+import intensityprovider
 
 
 class TsunamiShakemap():
@@ -40,26 +40,18 @@ class TsunamiShakemap():
         Returns an instance to access the data point
         that is closest to a given location.
         '''
-        grid_fields = self._find_grid_fields()
-        grid_data = self._find_grid_data()
+        data, units = read_shakemap_data_and_units(
+            grid_fields=self._find_grid_fields(),
+            grid_data=self._find_grid_data())
 
-        # I used the example shakemap that
-        # Alireza sent me
-        # I converted it into a point layer
-        # and estimated this distance
-        # to be distance after that
-        # there are at least two other points
-        # in that grid in between
-        # in that way it is possible to
-        # use the nearest values
-        # and we can still assume that we only take
-        # data where points are given in the
-        # irregular tsunami shakemaps
-        max_dist = 0.0003
-        return ShakemapIntensityProvider(
-            grid_fields, grid_data,
-            'longitude'.upper(), 'latitude'.upper(),
-            max_dist)
+        wrapped_data = intensitydatawrapper.DictWithListDataWrapper(
+            data=data,
+            units=units,
+            x_column='longitude'.upper(),
+            y_column='latitude'.upper()
+        )
+
+        return intensityprovider.IntensityProvider(intensity_data=wrapped_data)
 
 
 class Shakemaps():
@@ -114,15 +106,18 @@ class EqShakemap():
         Returns an instance to access the data point
         that is closest to a given location.
         '''
-        grid_fields = self._find_grid_fields()
-        grid_data = self._find_grid_data()
+        data, units = read_shakemap_data_and_units(
+            grid_fields=self._find_grid_fields(),
+            grid_data=self._find_grid_data())
 
-        lon_spacing, lat_spacing = self._find_lon_lat_spacing()
+        wrapped_data = intensitydatawrapper.DictWithListDataWrapper(
+            data=data,
+            units=units,
+            x_column='LON',
+            y_column='LAT',
+        )
 
-        max_dist = 2.1 * math.sqrt(lon_spacing**2 + lat_spacing**2)
-
-        return ShakemapIntensityProvider(
-            grid_fields, grid_data, 'LON', 'LAT', max_dist)
+        return intensityprovider.IntensityProvider(intensity_data=wrapped_data)
 
 
 class ShakemapGridField():
@@ -168,68 +163,32 @@ class ShakemapGridData():
         return self._xml.text
 
 
-class ShakemapIntensityProvider():
+def read_shakemap_data_and_units(grid_fields, grid_data):
     '''
-    Class to give access to the nearest value to a given
-    location.
+    Function to read the grid_data and the grid fields.
+    Returns a dict with the values (in lists) and a dict
+    with units for the different fields.
     '''
-    def __init__(
-            self,
-            grid_fields,
-            grid_data,
-            lon_name,
-            lat_name,
-            max_dist):
-        names = [x.get_name().upper() for x in grid_fields]
-        units = {x.get_name().upper(): x.get_units() for x in grid_fields}
-        data = collections.defaultdict(list)
-        # it must be tokenized (because of xml processing the newlines
-        # may not be consistent)
-        tokens = tokenize.tokenize(
-            io.BytesIO(
-                grid_data.get_text().encode('utf-8')).readline)
-        index = 0
-        token_before = None
-        for token in tokens:
-            # 2 is number
-            if token.type == 2:
-                if index >= len(names):
-                    index = 0
-                name = names[index]
-                value = float(token.string)
-                if token_before is not None and token_before.string == '-':
-                    value = -1 * value
-                data[name].append(value)
-                index += 1
-            token_before = token
-        coords = np.array(
-            [
-                [data[lon_name][i],
-                 data[lat_name][i]]
-                for i in range(len(data[lon_name]))])
-        self._spatial_index = cKDTree(coords)
-        self._names = names
-        self._data = data
-        self._units = units
-        self._max_dist = max_dist
-
-    def get_nearest(self, lon, lat):
-        '''
-        Searches for the nearest value in the shakemap to
-        the given lon lat location.
-        Returns all the data in a dict, as well as all the units.
-        Both together are returned as a tuple.
-        '''
-        coord = np.array([lon, lat])
-        dist, idx = self._spatial_index.query(coord, k=1)
-
-        data = {}
-
-        for name in self._names:
-            if dist > self._max_dist:
-                value = 0
-            else:
-                value = self._data[name][idx]
-            data[name] = value
-
-        return data, self._units
+    names = [x.get_name().upper() for x in grid_fields]
+    units = {x.get_name().upper(): x.get_units() for x in grid_fields}
+    data = collections.defaultdict(list)
+    # it must be tokenized (because of xml processing the newlines
+    # may not be consistent)
+    tokens = tokenize.tokenize(
+        io.BytesIO(
+            grid_data.get_text().encode('utf-8')).readline)
+    index = 0
+    token_before = None
+    for token in tokens:
+        # 2 is number
+        if token.type == 2:
+            if index >= len(names):
+                index = 0
+            name = names[index]
+            value = float(token.string)
+            if token_before is not None and token_before.string == '-':
+                value = -1 * value
+            data[name].append(value)
+            index += 1
+        token_before = token
+    return data, units
