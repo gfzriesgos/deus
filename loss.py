@@ -149,6 +149,13 @@ class LossProvider():
         tax_candidates = [
             x for x in self._data['data']
             if x['taxonomy'] == taxonomy]
+
+        if not tax_candidates:
+            raise Exception('no taxonomy candidates found')
+
+        if 'loss_matrix' not in tax_candidates[0]:
+            raise Exception('could not found loss matrix for taxonomy')
+
         loss_matrix = tax_candidates[0]['loss_matrix']
         return loss_matrix[str(from_damage_state)][str(to_damage_state)]
 
