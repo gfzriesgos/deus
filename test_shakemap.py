@@ -40,6 +40,24 @@ class TestShakemap(unittest.TestCase):
         self.assertLess(0.028835543, eq_intensity['PGA'])
         self.assertLess(eq_intensity['PGA'], 0.028835545)
 
+    def test_lahar_shakemap(self):
+        '''
+        Reads a lahar shakemap.
+        '''
+
+        shake_map_lahar = shakemap.Shakemaps.from_file(
+            './testinputs/shakemap_lahar.xml'
+        )
+        lh_provider = shake_map_lahar.to_intensity_provider()
+
+        lh_intensity, lh_units = lh_provider.get_nearest(
+            lon=-78.5075157783, lat=-0.499855281537
+        )
+
+        self.assertEqual('m/s', lh_units['MAXVELOCITY'])
+        self.assertLess(0.029, lh_intensity['MAXVELOCITY'])
+        self.assertLess(lh_intensity['MAXVELOCITY'], 0.031)
+
 
 if __name__ == '__main__':
     unittest.main()
