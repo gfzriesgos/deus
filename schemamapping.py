@@ -160,8 +160,20 @@ class BuildingClassSpecificDamageStateMapper():
         mapping_data = {}
 
         for single_dict in list_of_dicts:
-            from_schema_and_building_class = single_dict['source_schema'] + '_' + single_dict['source_taxonomy']
-            to_schema_and_building_class = single_dict['target_schema'] + '_' + single_dict['target_taxonomy']
+            from_schema_and_building_class = (
+                single_dict['source_schema']
+                +
+                '_'
+                +
+                single_dict['source_taxonomy']
+            )
+            to_schema_and_building_class = (
+                single_dict['target_schema']
+                +
+                '_'
+                +
+                single_dict['target_taxonomy']
+            )
             conv_matrix = single_dict['conv_matrix']
 
             if from_schema_and_building_class not in mapping_data.keys():

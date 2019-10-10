@@ -12,6 +12,7 @@ from shapely import wkt
 import schemamapping
 import exposure
 
+
 class TestSchemaMapping(unittest.TestCase):
 
     def test_schema_mapping_with_data_specific_for_each_building_class(self):
@@ -204,6 +205,7 @@ class TestSchemaMapping(unittest.TestCase):
 
         self.assertLess(6.211e-19, new_series['RC2_D4'])
         self.assertLess(new_series['RC2_D4'], 6.213e-19)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -238,7 +238,6 @@ class TestAll(unittest.TestCase):
         self.assertLess(49.9, new_series['STEEL_D3'])
         self.assertLess(new_series['STEEL_D3'], 50.1)
 
-
     def test_cell_update(self):
         '''
         Tests the update of the damage states for

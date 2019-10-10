@@ -151,7 +151,9 @@ class LossProvider():
             if x['taxonomy'] == taxonomy]
 
         if not tax_candidates:
-            raise Exception('no taxonomy candidates found for %s', repr(taxonomy))
+            raise Exception(
+                'no taxonomy candidates found for %s', repr(taxonomy)
+            )
 
         if 'loss_matrix' not in tax_candidates[0]:
             raise Exception('could not found loss matrix for taxonomy')

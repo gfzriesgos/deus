@@ -27,5 +27,6 @@ class TestFragility(unittest.TestCase):
 
         self.assertEqual('SUPPASRI2013.0', schema2)
 
+
 if __name__ == '__main__':
     unittest.main()

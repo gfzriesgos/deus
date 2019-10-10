@@ -4,6 +4,7 @@ import unittest
 
 import shakemap
 
+
 class TestShakemap(unittest.TestCase):
 
     def test_read_ts_shakemap(self):
@@ -18,8 +19,6 @@ class TestShakemap(unittest.TestCase):
 
         self.assertLess(3.5621, ts_intensity['MWH'])
         self.assertLess(ts_intensity['MWH'], 3.5623)
-
-
 
     def test_read_shakemap(self):
         '''
