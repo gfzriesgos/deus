@@ -26,3 +26,21 @@ class AlwaysOneDollarPerTransitionLossProvider():
         Unit of the loss.
         '''
         return '$'
+
+
+class AlwaysTheSameIntensityProvider():
+    def __init__(self, kind, value, unit):
+        self._kind = kind
+        self._value = value
+        self._unit = unit
+
+    def get_nearest(self, lon, lat):
+        '''
+        Returns always an intensity of
+        1 at every point for PGA and the unit g.
+        '''
+
+        intensities = {self._kind: self._value}
+        units = {self._kind: self._unit}
+
+        return intensities, units

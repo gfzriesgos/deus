@@ -28,6 +28,7 @@ from test_exposure import *
 from test_loss import *
 from test_transition import *
 from test_cmdexecution import *
+from test_intensity import *
 
 
 class TestAll(unittest.TestCase):
