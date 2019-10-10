@@ -12,6 +12,7 @@ import os
 
 import exposure
 import fragility
+import intensityprovider
 import loss
 import schemamapping
 import shakemap
@@ -78,6 +79,17 @@ def main():
 
     intensity_provider = shakemap.Shakemaps.from_file(
         args.intensity_file).to_intensity_provider()
+    # add aliases
+    # ID for inundation (out of the maximum wave height)
+    # SA_01 and SA_03 out of the PGA
+    intensity_provider = intensityprovider.AliasIntensityProvider(
+        intensity_provider,
+        aliases={
+            'SA_01': 'PGA',
+            'SA_03': 'PGA',
+            'ID': 'MWH',
+        }
+    )
     fragility_provider = fragility.Fragility.from_file(
         args.fragilty_file).to_fragility_provider()
     exposure_cell_provider = exposure.ExposureCellList.from_file(

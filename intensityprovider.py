@@ -137,3 +137,78 @@ class StackedIntensityProvider():
             intensities.update(sub_intens)
             units.update(sub_units)
         return intensities, units
+
+class AliasIntensityProvider():
+    '''
+    Intensity provider that adds intensities as aliases
+    for exisiting intensities.
+
+    This is done if one intensity can have several names for
+    fragility functions,
+    '''
+    def __init__(self, inner_intensity_provider, aliases=None):
+        if aliases is None:
+            aliases = {}
+        self._inner_intensity_provider = inner_intensity_provider
+        self._aliases = aliases
+
+    def get_nearest(self, lon, lat):
+        '''
+        Returns the base intensities.
+        It also adds intensities under other names.
+        '''
+        intensities, units = self._inner_intensity_provider.get_nearest(lon, lat)
+
+        for new_intensity_measure in self._aliases:
+            given_intensity_measure = self._aliases[new_intensity_measure]
+            if given_intensity_measure in intensities.keys():
+                if new_intensity_measure not in intensities.keys():
+                    intensities[new_intensity_measure] = intensities[given_intensity_measure]
+                    units[new_intensity_measure] = units[given_intensity_measure]
+
+        return intensities, units
+
+class ConversionIntensityProvider():
+    '''
+    Intensity provider that can convert intensities
+    to new intensity measures.
+    
+    The AliasIntensityProvider just inserts the intensities and the units as
+    they are, here it is possible to rename and convert them to other intensities
+    and other units.
+
+    At the moment it supports only single intensity measures to
+    be converted into one new, so there is no option
+    to compute one new intensity from two or more existing ones (so kind a merge).
+    '''
+    def __init__(
+            self,
+            inner_intensity_provider,
+            from_intensity,
+            as_intensity,
+            fun):
+        self._inner_intensity_provider = inner_intensity_provider
+        self._from_intensity = from_intensity
+        self._as_intensity = as_intensity
+        self._fun = fun
+
+    def get_nearest(self, lon, lat):
+        '''
+        Adds one intensity measurement with the given conversion function.
+        '''
+        intensities, units = self._inner_intensity_provider.get_nearest(lon, lat)
+
+        if self._from_intensity in intensities.keys():
+            if not self._as_intensity in intensities.keys():
+                new_intensity, new_unit = self._fun(
+                        intensities[self._from_intensity],
+                        units[self._from_intensity]
+                )
+                intensities[self._as_intensity] = new_intensity
+                units[self._as_intensity] = new_unit
+
+        return intensities, units
+                
+
+
+

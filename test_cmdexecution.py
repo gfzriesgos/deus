@@ -98,7 +98,7 @@ class TestCmdExecution(unittest.TestCase):
                 test_fragility_file,
                 test_loss_file
             ],
-            check=True
+            check=True,
         )
         subprocess.run(
             [
@@ -116,7 +116,7 @@ class TestCmdExecution(unittest.TestCase):
                 test_fragility_file,
                 test_loss_file
             ],
-            check=True
+            check=True,
         )
 
 
