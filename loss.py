@@ -126,10 +126,6 @@ class LossProvider():
     Class to access loss data depending
     on the schema, the taxonomy, the from
     and to damage states.
-
-    The current impl doesn't deal with
-    different schemas nor does it provides
-    a useful unit.
     '''
 
     def __init__(self, data, unit=None):
@@ -146,8 +142,12 @@ class LossProvider():
         Returns the loss for the transition.
         '''
 
+        if schema not in self._data:
+            raise Exception('schema is not known for loss computation')
+        data_for_schema = self._data[schema]['data']
+
         tax_candidates = [
-            x for x in self._data['data']
+            x for x in data_for_schema
             if x['taxonomy'] == taxonomy]
 
         if not tax_candidates:
@@ -166,10 +166,14 @@ class LossProvider():
         return self._unit
 
     @classmethod
-    def from_file(cls, json_file, unit=None):
+    def from_files(cls, files, unit=None):
         '''
         Reads the loss data from a json file.
         '''
-        with open(json_file, 'rt') as input_file:
-            data = json.load(input_file)
+        data = {}
+        for json_file in files:
+            with open(json_file, 'rt') as input_file:
+                single_data = json.load(input_file)
+                schema = single_data['meta']['id']
+                data[schema] = single_data
         return cls(data, unit=unit)

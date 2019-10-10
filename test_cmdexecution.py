@@ -31,10 +31,6 @@ class TestCmdExecution(unittest.TestCase):
             testinput_dir,
             'fragility_sara.json'
         )
-        test_loss_file = os.path.join(
-            testinput_dir,
-            'loss_sara.json'
-        )
 
         output_dir = os.path.join(current_dir, 'testoutputs')
 
@@ -96,7 +92,6 @@ class TestCmdExecution(unittest.TestCase):
                 test_exposure_file,
                 schema,
                 test_fragility_file,
-                test_loss_file
             ],
             check=True
         )
@@ -114,7 +109,6 @@ class TestCmdExecution(unittest.TestCase):
                 updated_exposure_output_filename,
                 schema,
                 test_fragility_file,
-                test_loss_file
             ],
             check=True
         )

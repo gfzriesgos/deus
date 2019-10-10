@@ -4,6 +4,8 @@
 Testclasses for the loss.
 '''
 
+import os
+import glob
 import unittest
 
 import pandas as pd
@@ -73,25 +75,43 @@ class TestLoss(unittest.TestCase):
         self.assertEqual(10, loss_dataframe['loss_value'][0])
         self.assertEqual('$', loss_dataframe['loss_unit'][0])
 
+    def test_read_loss_from_files(self):
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        loss_data_dir = os.path.join(current_dir, 'loss_data')
+        files = glob.glob(os.path.join(loss_data_dir, '*.json'))
+
+        loss_provider = loss.LossProvider.from_files(files, '$')
+
+        loss_value = loss_provider.get_loss(
+            schema='SUPPASRI2013_v2.0',
+            taxonomy='MIX',
+            from_damage_state=0,
+            to_damage_state=3
+        )
+
+        self.assertLess(0.0, loss_value)
+
     def test_loss_computation(self):
         '''
         Test for the loss computation.
         :return: None
         '''
         loss_data = {
-            'data': [
-                {
-                    'taxonomy': 'URM',
-                    'loss_matrix': {
-                        '0': {
-                            '1': 500,
-                            '2': 600,
-                            '3': 700,
-                            '4': 800,
+            'SUPPASRI2013_v2.0': {
+                'data': [
+                    {
+                        'taxonomy': 'URM',
+                        'loss_matrix': {
+                            '0': {
+                                '1': 500,
+                                '2': 600,
+                                '3': 700,
+                                '4': 800,
+                            }
                         }
                     }
-                }
-            ]
+                ]
+            }
         }
 
         loss_provider = loss.LossProvider(loss_data)

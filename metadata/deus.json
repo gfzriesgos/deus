@@ -27,12 +27,6 @@
             "title": "fragility",
             "useAs": "commandLineArgument",
             "type": "json"
-        },
-        {
-            "title": "loss",
-            "useAs": "commandLineArgument",
-            "type": "string",
-            "default": "testinputs/loss_sara.json"
         }
     ],
     "output": [
