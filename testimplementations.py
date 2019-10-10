@@ -27,6 +27,7 @@ class AlwaysOneDollarPerTransitionLossProvider():
         '''
         return '$'
 
+
 class AlwaysTheSameIntensityProvider():
     def __init__(self, kind, value, unit):
         self._kind = kind

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+'''
+Test cases for the intensity classes.
+'''
+
 import unittest
 
 import intensityprovider
@@ -12,10 +16,17 @@ class TestIntensity(unittest.TestCase):
     '''
 
     def test_always_the_same_intensity_provider(self):
-        intensity_provider = testimplementations.AlwaysTheSameIntensityProvider(
-            kind='PGA',
-            value=1.0,
-            unit='g'
+        '''
+        Tests an test implementation which always
+        returns the same values regardless of
+        the coordinates.
+        '''
+        intensity_provider = (
+            testimplementations.AlwaysTheSameIntensityProvider(
+                kind='PGA',
+                value=1.0,
+                unit='g'
+            )
         )
 
         intensities, units = intensity_provider.get_nearest(1, 1)
@@ -25,12 +36,20 @@ class TestIntensity(unittest.TestCase):
 
         self.assertEqual(units['PGA'], 'g')
 
+        intensities2, units2 = intensity_provider.get_nearest(180, 90)
+        self.assertEqual(intensities, intensities2)
+        self.assertEqual(units, units2)
 
     def test_alias_intensity_provider(self):
-        inner_intensity_provider = testimplementations.AlwaysTheSameIntensityProvider(
-            kind='PGA',
-            value=1.0,
-            unit='g'
+        '''
+        Test for aliases.
+        '''
+        inner_intensity_provider = (
+            testimplementations.AlwaysTheSameIntensityProvider(
+                kind='PGA',
+                value=1.0,
+                unit='g'
+            )
         )
 
         intensity_provider = intensityprovider.AliasIntensityProvider(
@@ -54,17 +73,25 @@ class TestIntensity(unittest.TestCase):
         self.assertNotIn('ID', intensities.keys())
 
     def test_conversion_intensity_provider(self):
-        inner_intensity_provider = testimplementations.AlwaysTheSameIntensityProvider(
-            kind='PGA',
-            value=1.0,
-            unit='g'
+        '''
+        Test for intensity conversion.
+        '''
+        inner_intensity_provider = (
+            testimplementations.AlwaysTheSameIntensityProvider(
+                kind='PGA',
+                value=1.0,
+                unit='g'
+            )
         )
+
+        def pga_to_pga1000(old_intensity, old_unit):
+            return old_intensity / 1000, 'g/1000'
 
         intensity_provider = intensityprovider.ConversionIntensityProvider(
             inner_intensity_provider,
             from_intensity='PGA',
             as_intensity='PGA/1000',
-            fun=lambda i, u: (i/1000.0, 'g/1000')
+            fun=pga_to_pga1000,
         )
 
         intensities, units = intensity_provider.get_nearest(1, 1)
@@ -82,4 +109,3 @@ class TestIntensity(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
