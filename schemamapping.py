@@ -99,6 +99,11 @@ class BuildingClassSpecificDamageStateMapper():
             if x.is_for_schema(target_schema)
         ]
 
+        if not target_list_with_target_schema:
+            raise Exception('There is no data to map from {0}'.format(
+                from_schema_and_building_class
+            ))
+
         for target_data in target_list_with_target_schema:
             target_building_class = target_data.get_building_class(
                 target_schema
