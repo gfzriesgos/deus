@@ -7,6 +7,8 @@ import os
 import subprocess
 import unittest
 
+import exposure
+
 
 class TestCmdExecution(unittest.TestCase):
     '''
@@ -73,6 +75,10 @@ class TestCmdExecution(unittest.TestCase):
             ],
             check=True,
         )
+
+        exposure_data = exposure.ExposureCellList.from_file('SUPPASRI2013_v2.0', updated_exposure_output_filename)
+        for exposure_cell in exposure_data.get_exposure_cells():
+            self.assertTrue(exposure_cell.get_taxonomies())
 
     def test_execute_deus_two_times(self):
         '''
