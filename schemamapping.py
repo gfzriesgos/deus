@@ -24,7 +24,7 @@ class TargetAndConvMatrix():
         '''
         Returns the target schema and builidng class in a format
         schema_building_class as in
-        'Supparsi_2013_RC1' for the schema Supparsi_2013 and the
+        'Suppasri_2013_RC1' for the schema Suppasri_2013 and the
         building class RC1.
         '''
         return self._target_schema_and_building_class
@@ -99,6 +99,11 @@ class BuildingClassSpecificDamageStateMapper():
             if x.is_for_schema(target_schema)
         ]
 
+        if not target_list_with_target_schema:
+            raise Exception('There is no data to map from {0}'.format(
+                from_schema_and_building_class
+            ))
+
         for target_data in target_list_with_target_schema:
             target_building_class = target_data.get_building_class(
                 target_schema
@@ -160,8 +165,20 @@ class BuildingClassSpecificDamageStateMapper():
         mapping_data = {}
 
         for single_dict in list_of_dicts:
-            from_schema_and_building_class = single_dict['source_schema']
-            to_schema_and_building_class = single_dict['target_schema']
+            from_schema_and_building_class = (
+                single_dict['source_schema']
+                +
+                '_'
+                +
+                single_dict['source_taxonomy']
+            )
+            to_schema_and_building_class = (
+                single_dict['target_schema']
+                +
+                '_'
+                +
+                single_dict['target_taxonomy']
+            )
             conv_matrix = single_dict['conv_matrix']
 
             if from_schema_and_building_class not in mapping_data.keys():

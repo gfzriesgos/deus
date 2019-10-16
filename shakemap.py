@@ -92,11 +92,18 @@ class EqShakemap():
     def _find_grid_fields(self):
         grid_fields = self._root.findall(
             '{http://earthquake.usgs.gov/eqcenter/shakemap}grid_field')
+        # fallback if namespace is not proper
+        if len(grid_fields) == 0:
+            grid_fields = self._root.findall('grid_field')
+
         return [ShakemapGridField(x) for x in grid_fields]
 
     def _find_grid_data(self):
         grid_data = self._root.find(
             '{http://earthquake.usgs.gov/eqcenter/shakemap}grid_data')
+        # fallback if namespace is not proper
+        if grid_data is None:
+            grid_data = self._root.find('grid_data')
         return ShakemapGridData(grid_data)
 
     def _find_lon_lat_spacing(self):

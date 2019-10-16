@@ -7,11 +7,81 @@ import os
 import subprocess
 import unittest
 
+import exposure
+
 
 class TestCmdExecution(unittest.TestCase):
     '''
     Test class to run deus as a command line tool.
     '''
+
+    def test_execute_deus_with_ts_shakemap(self):
+        '''
+        Runs deus with a tsunami shakemap.
+        '''
+        schema = 'SARA_v1.0'
+
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+
+        testinput_dir = os.path.join(current_dir, 'testinputs')
+        test_shakemap = os.path.join(testinput_dir, 'shakemap_tsunami.xml')
+        test_exposure_file = os.path.join(
+            testinput_dir,
+            'exposure_from_assetmaster.json'
+        )
+        test_fragility_file = os.path.join(
+            testinput_dir,
+            'fragility_suppasri.json'
+        )
+
+        output_dir = os.path.join(current_dir, 'testoutputs')
+
+        updated_exposure_output_filename = os.path.join(
+            output_dir,
+            'updated_exposure_ts.json'
+        )
+        transition_output_filename = os.path.join(
+            output_dir,
+            'transitions_ts.json'
+        )
+        loss_output_filename = os.path.join(output_dir, 'losses_ts.json')
+
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
+
+        if os.path.exists(updated_exposure_output_filename):
+            os.unlink(updated_exposure_output_filename)
+
+        if os.path.exists(transition_output_filename):
+            os.unlink(transition_output_filename)
+
+        if os.path.exists(loss_output_filename):
+            os.unlink(loss_output_filename)
+
+        subprocess.run(
+            [
+                'python3',
+                'deus.py',
+                '--updated_exposure_output_file',
+                updated_exposure_output_filename,
+                '--transition_output_file',
+                transition_output_filename,
+                '--loss_output_file',
+                loss_output_filename,
+                test_shakemap,
+                test_exposure_file,
+                schema,
+                test_fragility_file,
+            ],
+            check=True,
+        )
+
+        exposure_data = exposure.ExposureCellList.from_file(
+            'SUPPASRI2013_v2.0',
+            updated_exposure_output_filename
+        )
+        for exposure_cell in exposure_data.get_exposure_cells():
+            self.assertTrue(exposure_cell.get_taxonomies())
 
     def test_execute_deus_two_times(self):
         '''
@@ -25,15 +95,11 @@ class TestCmdExecution(unittest.TestCase):
         test_shakemap = os.path.join(testinput_dir, 'shakemap.xml')
         test_exposure_file = os.path.join(
             testinput_dir,
-            'exposure_sara.json'
+            'exposure_from_assetmaster.json'
         )
         test_fragility_file = os.path.join(
             testinput_dir,
             'fragility_sara.json'
-        )
-        test_loss_file = os.path.join(
-            testinput_dir,
-            'loss_sara.json'
         )
 
         output_dir = os.path.join(current_dir, 'testoutputs')
@@ -96,9 +162,8 @@ class TestCmdExecution(unittest.TestCase):
                 test_exposure_file,
                 schema,
                 test_fragility_file,
-                test_loss_file
             ],
-            check=True
+            check=True,
         )
         subprocess.run(
             [
@@ -114,9 +179,8 @@ class TestCmdExecution(unittest.TestCase):
                 updated_exposure_output_filename,
                 schema,
                 test_fragility_file,
-                test_loss_file
             ],
-            check=True
+            check=True,
         )
 
 

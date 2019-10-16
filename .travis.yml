@@ -23,6 +23,7 @@ stages:
   - pep8check
   - pylintcheck
   - test
+  - dockerbuild
 
 jobs:
   include:
@@ -43,3 +44,8 @@ jobs:
     - stage: test
       script:
         - python3 test_all.py
+    - stage: dockerbuild
+      before_install: skip
+      install: skip
+      script:
+        - docker build -f metadata/Dockerfile .

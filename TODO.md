@@ -30,7 +30,7 @@ exposure data that is given as input.
 At the moment I use them to read the correct value out of the shakemap,
 so that it is 'pga' for earth quakes.
 The tsunami shakemaps have the intensity as mwh - maximum wave height,
-so that should be in the imt field for the fragility files for supparsi.
+so that should be in the imt field for the fragility files for suppasri.
 
 If it can't be used for this - so that it has another meaning and I'm
 just wrong with my idea to use it to read the intensity value -

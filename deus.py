@@ -12,6 +12,7 @@ import os
 
 import exposure
 import fragility
+import intensityprovider
 import loss
 import schemamapping
 import shakemap
@@ -56,10 +57,6 @@ def main():
     argparser.add_argument(
         'fragilty_file',
         help='File with the fragility function data')
-    if COMPUTE_LOSS:
-        argparser.add_argument(
-            'loss_file',
-            help='File with the loss function data')
     argparser.add_argument(
         '--updated_exposure_output_file',
         default='output_updated_exposure.json',
@@ -73,18 +70,30 @@ def main():
             '--loss_output_file',
             default='output_loss.json',
             help='Filename for the output with the computed loss')
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        loss_data_dir = os.path.join(current_dir, 'loss_data')
+        files = glob.glob(os.path.join(loss_data_dir, '*.json'))
+        loss_provider = loss.LossProvider.from_files(files, 'USD')
 
     args = argparser.parse_args()
 
     intensity_provider = shakemap.Shakemaps.from_file(
         args.intensity_file).to_intensity_provider()
+    # add aliases
+    # ID for inundation (out of the maximum wave height)
+    # SA_01 and SA_03 out of the PGA
+    intensity_provider = intensityprovider.AliasIntensityProvider(
+        intensity_provider,
+        aliases={
+            'SA_01': 'PGA',
+            'SA_03': 'PGA',
+            'ID': 'MWH',
+        }
+    )
     fragility_provider = fragility.Fragility.from_file(
         args.fragilty_file).to_fragility_provider()
     exposure_cell_provider = exposure.ExposureCellList.from_file(
         file_name=args.exposure_file, schema=args.exposure_schema)
-    if COMPUTE_LOSS:
-        loss_provider = loss.LossProvider.from_file(
-            args.loss_file)
 
     current_dir = os.path.dirname(os.path.realpath(__file__))
 
