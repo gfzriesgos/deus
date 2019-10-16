@@ -20,15 +20,15 @@ One file follows the following format:
 
 ```javascript
 {
-    "source_name": "SARA_MUR_H1", 
-    "target_name": "SUPPARSI_2013_W1", 
+    "source_schema": "SARA",
+    "source_taxonomy": "MUR_H1", 
+    "target_schema": "SUPPASRI_2013", 
+    "target_taxonomy": "W1", 
     "source_damage_states": [0, 1, 2, 3, 4], 
     "target_damage_states": [0, 1, 2, 3, 4, 5, 6], 
     "conv_matrix": "{\"0\":{\"0\":0.0000000002,\"1\":0.0,\"2\":0.0,\"3\":2.147685954e-17,...
 ```
 
-The source name is the source schema together with the building class.
-Same is true for the target name, except that the target schema and building classes is used.
 For each source building class there are several target files.
 
 The most important part is the conversion matrix, which contains on which part one building of the

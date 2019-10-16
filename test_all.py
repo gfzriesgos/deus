@@ -24,10 +24,14 @@ import schemamapping
 import shakemap
 
 # import other test classes
-from test_exposure import *
-from test_loss import *
-from test_transition import *
 from test_cmdexecution import *
+from test_exposure import *
+from test_fragility import *
+from test_intensity import *
+from test_loss import *
+from test_schemamapping import *
+from test_shakemap import *
+from test_transition import *
 
 
 class TestAll(unittest.TestCase):
@@ -197,334 +201,6 @@ class TestAll(unittest.TestCase):
 
         self.assertEqual(1, len(search_taxonomy))
 
-    def test_damage_state_mapping(self):
-        '''
-        Test the mapping of one damage state to another.
-        :return: None
-        '''
-
-        mapping_data = [
-            {
-                'source_schema': 'sup_13',
-                'target_schema': 'ems_98',
-                'conv_matrix': {
-                    '0': {
-                        '0': 1,
-                    },
-                    '1': {
-                        '1': 1,
-                    },
-                    '2': {
-                        '2': 1,
-                    },
-                    '3': {
-                        '3': 1,
-                    },
-                    '4': {
-                        '4': 1,
-                    },
-                    '5': {
-                        '5': 1,
-                    },
-                    '6': {
-                        '5': 1
-                    },
-                },
-            },
-            {
-                'source_schema': 'ems_98',
-                'target_schema': 'sup_13',
-                'conv_matrix': {
-                    '0': {
-                        '0': 1,
-                    },
-                    '1': {
-                        '1': 1,
-                    },
-                    '2': {
-                        '2': 1,
-                    },
-                    '3': {
-                        '3': 1,
-                    },
-                    '4': {
-                        '4': 1,
-                    },
-                    '5': {
-                        '5': 0.5,
-                        '6': 0.5,
-                    },
-                },
-            },
-        ]
-        damage_state_mapper = schemamapping.DamageStateMapper(mapping_data)
-
-        result_0_sup_to_sup = damage_state_mapper.map_damage_state(
-            source_damage_state=0,
-            source_schema='sup_13',
-            target_schema='sup_13',
-            n_buildings=100.0
-        )
-
-        self.assertEqual(1, len(result_0_sup_to_sup))
-        self.assertEqual(0, result_0_sup_to_sup[0].get_damage_state())
-        self.assertLess(99.9999, result_0_sup_to_sup[0].get_n_buildings())
-        self.assertLess(result_0_sup_to_sup[0].get_n_buildings(), 100.0001)
-
-        result_0_sup_to_ems = damage_state_mapper.map_damage_state(
-            source_damage_state=0,
-            source_schema='sup_13',
-            target_schema='ems_98',
-            n_buildings=100.0
-        )
-
-        self.assertEqual(1, len(result_0_sup_to_ems))
-        self.assertEqual(0, result_0_sup_to_ems[0].get_damage_state())
-        self.assertLess(99.9999, result_0_sup_to_ems[0].get_n_buildings())
-        self.assertLess(result_0_sup_to_ems[0].get_n_buildings(), 100.0001)
-
-        result_5_ems_to_sup = damage_state_mapper.map_damage_state(
-            source_damage_state=5,
-            source_schema='ems_98',
-            target_schema='sup_13',
-            n_buildings=100.0
-        )
-        self.assertEqual(2, len(result_5_ems_to_sup))
-        result_5_ems_to_sup_to_5 = [
-            x for x in result_5_ems_to_sup
-            if x.get_damage_state() == 5][0]
-        result_5_ems_to_sup_to_6 = [
-            x for x in result_5_ems_to_sup
-            if x.get_damage_state() == 6][0]
-
-        self.assertLess(49.999, result_5_ems_to_sup_to_5.get_n_buildings())
-        self.assertLess(result_5_ems_to_sup_to_5.get_n_buildings(), 50.001)
-
-        self.assertLess(49.999, result_5_ems_to_sup_to_6.get_n_buildings())
-        self.assertLess(result_5_ems_to_sup_to_6.get_n_buildings(), 50.001)
-
-    def test_load_damage_state_conversions_from_files(self):
-        '''
-        Test the read process of the damage states.
-        :return: None
-        '''
-        current_dir_with_test_in = os.path.dirname(
-            os.path.realpath(__file__))
-        pattern_to_search = os.path.join(
-            current_dir_with_test_in, 'mapping*.json')
-        files = glob.glob(pattern_to_search)
-
-        damage_state_mapper = schemamapping.DamageStateMapper.from_files(files)
-        self.assertIsNotNone(damage_state_mapper)
-
-    def test_building_class_mapping(self):
-        '''
-        Test the mapping of one building class to another.
-        :return: None
-        '''
-
-        # the names and the data here are mostly
-        # fantasy values
-        mapping_data = [
-            {
-                'source_schema': 'ems_98',
-                'target_schema': 'sup_13',
-                'conv_matrix': {
-                    'URM': {
-                        'WOOD': 0.2,
-                        'RC': 0.8,
-                    },
-                },
-            },
-        ]
-
-        building_class_mapper = schemamapping.BuildingClassMapper(mapping_data)
-
-        result_urm_ems_to_ems = building_class_mapper.map_building_class(
-            taxonomy='URM',
-            source_schema='ems_98',
-            target_schema='ems_98',
-            n_buildings=100.0
-        )
-
-        self.assertEqual(1, len(result_urm_ems_to_ems))
-        self.assertEqual('URM', result_urm_ems_to_ems[0].get_building_class())
-        self.assertLess(99.9999, result_urm_ems_to_ems[0].get_n_buildings())
-        self.assertLess(result_urm_ems_to_ems[0].get_n_buildings(), 100.0001)
-
-        result_urm_ems_to_sup = building_class_mapper.map_building_class(
-            taxonomy='URM',
-            source_schema='ems_98',
-            target_schema='sup_13',
-            n_buildings=100.0
-        )
-
-        self.assertEqual(2, len(result_urm_ems_to_sup))
-        result_urm_ems_to_sup_wood = [
-            x for x in result_urm_ems_to_sup
-            if x.get_building_class() == 'WOOD'][0]
-        result_urm_ems_to_sup_rc = [
-            x for x in result_urm_ems_to_sup
-            if x.get_building_class() == 'RC'][0]
-
-        self.assertLess(19.999, result_urm_ems_to_sup_wood.get_n_buildings())
-        self.assertLess(result_urm_ems_to_sup_wood.get_n_buildings(), 20.001)
-
-        self.assertLess(79.999, result_urm_ems_to_sup_rc.get_n_buildings())
-        self.assertLess(result_urm_ems_to_sup_rc.get_n_buildings(), 81.001)
-
-    def test_read_shakemap(self):
-        '''
-        Reads a normal shakemap (as it is the output of shakyground.
-        :return: None
-        '''
-        shake_map_eq = shakemap.Shakemaps.from_file(
-            './testinputs/shakemap.xml')
-        eq_provider = shake_map_eq.to_intensity_provider()
-
-        self.assertIsNotNone(eq_provider)
-
-        eq_intensity, eq_units = eq_provider.get_nearest(
-            lon=-71.2, lat=-32.65)
-
-        self.assertEqual('g', eq_units['PGA'])
-
-        self.assertLess(0.06327, eq_intensity['PGA'])
-        self.assertLess(eq_intensity['PGA'], 0.06328)
-
-        shake_map_ts = shakemap.Shakemaps.from_file(
-            './testinputs/shakemap_tsunami.xml')
-        ts_provider = shake_map_ts.to_intensity_provider()
-
-        ts_intensity, ts_units = ts_provider.get_nearest(
-            lon=-71.547, lat=-32.803)
-
-        self.assertEqual('m', ts_units['MWH'])
-
-        self.assertLess(3.5621, ts_intensity['MWH'])
-        self.assertLess(ts_intensity['MWH'], 3.5623)
-
-    def test_schema_mapping(self):
-        '''
-        Maps a building class with damage states to other
-        building classes and damage states.
-        :return: None
-        '''
-
-        bc_mapping_data = [
-            {
-                'source_schema': 'ems_98',
-                'target_schema': 'sup_13',
-                'conv_matrix': {
-                    'URM': {
-                        'WOOD': 0.2,
-                        'RC': 0.8,
-                    },
-                },
-            }
-        ]
-
-        building_class_mapper = schemamapping.BuildingClassMapper(
-            bc_mapping_data)
-
-        ds_mapping_data = [
-            {
-                'source_schema': 'ems_98',
-                'target_schema': 'sup_13',
-                'conv_matrix': {
-                    '5': {
-                        '5': 0.5,
-                        '6': 0.5,
-                    },
-                },
-            },
-        ]
-
-        damage_state_mapper = schemamapping.DamageStateMapper(ds_mapping_data)
-
-        schema_mapper = schemamapping.SchemaMapper(
-            building_class_mapper, damage_state_mapper)
-
-        result_mapping_in_schema = schema_mapper.map_schema(
-            source_taxonomy='URM',
-            source_damage_state=5,
-            source_schema='ems_98',
-            target_schema='ems_98',
-            n_buildings=100.0
-        )
-
-        self.assertEqual(1, len(result_mapping_in_schema))
-        self.assertEqual(
-            'URM',
-            result_mapping_in_schema[0].get_taxonomy())
-        self.assertEqual(5, result_mapping_in_schema[0].get_damage_state())
-
-        self.assertLess(99.9, result_mapping_in_schema[0].get_n_buildings())
-        self.assertLess(result_mapping_in_schema[0].get_n_buildings(), 100.1)
-
-        result_mapping_to_sup = schema_mapper.map_schema(
-            source_taxonomy='URM',
-            source_damage_state=5,
-            source_schema='ems_98',
-            target_schema='sup_13',
-            n_buildings=100.0
-        )
-
-        self.assertEqual(4, len(result_mapping_to_sup))
-
-        res_wood_5 = [
-            x for x in result_mapping_to_sup
-            if x.get_taxonomy() == 'WOOD'
-            and x.get_damage_state() == 5][0]
-
-        self.assertLess(9.9, res_wood_5.get_n_buildings())
-        self.assertLess(res_wood_5.get_n_buildings(), 10.1)
-
-        res_wood_6 = [
-            x for x in result_mapping_to_sup
-            if x.get_taxonomy() == 'WOOD'
-            and x.get_damage_state() == 6][0]
-
-        self.assertLess(9.9, res_wood_6.get_n_buildings())
-        self.assertLess(res_wood_6.get_n_buildings(), 10.1)
-
-        res_rc_5 = [
-            x for x in result_mapping_to_sup
-            if x.get_taxonomy() == 'RC'
-            and x.get_damage_state() == 5][0]
-
-        self.assertLess(39.9, res_rc_5.get_n_buildings())
-        self.assertLess(res_rc_5.get_n_buildings(), 40.1)
-
-        res_rc_6 = [
-            x for x in result_mapping_to_sup
-            if x.get_taxonomy() == 'RC'
-            and x.get_damage_state() == 6][0]
-
-        self.assertLess(39.9, res_rc_6.get_n_buildings())
-        self.assertLess(res_rc_6.get_n_buildings(), 40.1)
-
-    def test_read_schema_from_fragility_file(self):
-        '''
-        Reads the schema from the fragility file.
-        '''
-
-        fr_file = fragility.Fragility.from_file(
-            './testinputs/fragility_sara.json')
-        fr_provider = fr_file.to_fragility_provider()
-
-        schema = fr_provider.get_schema()
-
-        self.assertEqual('SARA_v1.0', schema)
-
-        fr_file2 = fragility.Fragility.from_file(
-            './testinputs/fragility_supparsi.json')
-        fr_provider2 = fr_file2.to_fragility_provider()
-
-        schema2 = fr_provider2.get_schema()
-
-        self.assertEqual('SUPPARSI_2013.0', schema2)
-
     def test_cell_mapping(self):
         '''
         Tests the schema mapping with a exposure
@@ -533,14 +209,14 @@ class TestAll(unittest.TestCase):
         '''
         exposure_cell = get_exposure_cell_for_sara()
 
-        schema_mapper = get_schema_mapper_for_sara_to_supparsi()
+        schema_mapper = get_schema_mapper_for_sara_to_suppasri()
 
         mapped_exposure_cell = exposure_cell.map_schema(
-            'SUPPARSI_2013.0', schema_mapper)
+            'SUPPASRI_2013.0', schema_mapper)
 
         new_schema = mapped_exposure_cell.get_schema()
 
-        self.assertEqual('SUPPARSI_2013.0', new_schema)
+        self.assertEqual('SUPPASRI_2013.0', new_schema)
 
         new_series = mapped_exposure_cell.to_simple_series()
 
@@ -561,193 +237,6 @@ class TestAll(unittest.TestCase):
 
         self.assertLess(49.9, new_series['STEEL_D3'])
         self.assertLess(new_series['STEEL_D3'], 50.1)
-
-    def test_schema_mapping_with_data_specific_for_each_building_class(self):
-        '''
-        Also tests the mapping process, but this time it uses
-        data specific to each building class for the mapping process.
-        :return: None
-        '''
-
-        mapping_data = [
-            {
-                "source_schema": "SARA_CR_LDUAL_DUC_H_8_19",
-                "target_schema": "Supparsi_2013_RC2",
-                "source_damage_states": [0, 1, 2, 3, 4],
-                "target_damage_states": [0, 1, 2, 3, 4, 5, 6],
-                "conv_matrix": {
-                    "0": {
-                        "0": 0.0000000142,
-                        "1": 0.0000000008,
-                        "2": 0.0,
-                        "3": 2.212268738e-20,
-                        "4": 6.212234209e-21
-                    },
-                    "1": {
-                        "0": 0.8390575513,
-                        "1": 0.048000721,
-                        "2": 0.0526925393,
-                        "3": 0.0000000162,
-                        "4": 0.0000000282
-                    },
-                    "2": {
-                        "0": 0.1609360831,
-                        "1": 0.0740190246,
-                        "2": 0.2988759267,
-                        "3": 0.0000040603,
-                        "4": 0.0000432286
-                    },
-                    "3": {
-                        "0": 0.00000635,
-                        "1": 0.8322648472,
-                        "2": 0.6103666121,
-                        "3": 0.6048565672,
-                        "4": 0.4031390361
-                    },
-                    "4": {
-                        "0": 0.0000000014,
-                        "1": 0.0119080503,
-                        "2": 0.0380006473,
-                        "3": 0.0990358442,
-                        "4": 0.1554193652
-                    },
-                    "5": {
-                        "0": 7.794059135e-20,
-                        "1": 0.0007803014,
-                        "2": 0.0000625369,
-                        "3": 0.06054086,
-                        "4": 0.196956846
-                    },
-                    "6": {
-                        "0": 3.174351391e-21,
-                        "1": 0.0330270548,
-                        "2": 0.0000017377,
-                        "3": 0.2355626521,
-                        "4": 0.2444414959
-                    }
-                }
-            },
-            {
-                "source_schema": "SARA_CR_LDUAL_DUC_H_8_19",
-                "target_schema": "Supparsi_2013_RC1",
-                "source_damage_states": [0, 1, 2, 3, 4],
-                "target_damage_states": [0, 1, 2, 3, 4, 5, 6],
-                "conv_matrix": {
-                    "0": {
-                        "0": 0.0000000142,
-                        "1": 0.0000000008,
-                        "2": 0.0,
-                        "3": 2.212268738e-20,
-                        "4": 6.212234209e-21
-                    },
-                    "1": {
-                        "0": 0.8390575513,
-                        "1": 0.048000721,
-                        "2": 0.0526925393,
-                        "3": 0.0000000162,
-                        "4": 0.0000000282
-                    },
-                    "2": {
-                        "0": 0.1609360831,
-                        "1": 0.0740190246,
-                        "2": 0.2988759267,
-                        "3": 0.0000040603,
-                        "4": 0.0000432286
-                    },
-                    "3": {
-                        "0": 0.00000635,
-                        "1": 0.8322648472,
-                        "2": 0.6103666121,
-                        "3": 0.6048565672,
-                        "4": 0.4031390361
-                    },
-                    "4": {
-                        "0": 0.0000000014,
-                        "1": 0.0119080503,
-                        "2": 0.0380006473,
-                        "3": 0.0990358442,
-                        "4": 0.1554193652
-                    },
-                    "5": {
-                        "0": 7.794059135e-20,
-                        "1": 0.0007803014,
-                        "2": 0.0000625369,
-                        "3": 0.06054086,
-                        "4": 0.196956846
-                    },
-                    "6": {
-                        "0": 3.174351391e-21,
-                        "1": 0.0330270548,
-                        "2": 0.0000017377,
-                        "3": 0.2355626521,
-                        "4": 0.2444414959
-                    }
-                }
-            }
-        ]
-
-        schema_mapper = schemamapping \
-            .BuildingClassSpecificDamageStateMapper \
-            .from_list_of_dicts(mapping_data)
-
-        exposure_cell_data = gpd.GeoDataFrame(pd.DataFrame({
-            'geometry': ['POINT(12.0 15.0)'],
-            'name': ['example point1'],
-            'gc_id': ['abcdefg'],
-            'CR_LDUAL_DUC_H_8_19': [100.0]
-        }))
-        exposure_cell_data['geometry'] = exposure_cell_data['geometry'].apply(
-            wkt.loads)
-        exposure_cell_series = exposure_cell_data.iloc[0]
-
-        exposure_cell = exposure.ExposureCell.from_simple_series(
-            series=exposure_cell_series,
-            schema='SARA'
-        )
-
-        mapped_exposure_cell = exposure_cell.map_schema(
-            'Supparsi_2013',
-            schema_mapper
-        )
-
-        self.assertEqual('Supparsi_2013', mapped_exposure_cell.get_schema())
-
-        new_series = mapped_exposure_cell.to_simple_series()
-        # there are only two aim building classes
-        # (and both with same data for the mapping)
-        # and the mappings here are picked randomly
-        # from the provided mapping files
-        # --> the mapping here is neither complete nor
-        # it is the expected one for the chosen building
-        # classes
-
-        self.assertLess(1.41e-6, new_series['RC1_D0'])
-        self.assertLess(new_series['RC1_D0'], 1.43e-6)
-
-        self.assertLess(7.9e-8, new_series['RC1_D1'])
-        self.assertLess(new_series['RC1_D1'], 8.1e-8)
-
-        self.assertEqual(0, new_series['RC1_D2'])
-
-        self.assertLess(2.20e-18, new_series['RC1_D3'])
-        self.assertLess(new_series['RC1_D3'], 2.22e-18)
-
-        self.assertLess(6.211e-19, new_series['RC1_D4'])
-        self.assertLess(new_series['RC1_D4'], 6.213e-19)
-
-        self.assertLess(1.41e-6, new_series['RC2_D0'])
-        self.assertLess(new_series['RC2_D0'], 1.43e-6)
-
-        self.assertLess(7.9e-8, new_series['RC2_D1'])
-        self.assertLess(new_series['RC2_D1'], 8.1e-8)
-
-        self.assertEqual(0, new_series['RC2_D2'])
-
-        self.assertLess(2.20e-18, new_series['RC2_D3'])
-        self.assertLess(new_series['RC2_D3'], 2.22e-18)
-
-        self.assertLess(6.211e-19, new_series['RC2_D4'])
-        self.assertLess(new_series['RC2_D4'], 6.213e-19)
 
     def test_cell_update(self):
         '''
@@ -1132,14 +621,14 @@ def get_exposure_cell_for_sara():
     )
 
 
-def get_schema_mapper_for_sara_to_supparsi():
+def get_schema_mapper_for_sara_to_suppasri():
     '''
-    Returns the mapper from sara to supparsi.
+    Returns the mapper from sara to suppasri.
     '''
     bc_mapping_data = [
         {
             'source_schema': 'SARA_v1.0',
-            'target_schema': 'SUPPARSI_2013.0',
+            'target_schema': 'SUPPASRI_2013.0',
             'conv_matrix': {
                 'MUR_H1': {
                     'RC_H1': 0.8,
@@ -1158,7 +647,7 @@ def get_schema_mapper_for_sara_to_supparsi():
     ds_mapping_data = [
         {
             'source_schema': 'SARA_v1.0',
-            'target_schema': 'SUPPARSI_2013.0',
+            'target_schema': 'SUPPASRI_2013.0',
             'conv_matrix': {
                 '0': {
                     '0': 1.0,
