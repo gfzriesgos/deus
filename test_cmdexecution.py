@@ -25,7 +25,10 @@ class TestCmdExecution(unittest.TestCase):
         current_dir = os.path.dirname(os.path.abspath(__file__))
 
         testinput_dir = os.path.join(current_dir, 'testinputs')
-        test_shakemap = os.path.join(testinput_dir, 'shakemap_with_multiple_imts.xml')
+        test_shakemap = os.path.join(
+            testinput_dir,
+            'shakemap_with_multiple_imts.xml'
+        )
         test_exposure_file = os.path.join(
             testinput_dir,
             'exposure_from_assetmaster.json'
@@ -45,7 +48,10 @@ class TestCmdExecution(unittest.TestCase):
             output_dir,
             'transitions_multiple_imts.json'
         )
-        loss_output_filename = os.path.join(output_dir, 'losses_multiple_imts.json')
+        loss_output_filename = os.path.join(
+            output_dir,
+            'losses_multiple_imts.json'
+        )
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
@@ -77,11 +83,16 @@ class TestCmdExecution(unittest.TestCase):
             check=True,
         )
 
-        input_n_buildings = get_n_buildings_by_cell_gid(schema, test_exposure_file)
-        output_n_buildings = get_n_buildings_by_cell_gid(schema, updated_exposure_output_filename)
+        input_n_buildings = get_n_buildings_by_cell_gid(
+            schema,
+            test_exposure_file
+        )
+        output_n_buildings = get_n_buildings_by_cell_gid(
+            schema,
+            updated_exposure_output_filename
+        )
 
         self.assertEqual(input_n_buildings, output_n_buildings)
-
 
     def test_execute_deus_with_ts_shakemap(self):
         '''
@@ -250,6 +261,7 @@ class TestCmdExecution(unittest.TestCase):
             ],
             check=True,
         )
+
 
 def get_n_buildings_by_cell_gid(schema, exposure_file):
     '''
