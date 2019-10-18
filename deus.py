@@ -85,6 +85,8 @@ def main():
     intensity_provider = intensityprovider.AliasIntensityProvider(
         intensity_provider,
         aliases={
+            'SA_01': 'PGA',
+            'SA_03': 'PGA',
             'ID': 'MWH',
         }
     )
