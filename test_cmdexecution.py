@@ -77,6 +77,12 @@ class TestCmdExecution(unittest.TestCase):
             check=True,
         )
 
+        input_n_buildings = get_n_buildings_by_cell_gid(schema, test_exposure_file)
+        output_n_buildings = get_n_buildings_by_cell_gid(schema, updated_exposure_output_filename)
+
+        self.assertEqual(input_n_buildings, output_n_buildings)
+
+
     def test_execute_deus_with_ts_shakemap(self):
         '''
         Runs deus with a tsunami shakemap.
@@ -244,6 +250,23 @@ class TestCmdExecution(unittest.TestCase):
             ],
             check=True,
         )
+
+def get_n_buildings_by_cell_gid(schema, exposure_file):
+    '''
+    For testing that the number of building stays the
+    same.
+    '''
+    exposure_data = exposure.ExposureCellList.from_file(
+        schema,
+        exposure_file,
+    ).to_dataframe()
+
+    buildings_by_cell_gid = {}
+    for _, series in exposure_data.iterrows():
+        gid = series['gid']
+        buildings = sum(series['expo']['Buildings'])
+
+    return buildings_by_cell_gid
 
 
 if __name__ == '__main__':
