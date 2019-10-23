@@ -21,6 +21,7 @@ import schemamapping
 
 import testimplementations
 
+
 class TestComposition(unittest.TestCase):
     """
     The test class for all tests
@@ -32,7 +33,7 @@ class TestComposition(unittest.TestCase):
         Here we have a test case in which we
         have an exposure model (all D0), update
         it with an intensity and fragility functions.
-        
+
         But we only have fragility functions for D0, D2 and D3,
         but none for D1.
 
@@ -49,14 +50,14 @@ class TestComposition(unittest.TestCase):
             'name': ['Colina'],
             'gc_id': ['CHL.14.1.1_1'],
             'geometry': [geometry],
-            taxonomy : [100.0]
+            taxonomy: [100.0]
         })
 
         exposure_cell_list = exposure.ExposureCellList.from_simple_dataframe(
             schema=schema,
             dataframe=dataframe
         )
-        
+
         exposure_cell = exposure_cell_list.get_exposure_cells()[0]
 
         fragility_data = {
@@ -80,13 +81,18 @@ class TestComposition(unittest.TestCase):
         fragility_instance = fragility.Fragility(fragility_data)
         fragility_provider = fragility_instance.to_fragility_provider()
 
-        intensity_provider = testimplementations.AlwaysTheSameIntensityProvider(
-            kind='PGA',
-            value=1.0,
-            unit='g',
+        intensity_provider = (
+            testimplementations.AlwaysTheSameIntensityProvider(
+                kind='PGA',
+                value=1.0,
+                unit='g',
+            )
         )
 
-        updated_cell, transition_cell = exposure_cell.update(intensity_provider, fragility_provider)
+        updated_cell, transition_cell = exposure_cell.update(
+            intensity_provider,
+            fragility_provider
+        )
 
         for taxonomy_bag in updated_cell.get_taxonomies():
             ds = taxonomy_bag.get_damage_state()
@@ -98,11 +104,12 @@ class TestComposition(unittest.TestCase):
             # and below 1 remain in damage state 0
             self.assertLess(0, n_buildings)
 
-        # ok we have no problem with 
+        # ok we have no problem with
         # it if we don't get any damage state 1
         # as input
 
-    def test_update_exposure_cell_with_missing_d1_but_with_d1_in_exposure(self):
+    def test_update_exposure_cell_with_missing_d1_but_with_d1_in_exposure(
+            self):
         """
         This is mostly the very same test as
         test_update_exposure_cell_with_missing_d1, but it now contains
@@ -123,14 +130,14 @@ class TestComposition(unittest.TestCase):
             'name': ['Colina'],
             'gc_id': ['CHL.14.1.1_1'],
             'geometry': [geometry],
-            taxonomy_d1 : [100.0]
+            taxonomy_d1: [100.0]
         })
 
         exposure_cell_list = exposure.ExposureCellList.from_simple_dataframe(
             schema=schema,
             dataframe=dataframe
         )
-        
+
         exposure_cell = exposure_cell_list.get_exposure_cells()[0]
 
         fragility_data = {
@@ -154,17 +161,21 @@ class TestComposition(unittest.TestCase):
         fragility_instance = fragility.Fragility(fragility_data)
         fragility_provider = fragility_instance.to_fragility_provider()
 
-        intensity_provider = testimplementations.AlwaysTheSameIntensityProvider(
-            kind='PGA',
-            value=1.0,
-            unit='g',
+        intensity_provider = (
+            testimplementations.AlwaysTheSameIntensityProvider(
+                kind='PGA',
+                value=1.0,
+                unit='g',
+            )
         )
 
-        updated_cell, transition_cell = exposure_cell.update(intensity_provider, fragility_provider)
+        updated_cell, transition_cell = exposure_cell.update(
+            intensity_provider,
+            fragility_provider,
+        )
 
         # this is the very same result as in the last test
         # but this time the data remains in D1 instead of D0
-
 
         for taxonomy_bag in updated_cell.get_taxonomies():
             ds = taxonomy_bag.get_damage_state()

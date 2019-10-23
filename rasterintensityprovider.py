@@ -7,6 +7,7 @@ the intensity provider for rasters.
 
 import georasters as gr
 
+
 class RasterIntensityProvider():
     """
     A intensity provider that reads from
@@ -42,4 +43,3 @@ class RasterIntensityProvider():
         raster = gr.from_file(filename)
 
         return cls(raster, intensity, unit, na_value)
-

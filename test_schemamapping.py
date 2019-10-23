@@ -69,7 +69,11 @@ class TestSchemaMapping(unittest.TestCase):
                 },
             ]
 
-            schema_mapper = schemamapping.BuildingClassSpecificDamageStateMapper.from_list_of_dicts(mapping_data)
+            schema_mapper = (
+                schemamapping
+                .BuildingClassSpecificDamageStateMapper
+                .from_list_of_dicts(mapping_data)
+            )
 
             source_taxonomy_d1 = source_taxonomy + '_D1'
 
@@ -80,7 +84,9 @@ class TestSchemaMapping(unittest.TestCase):
                 source_taxonomy_d1: [100.0]
             }))
 
-            exposure_cell_data['geometry'] = exposure_cell_data['geometry'].apply(
+            exposure_cell_data['geometry'] = exposure_cell_data[
+                'geometry'
+            ].apply(
                 wkt.loads)
             exposure_cell_series = exposure_cell_data.iloc[0]
 
