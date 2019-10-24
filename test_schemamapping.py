@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+"""
+Testcases for the schema mappings.
+"""
+
 import glob
 import os
 import unittest
@@ -14,6 +18,98 @@ import exposure
 
 
 class TestSchemaMapping(unittest.TestCase):
+    """
+    Testclass for the schema mapping.
+    """
+
+    def test_schema_mapping_with_missing_aim_damage_state(self):
+        """
+        Test case for a missing aim damage state in the conversion
+        matrix.
+        As there is no number, we expect it equivalent to a weight of 0,
+        so that nnothing is mapped to this damage state.
+        """
+        source_schema = 'schema1'
+        source_taxonomy = 'tax1'
+        target_schema = 'schema2'
+        target_taxonomy = 'tax2'
+
+        possible_target_damage_states = [
+            [0, 2, 3],
+            [0, 1, 2, 3],
+        ]
+
+        for target_damage_states in possible_target_damage_states:
+
+            mapping_data = [
+                {
+                    'source_schema': source_schema,
+                    'source_taxonomy': source_taxonomy,
+                    'target_schema': target_schema,
+                    'target_taxonomy': target_taxonomy,
+                    'source_damage_states': [0, 1, 2],
+                    'target_damage_states': target_damage_states,
+                    'conv_matrix': {
+                        '0': {
+                            '0': 1.0,
+                            '2': 0.0,
+                            '3': 0.0,
+                        },
+                        '1': {
+                            '0': 0.0,
+                            '2': 1.0,
+                            '3': 0.0,
+                        },
+                        '2': {
+                            '0': 0.0,
+                            '2': 0.0,
+                            '3': 1.0,
+                        },
+                    },
+                },
+            ]
+
+            schema_mapper = (
+                schemamapping
+                .BuildingClassSpecificDamageStateMapper
+                .from_list_of_dicts(mapping_data)
+            )
+
+            source_taxonomy_d1 = source_taxonomy + '_D1'
+
+            exposure_cell_data = gpd.GeoDataFrame(pd.DataFrame({
+                'geometry': ['POINT(12.0 15.0)'],
+                'name': ['example point1'],
+                'gc_id': ['abcdefg'],
+                source_taxonomy_d1: [100.0]
+            }))
+
+            exposure_cell_data['geometry'] = exposure_cell_data[
+                'geometry'
+            ].apply(
+                wkt.loads)
+            exposure_cell_series = exposure_cell_data.iloc[0]
+
+            exposure_cell = exposure.ExposureCell.from_simple_series(
+                series=exposure_cell_series,
+                schema=source_schema,
+            )
+
+            mapped_exposure_cell = exposure_cell.map_schema(
+                target_schema,
+                schema_mapper
+            )
+
+            self.assertEqual(target_schema, mapped_exposure_cell.get_schema())
+            new_series = mapped_exposure_cell.to_simple_series()
+            target_taxonomy_d2 = target_taxonomy + '_D2'
+            self.assertLess(99.9, new_series[target_taxonomy_d2])
+            self.assertLess(new_series[target_taxonomy_d2], 100.1)
+
+            # but there is no d1 in it
+            self.assertNotIn(target_taxonomy + '_D1', new_series.keys())
+            self.assertIn(target_taxonomy + '_D0', new_series.keys())
+            self.assertIn(target_taxonomy + '_D3', new_series.keys())
 
     def test_schema_mapping_with_data_specific_for_each_building_class(self):
         '''
