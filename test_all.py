@@ -584,7 +584,5 @@ def get_exposure_cell_for_sara():
     )
 
 
-
-
 if __name__ == "__main__":
     unittest.main()
