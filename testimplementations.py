@@ -44,3 +44,4 @@ class AlwaysTheSameIntensityProvider():
         units = {self._kind: self._unit}
 
         return intensities, units
+

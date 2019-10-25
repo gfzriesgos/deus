@@ -36,7 +36,7 @@ def main():
 
     # follow the very same structure as for the damage state mappings
     # so target_taxonomies as keys in the first level
-    conv_matrix_str = data.to_json()
+    conv_matrix_str = data.transpose().to_json()
     conv_matrix = json.loads(conv_matrix_str)
     result['conv_matrix'] = conv_matrix
 
