@@ -27,12 +27,18 @@ def create_schema_mapper(current_dir):
     Creates and returns a schema mapper
     using local mapping files.
     '''
-    pattern_to_search_for_files = os.path.join(
-        current_dir, 'schema_mapping_data', '*.json')
-    mapping_files = glob.glob(pattern_to_search_for_files)
+    pattern_to_search_for_tax_files = os.path.join(
+        current_dir, 'schema_mapping_data_tax', '*.json')
+    tax_mapping_files = glob.glob(pattern_to_search_for_tax_files)
+
+    pattern_to_search_for_ds_files = os.path.join(
+        current_dir, 'schema_mapping_data_ds', '*.json')
+    ds_mapping_files = glob.glob(pattern_to_search_for_ds_files)
+
     return (schemamapping
-            .BuildingClassSpecificDamageStateMapper
-            .from_files(mapping_files))
+            .SchemaMapper
+            .from_taxonomy_and_damage_state_conversion_files(
+                tax_mapping_files, ds_mapping_files))
 
 
 def main():
