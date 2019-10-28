@@ -20,7 +20,6 @@ import fragility
 import intensitydatawrapper
 import intensityprovider
 import rasterwrapper
-import schemamapping
 import shakemap
 
 # import other test classes
@@ -201,43 +200,6 @@ class TestAll(unittest.TestCase):
         ]
 
         self.assertEqual(1, len(search_taxonomy))
-
-    def test_cell_mapping(self):
-        '''
-        Tests the schema mapping with a exposure
-        cell.
-        :return: None
-        '''
-        exposure_cell = get_exposure_cell_for_sara()
-
-        schema_mapper = get_schema_mapper_for_sara_to_suppasri()
-
-        mapped_exposure_cell = exposure_cell.map_schema(
-            'SUPPASRI_2013.0', schema_mapper)
-
-        new_schema = mapped_exposure_cell.get_schema()
-
-        self.assertEqual('SUPPASRI_2013.0', new_schema)
-
-        new_series = mapped_exposure_cell.to_simple_series()
-
-        self.assertLess(79.9, new_series['RC_H1_D0'])
-        self.assertLess(new_series['RC_H1_D0'], 80.1)
-
-        self.assertLess(19.9, new_series['BRICK_D0'])
-        self.assertLess(new_series['BRICK_D0'], 20.1)
-
-        self.assertLess(49.9, new_series['MIX_D2'])
-        self.assertLess(new_series['MIX_D2'], 50.1)
-
-        self.assertLess(49.9, new_series['MIX_D3'])
-        self.assertLess(new_series['MIX_D3'], 50.1)
-
-        self.assertLess(49.9, new_series['STEEL_D2'])
-        self.assertLess(new_series['STEEL_D2'], 50.1)
-
-        self.assertLess(49.9, new_series['STEEL_D3'])
-        self.assertLess(new_series['STEEL_D3'], 50.1)
 
     def test_cell_update(self):
         '''
@@ -620,61 +582,6 @@ def get_exposure_cell_for_sara():
         series=exposure_cell_series,
         schema='SARA_v1.0'
     )
-
-
-def get_schema_mapper_for_sara_to_suppasri():
-    '''
-    Returns the mapper from sara to suppasri.
-    '''
-    bc_mapping_data = [
-        {
-            'source_schema': 'SARA_v1.0',
-            'target_schema': 'SUPPASRI_2013.0',
-            'conv_matrix': {
-                'MUR_H1': {
-                    'RC_H1': 0.8,
-                    'BRICK': 0.2,
-                },
-                'ER_ETR_H1_2': {
-                    'MIX': 0.5,
-                    'STEEL': 0.5,
-                },
-            }
-        },
-    ]
-
-    building_class_mapper = schemamapping.BuildingClassMapper(bc_mapping_data)
-
-    ds_mapping_data = [
-        {
-            'source_schema': 'SARA_v1.0',
-            'target_schema': 'SUPPASRI_2013.0',
-            'conv_matrix': {
-                '0': {
-                    '0': 1.0,
-                },
-                '1': {
-                    '1': 1.0,
-                },
-                '2': {
-                    '2': 0.5,
-                    '3': 0.5,
-                },
-                '3': {
-                    '4': 0.5,
-                    '5': 0.5,
-                },
-                '4': {
-                    '6': 1.0,
-                },
-            },
-        },
-    ]
-
-    damage_state_mapper = schemamapping.DamageStateMapper(ds_mapping_data)
-
-    return schemamapping.SchemaMapper(
-        building_class_mapper, damage_state_mapper)
 
 
 if __name__ == "__main__":

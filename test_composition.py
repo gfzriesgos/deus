@@ -17,7 +17,6 @@ from shapely import wkt
 
 import exposure
 import fragility
-import schemamapping
 
 import testimplementations
 

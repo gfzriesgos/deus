@@ -11,47 +11,43 @@ an approach to map those taxonomies to each other.
 At the moment we support the SARA and Suppasri 2013 schemas.
 
 ## How it works
-The mapping is done via the files in the `schema_mapping_data` folder.
-It follows a format to have a json file for each building class in a schema to
-another building class in the target schema.
 
-## Mapping file by example
-One file follows the following format:
+Currently the approach is splitted into the mapping between taxonomies
+(see the `schema_mapping_data_tax` folder) and damage states
+(`schema_mapping_data_ds`).
+
+You can see each file as a standalone file.
+
+For taxonomy mappings we have in each file the target and source schemas
+as well as a conversion matrix with the source taxonomies as top level
+keys, while the target taxonomies are in inner level keys.
+The inner level values must sum to 1.
 
 ```javascript
 {
-    "source_schema": "SARA",
-    "source_taxonomy": "MUR_H1", 
-    "target_schema": "SUPPASRI_2013", 
-    "target_taxonomy": "W1", 
-    "source_damage_states": [0, 1, 2, 3, 4], 
-    "target_damage_states": [0, 1, 2, 3, 4, 5, 6], 
-    "conv_matrix": "{\"0\":{\"0\":0.0000000002,\"1\":0.0,\"2\":0.0,\"3\":2.147685954e-17,...
+    "source_schema": "SARA_v1.0",
+    "target_schema": "SUPPASRI2013_v2.0", 
+    "source_taxonomies": [UNK, ...],
+    "target_taxonomies": [RC1, RC2, ...]
+    "conv_matrix": {
+       "UNK": {
+           "RC1": 0.3,
+           "RC2": 0.2,
+           ...
+        },
+        ...
+    }
+}
 ```
 
-For each source building class there are several target files.
+The damage state mappings are similar, but the files also contain
+entries for the source taxonomy and the target taxonomy (as the mapping
+is specific for these).
 
-The most important part is the conversion matrix, which contains on which part one building of the
-source and with a given damage state is mapped to other damage states in target.
+*The very most important differnce is that in the conversion matrix
+in this files the target_damage states are the toplevel keys,
+while the source damage states are the inner level keys.*
 
-So the format is:
-
-```
-"damage_state_in_source1": {
-    "damage_state_in_target1": p_1_1,
-    "damage_state_in_target2": p_1_2,
-    ...
-},
-"damage_state_in_source2": {
-    "damage_state_in_target1": p_2_1,
-    "damage_state_in_target2": p_2_2,
-    ...
-},
-...
-```
-
-We can add other supported schema mappings by just inserting new files in the `schema_mapping_data`
-folder.`
 
 ## Hard science
 
