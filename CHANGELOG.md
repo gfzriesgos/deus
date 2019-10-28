@@ -1,3 +1,7 @@
+# 2019-10-28:
+
+- Updated the damage state schema mapping files
+
 # 2019-10-25:
 
 - Fixed the schema mapping
