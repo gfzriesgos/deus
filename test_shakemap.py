@@ -5,6 +5,87 @@ import unittest
 import shakemap
 
 
+class TestReadShakemapGridData(unittest.TestCase):
+    """
+    This is the test class for reading
+    the content from the grid_data text.
+    """
+
+    def test_one_row_ints(self):
+        """
+        Test with one row of integers.
+        """
+        raw_data = '15 16 17'
+
+        result = list(shakemap.read_shakemap_data_from_str(raw_data))
+
+        self.assertEqual([15, 16, 17], result)
+
+    def test_two_rows_ints(self):
+        """
+        Test with two rows of integers.
+        Here we use a real newline.
+        """
+        raw_data = '15 16 17\n18 19 20'
+
+        result = list(shakemap.read_shakemap_data_from_str(raw_data))
+
+        self.assertEqual([15, 16, 17, 18, 19, 20], result)
+
+    def test_two_rows_without_newline_ints(self):
+        """
+        Simulates the usage of two rows (2x3 values)
+        but the newline was replaced by a simple space.
+        """
+        raw_data = '15 16 17 18 19 20'
+
+        result = list(shakemap.read_shakemap_data_from_str(raw_data))
+
+        self.assertEqual([15, 16, 17, 18, 19, 20], result)
+
+    def test_negative(self):
+        """
+        Test with some negative numbers.
+        """
+        raw_data = '15 -16 17 18 19 -20'
+
+        result = list(shakemap.read_shakemap_data_from_str(raw_data))
+
+        self.assertEqual([15, -16, 17, 18, 19, -20], result)
+
+    def test_quoted(self):
+        """
+        Test with quoted values (double quotes).
+        """
+        raw_data = '"0 1" 1 -71.4786 -33.0123 4 0 0.0 0.0 ' + \
+            '"0 2" 2 -71.5396 -33.0543 48 0 0.0 0.0'
+        result = list(shakemap.read_shakemap_data_from_str(raw_data))
+
+        self.assertEqual(
+            [
+                '0 1', 1, -71.4786, -33.0123, 4, 0, 0.0, 0.0,
+                '0 2', 2, -71.5396, -33.0543, 48, 0, 0.0, 0.0
+            ],
+            result
+        )
+
+    def test_quoted_single(self):
+        """
+        Test with quoted values (single quotes).
+        """
+        raw_data = "'0 1' 1 -71.4786 -33.0123 4 0 0.0 0.0 " + \
+            "'0 2' 2 -71.5396 -33.0543 48 0 0.0 0.0"
+        result = list(shakemap.read_shakemap_data_from_str(raw_data))
+
+        self.assertEqual(
+            [
+                '0 1', 1, -71.4786, -33.0123, 4, 0, 0.0, 0.0,
+                '0 2', 2, -71.5396, -33.0543, 48, 0, 0.0, 0.0
+            ],
+            result
+        )
+
+
 class TestShakemap(unittest.TestCase):
 
     def test_read_ts_shakemap(self):

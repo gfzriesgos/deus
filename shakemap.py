@@ -176,6 +176,34 @@ class ShakemapGridData():
         return self._xml.text
 
 
+def read_shakemap_data_from_str(grid_data_text):
+    '''
+    Helper to work with the tokens.
+    Can work with both strings and floats.
+    '''
+    # it must be tokenized (because of xml processing the newlines
+    # may not be consistent)
+    tokens = tokenize.tokenize(
+        io.BytesIO(
+            grid_data_text.encode('utf-8')).readline)
+    token_before = None
+    for token in tokens:
+        # 2 is number
+        if token.type == 2:
+            value = float(token.string)
+            if token_before is not None and token_before.string == '-':
+                value = -1 * value
+            yield value
+        # 3 is str
+        elif token.type == 3:
+            raw_value = token.string
+            # remove quotes around
+            value = raw_value[1:-1]
+            yield value
+        # take care about the before token for negative numbers
+        token_before = token
+
+
 def read_shakemap_data_and_units(grid_fields, grid_data):
     '''
     Function to read the grid_data and the grid fields.
@@ -185,23 +213,9 @@ def read_shakemap_data_and_units(grid_fields, grid_data):
     names = [x.get_name().upper() for x in grid_fields]
     units = {x.get_name().upper(): x.get_units() for x in grid_fields}
     data = collections.defaultdict(list)
-    # it must be tokenized (because of xml processing the newlines
-    # may not be consistent)
-    tokens = tokenize.tokenize(
-        io.BytesIO(
-            grid_data.get_text().encode('utf-8')).readline)
-    index = 0
-    token_before = None
-    for token in tokens:
-        # 2 is number
-        if token.type == 2:
-            if index >= len(names):
-                index = 0
-            name = names[index]
-            value = float(token.string)
-            if token_before is not None and token_before.string == '-':
-                value = -1 * value
-            data[name].append(value)
-            index += 1
-        token_before = token
+    values = read_shakemap_data_from_str(grid_data.get_text())
+    for idx, value in enumerate(values):
+        name_idx = idx % len(names)
+        name = names[name_idx]
+        data[name].append(value)
     return data, units

@@ -91,9 +91,9 @@ def main():
     intensity_provider = intensityprovider.AliasIntensityProvider(
         intensity_provider,
         aliases={
-            'SA_01': 'PGA',
-            'SA_03': 'PGA',
-            'ID': 'MWH',
+            'SA_01': ['PGA'],
+            'SA_03': ['PGA'],
+            'ID': ['MWH', 'INUN_MEAN_POLY'],
         }
     )
     fragility_provider = fragility.Fragility.from_file(
