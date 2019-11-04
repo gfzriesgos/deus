@@ -163,13 +163,18 @@ class AliasIntensityProvider():
         )
 
         for new_intensity_measure in self._aliases:
-            given_intensity_measure = self._aliases[new_intensity_measure]
-            if given_intensity_measure in intensities.keys():
-                if new_intensity_measure not in intensities.keys():
-                    intensities[new_intensity_measure] = \
-                        intensities[given_intensity_measure]
-                    units[new_intensity_measure] = \
-                        units[given_intensity_measure]
+            possible_intensity_measures = self._aliases[new_intensity_measure]
+            # the current behaviour is that later names can overwrite
+            # the source columns used before
+            # however it is more indented as an overall use
+            # case for "Use one of this columns if you have none in the data"
+            for given_intensity_measure in possible_intensity_measures:
+                if given_intensity_measure in intensities.keys():
+                    if new_intensity_measure not in intensities.keys():
+                        intensities[new_intensity_measure] = \
+                            intensities[given_intensity_measure]
+                        units[new_intensity_measure] = \
+                            units[given_intensity_measure]
 
         return intensities, units
 
