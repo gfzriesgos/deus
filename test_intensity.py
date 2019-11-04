@@ -55,9 +55,9 @@ class TestIntensity(unittest.TestCase):
         intensity_provider = intensityprovider.AliasIntensityProvider(
             inner_intensity_provider,
             aliases={
-                'SA_01': 'PGA',
-                'SA_03': 'PGA',
-                'ID': 'mwh',
+                'SA_01': ['PGA'],
+                'SA_03': ['PGA'],
+                'ID': ['mwh'],
             }
         )
 

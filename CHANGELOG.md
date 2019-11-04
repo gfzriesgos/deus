@@ -1,3 +1,10 @@
+# 2019-11-04:
+
+- Added support for strings in shakemap grid data
+- Added support for intensity aliases to get their value
+  from columns with different names (say one uses MHW, another
+  INUN\_MEAN\_POLY, but both should be used as ID - for inundation)
+
 # 2019-10-28:
 
 - Updated the damage state schema mapping files
