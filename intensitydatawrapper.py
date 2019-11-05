@@ -176,11 +176,26 @@ class DictWithListDataWrapper():
     a dict with lists for the data
     and an addtional dict for the units.
     '''
-    def __init__(self, data, units, x_column, y_column):
+    def __init__(self, data, units, possible_x_columns, possible_y_columns):
         self._data = data
         self._units = units
-        self._x_column = x_column
-        self._y_column = y_column
+
+        self._x_column = None
+        self._y_column = None
+
+        for possible_column in possible_x_columns:
+            if possible_column in self._data.keys():
+                self._x_column = possible_column
+                break
+
+        assert self._x_column is not None
+
+        for possible_column in possible_y_columns:
+            if possible_column in self._data.keys():
+                self._y_column = possible_column
+                break
+
+        assert self._y_column is not None
 
     def get_list_x_coordinates(self):
         '''

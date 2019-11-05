@@ -94,12 +94,12 @@ class TestShakemap(unittest.TestCase):
         ts_provider = shake_map_ts.to_intensity_provider()
 
         ts_intensity, ts_units = ts_provider.get_nearest(
-            lon=-71.547, lat=-32.803)
+            lon=-71.547, lat=-32.9857)
 
-        self.assertEqual('m', ts_units['MWH'])
+        self.assertEqual('m', ts_units['INUN_MEAN_POLY'])
 
-        self.assertLess(3.5621, ts_intensity['MWH'])
-        self.assertLess(ts_intensity['MWH'], 3.5623)
+        self.assertLess(1.598, ts_intensity['INUN_MEAN_POLY'])
+        self.assertLess(ts_intensity['INUN_MEAN_POLY'], 1.6)
 
     def test_read_shakemap(self):
         '''
