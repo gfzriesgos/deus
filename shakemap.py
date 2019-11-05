@@ -16,45 +16,6 @@ import intensitydatawrapper
 import intensityprovider
 
 
-class TsunamiShakemap():
-    '''
-    Shakemap implementation for the tsunamis.
-    '''
-
-    def __init__(self, root):
-        self._root = root
-
-    def _find_grid_fields(self):
-        grid_fields = self._root.find(
-            'event').findall(
-                'grid_field')
-        return [ShakemapGridField(x) for x in grid_fields]
-
-    def _find_grid_data(self):
-        grid_data = self._root.find(
-            'event').find(
-                'grid_data')
-        return ShakemapGridData(grid_data)
-
-    def to_intensity_provider(self):
-        '''
-        Returns an instance to access the data point
-        that is closest to a given location.
-        '''
-        data, units = read_shakemap_data_and_units(
-            grid_fields=self._find_grid_fields(),
-            grid_data=self._find_grid_data())
-
-        wrapped_data = intensitydatawrapper.DictWithListDataWrapper(
-            data=data,
-            units=units,
-            x_column='longitude'.upper(),
-            y_column='latitude'.upper()
-        )
-
-        return intensityprovider.IntensityProvider(intensity_data=wrapped_data)
-
-
 class Shakemaps():
     '''
     Factory class for reading shakemaps.
@@ -72,13 +33,7 @@ class Shakemaps():
         xml = le.parse(file_name, huge_parser)
         root = xml.getroot()
 
-        if Shakemaps._looks_like_tsunami_shakemap(root):
-            return TsunamiShakemap(root)
         return EqShakemap(root)
-
-    @staticmethod
-    def _looks_like_tsunami_shakemap(root):
-        return root.get('shakemap_originator') == '_AWI_'
 
 
 class EqShakemap():
@@ -126,8 +81,8 @@ class EqShakemap():
         wrapped_data = intensitydatawrapper.DictWithListDataWrapper(
             data=data,
             units=units,
-            x_column='LON',
-            y_column='LAT',
+            possible_x_columns=['LON', 'CENTROID_LON'],
+            possible_y_columns=['LAT', 'CENTROID_LAT'],
         )
 
         return intensityprovider.IntensityProvider(intensity_data=wrapped_data)
