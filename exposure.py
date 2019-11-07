@@ -4,6 +4,7 @@
 Module for the exposure related classes.
 '''
 
+import collections
 import math
 import re
 
@@ -116,6 +117,13 @@ class ExposureCell():
         self._geometry = geometry
         self._taxonomies = taxonomies
 
+        self._tax_idx_by_taxonomy_key = {}
+        for idx, taxonomy in enumerate(taxonomies):
+            key = taxonomy.to_key()
+            self._tax_idx_by_taxonomy_key[key] = idx
+
+
+
     def get_schema(self):
         '''
         Returns the schema.
@@ -177,16 +185,14 @@ class ExposureCell():
         Here is logic to merge with taxonomies that are
         already included.
         '''
-
-        idx_to_insert = None
-        for idx, test_tax in enumerate(self._taxonomies):
-            if taxonomy.can_be_merged(test_tax):
-                idx_to_insert = idx
-
-        if idx_to_insert is not None:
+        key = taxonomy.to_key()
+        if key in self._tax_idx_by_taxonomy_key.keys():
+            idx_to_insert = self._tax_idx_by_taxonomy_key.get(key)
             self._taxonomies[idx_to_insert].merge(taxonomy)
         else:
+            new_idx = len(self._taxonomies)
             self._taxonomies.append(taxonomy)
+            self._tax_idx_by_taxonomy_key[key] = new_idx
 
     def update_single_taxonomy(
             self,
@@ -410,6 +416,11 @@ class ExposureCell():
             taxonomies=taxonomies
         )
 
+TaxonomyDataBagKey = collections.namedtuple(
+    'TaxonomyDataBagKey',
+    'schema taxonomy damage_state'
+)
+
 
 class TaxonomyDataBag():
     '''
@@ -443,6 +454,13 @@ class TaxonomyDataBag():
         self._repl_cost_usd_bdg = repl_cost_usd_bdg
         self._population = population
         self._name = name
+
+    def to_key(self):
+        return TaxonomyDataBagKey(
+            self._schema,
+            self._taxonomy,
+            self._damage_state
+        )
 
     def with_updated_mapping(
             self,
@@ -527,25 +545,11 @@ class TaxonomyDataBag():
         '''
         return self._name
 
-    def can_be_merged(self, other_taxonomy):
-        '''
-        Tests if two taxonomy data bags for the same
-        cell can be merged.
-        '''
-        if self._schema != other_taxonomy.get_schema():
-            return False
-        if self._taxonomy != other_taxonomy.get_taxonomy():
-            return False
-        if self._damage_state != other_taxonomy.get_damage_state():
-            return False
-        return True
-
     def merge(self, other_taxonomy):
         '''
         Adds the number of buildings.
         Here is no check if the other taxonomy data bag
         can be merged or not.
-        Use the can_be_merged method before.
         '''
         self._n_buildings += other_taxonomy.get_n_buildings()
 
