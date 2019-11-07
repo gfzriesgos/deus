@@ -192,11 +192,16 @@ class SchemaMapper():
             source_damage_state,
             target_schema):
 
-        cachekey = CacheKey(source_schema, source_taxonomy, source_damage_state, target_schema)
+        cachekey = CacheKey(
+            source_schema,
+            source_taxonomy,
+            source_damage_state,
+            target_schema
+        )
 
         if cachekey in self._cached_mappings:
             return self._cached_mappings[cachekey]
-        
+
         results = self._do_map_schema_1(
             source_schema,
             source_taxonomy,

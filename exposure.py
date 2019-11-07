@@ -122,8 +122,6 @@ class ExposureCell():
             key = taxonomy.to_key()
             self._tax_idx_by_taxonomy_key[key] = idx
 
-
-
     def get_schema(self):
         '''
         Returns the schema.
@@ -415,6 +413,7 @@ class ExposureCell():
             geometry=geometry,
             taxonomies=taxonomies
         )
+
 
 TaxonomyDataBagKey = collections.namedtuple(
     'TaxonomyDataBagKey',

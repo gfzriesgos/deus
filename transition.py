@@ -119,10 +119,12 @@ class TransitionCell():
             transitions=[]
         )
 
+
 TransitionKey = collections.namedtuple(
     'TransitionKey',
     'schema taxonomy from_damage_state to_damage_state'
 )
+
 
 class Transition():
     '''
