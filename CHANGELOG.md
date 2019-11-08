@@ -1,3 +1,13 @@
+# 2019-11-08:
+
+- Replaced the replacement costs for sara with the country specific
+  one for peru
+
+# 2019-11-07:
+
+- Performance improvements for Schema Mapping and merges for
+  taxonomy+damagestate combinations and transitions
+
 # 2019-11-04:
 
 - Added support for strings in shakemap grid data

@@ -11,6 +11,12 @@ import json
 import pandas as pd
 
 
+CacheKey = collections.namedtuple(
+    'CacheKey',
+    'source_schema source_taxonomy source_damage_state target_schema'
+)
+
+
 class SchemaMapperResult():
     """
     Class to store the mapping results in.
@@ -61,6 +67,8 @@ class SchemaMapper():
     def __init__(self, tax_mapping_data, ds_mapping_data):
         self._tax_mapping_data = tax_mapping_data
         self._ds_mapping_data = ds_mapping_data
+
+        self._cached_mappings = {}
 
     @classmethod
     def from_taxonomy_and_damage_state_conversion_files(
@@ -157,8 +165,61 @@ class SchemaMapper():
                 )
             ]
         # otherwise we have to map
-        mapping_results = []
+        results_for_1_building = self._map_schema_1(
+            source_schema,
+            source_taxonomy,
+            source_damage_state,
+            target_schema
+        )
 
+        results_for_n_buildings = []
+        for result in results_for_1_building:
+            results_for_n_buildings.append(
+                SchemaMapperResult(
+                    result.get_schema(),
+                    result.get_taxonomy(),
+                    result.get_damage_state(),
+                    result.get_n_buildings() * n_buildings
+                )
+            )
+
+        return results_for_n_buildings
+
+    def _map_schema_1(
+            self,
+            source_schema,
+            source_taxonomy,
+            source_damage_state,
+            target_schema):
+
+        cachekey = CacheKey(
+            source_schema,
+            source_taxonomy,
+            source_damage_state,
+            target_schema
+        )
+
+        if cachekey in self._cached_mappings:
+            return self._cached_mappings[cachekey]
+
+        results = self._do_map_schema_1(
+            source_schema,
+            source_taxonomy,
+            source_damage_state,
+            target_schema
+        )
+
+        self._cached_mappings[cachekey] = results
+        return results
+
+    def _do_map_schema_1(
+            self,
+            source_schema,
+            source_taxonomy,
+            source_damage_state,
+            target_schema):
+
+        mapping_results = []
         source_target_schema_tuple = SourceTargetSchemaTuple(
             source_schema=source_schema,
             target_schema=target_schema,
@@ -184,7 +245,7 @@ class SchemaMapper():
 
         for target_taxonomy in tax_conv_row.keys():
             n_buildings_in_target_taxonomy = (
-                n_buildings * tax_conv_row[target_taxonomy]
+                1.0 * tax_conv_row[target_taxonomy]
             )
 
             if tax_conv_row[target_taxonomy] > 0:

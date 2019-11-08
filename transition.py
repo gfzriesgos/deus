@@ -4,6 +4,8 @@
 Module that contains all the transition classes.
 '''
 
+import collections
+
 import geopandas as gpd
 import pandas as pd
 
@@ -19,6 +21,11 @@ class TransitionCell():
         self._name = name
         self._geometry = geometry
         self._transitions = transitions
+        self._transition_idx_by_transition_key = {}
+
+        for idx, transition in enumerate(transitions):
+            key = transition.to_key()
+            self._transition_idx_by_transition_key[key] = idx
 
     def get_schema(self):
         '''
@@ -56,16 +63,14 @@ class TransitionCell():
         Adds one transition to the list.
         Tries to merge the transitions.
         '''
-        idx_to_add = None
-
-        for idx, single_transition in enumerate(self._transitions):
-            if single_transition.can_be_merged(transition):
-                idx_to_add = idx
-
-        if idx_to_add is not None:
-            self._transitions[idx_to_add].merge(transition)
+        key = transition.to_key()
+        if key in self._transition_idx_by_transition_key.keys():
+            idx_to_insert = self._transition_idx_by_transition_key[key]
+            self._transitions[idx_to_insert].merge(transition)
         else:
+            new_idx = len(self._transitions)
             self._transitions.append(transition)
+            self._transition_idx_by_transition_key[key] = new_idx
 
     def to_series(self):
         '''
@@ -115,6 +120,12 @@ class TransitionCell():
         )
 
 
+TransitionKey = collections.namedtuple(
+    'TransitionKey',
+    'schema taxonomy from_damage_state to_damage_state'
+)
+
+
 class Transition():
     '''
     Single Transition dataset.
@@ -131,6 +142,14 @@ class Transition():
         self._from_damage_state = from_damage_state
         self._to_damage_state = to_damage_state
         self._n_buildings = n_buildings
+
+    def to_key(self):
+        return TransitionKey(
+            self._schema,
+            self._taxonomy,
+            self._from_damage_state,
+            self._to_damage_state,
+        )
 
     def get_schema(self):
         '''
@@ -162,26 +181,10 @@ class Transition():
         '''
         return self._n_buildings
 
-    def can_be_merged(self, other_transition):
-        '''
-        Tests if the other transition can be merged into
-        this one.
-        '''
-        if self._schema != other_transition.get_schema():
-            return False
-        if self._taxonomy != other_transition.get_taxonomy():
-            return False
-        if self._from_damage_state != other_transition.get_from_damage_state():
-            return False
-        if self._to_damage_state != other_transition.get_to_damage_state():
-            return False
-        return True
-
     def merge(self, other_transition):
         '''
         Adds the number of buildings to this transition.
         Here it does not check if the merge is valid or not.
-        Please use the can_be_merged method before.
         '''
         self._n_buildings += other_transition.get_n_buildings()
 
