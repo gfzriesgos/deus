@@ -4,6 +4,7 @@
 Test classes to run deus for performance reasons.
 '''
 import os
+import datetime
 import subprocess
 import unittest
 
@@ -60,6 +61,8 @@ class TestPerformance(unittest.TestCase):
         if os.path.exists(loss_output_filename):
             os.unlink(loss_output_filename)
 
+        start = datetime.datetime.now()
+
         subprocess.run(
             [
                 'python3',
@@ -77,6 +80,16 @@ class TestPerformance(unittest.TestCase):
             ],
             check=True,
         )
+
+        end = datetime.datetime.now()
+
+        delta = end - start
+
+        total_seconds = delta.total_seconds()
+
+        time_ok_seconds = 60 * 3
+
+        self.assertLess(total_seconds, time_ok_seconds)
 
 
 if __name__ == '__main__':
