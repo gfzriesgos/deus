@@ -42,7 +42,7 @@ class DamageState():
         self.taxonomy = taxonomy
         self.from_state = from_state
         self.to_state = to_state
-        self.intensity_field = intensity_field
+        self.intensity_field = intensity_field.upper()
         self.intensity_unit = intensity_unit
 
         self.fragility_function = fragility_function
@@ -65,7 +65,7 @@ class DamageState():
         This method throws an exception if the unit for the
         fragility function is not the expected one.
         '''
-        field = self.intensity_field.upper()
+        field = self.intensity_field
         value = intensity[field]
         unit = units[field]
 
