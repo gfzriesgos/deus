@@ -1,3 +1,8 @@
+# 2019-11-07:
+
+- Performance improvements for Schema Mapping and merges for
+  taxonomy+damagestate combinations and transitions
+
 # 2019-11-04:
 
 - Added support for strings in shakemap grid data
