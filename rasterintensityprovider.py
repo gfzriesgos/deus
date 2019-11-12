@@ -27,7 +27,7 @@ class RasterIntensityProvider():
             value = self.raster.map_pixel(point_x=lon, point_y=lat)
         except gr.RasterGeoError:
             # it is outside of the raster
-            value = na_value
+            value = self.na_value
 
         intensities = {
             self.intensity: value
