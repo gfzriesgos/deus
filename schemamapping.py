@@ -16,6 +16,70 @@ CacheKey = collections.namedtuple(
     'source_schema source_taxonomy source_damage_state target_schema'
 )
 
+CacheKeyTaxonomy = collections.namedtuple(
+    'CacheKeyTaxonomy',
+    'source_schema source_taxonomy target_schema'
+)
+
+
+def convert_dict_to_use_int_keys(d):
+    """
+    Takes a dict with string keys that
+    should be int keys for faster work.
+
+    Returns a generator, so that it can
+    be used with dict(convert_dict_to_use_int_keys(...))
+    """
+    for k, v in d.items():
+        k = int(k)
+        if type(v) == dict:
+            v = dict(convert_dict_to_use_int_keys(v))
+        yield k, v
+
+
+class DamageStateMappingMatrix():
+    """
+    This is a mapper for the damage state mapping matrix.
+    It is necessary, because it is used in a transposed
+    format compared to a normal dict.
+
+    But in this format in can be read into
+    pandas without further conversion.
+    """
+    def __init__(self, dict_conv_matrix):
+        self.pure_dict_conv_matrix = dict_conv_matrix
+        # do the init of the conv matrix lazy
+        self.conv_matrix = None
+
+    def _init_conv_matrix(self):
+        self.conv_matrix = pd.DataFrame(
+            dict(
+                convert_dict_to_use_int_keys(
+                    self.pure_dict_conv_matrix
+                )
+            )
+        ).transpose().to_dict()
+
+    def contains_source_damage_state(self, source_damage_state_int):
+        """
+        Check if the source damage state is included in the
+        matrix.
+        """
+        if self.conv_matrix is None:
+            self._init_conv_matrix()
+        return source_damage_state_int in self.conv_matrix.keys()
+
+    def yield_target_damage_state_with_fraction(self, source_damage_state_int):
+        """
+        Returns a generator with the target damage state and the fraction
+        of for the the specific target damage state.
+        """
+        for target_damage_state_int, fraction in (
+            self.conv_matrix[source_damage_state_int].items()
+        ):
+            if fraction > 0:
+                yield target_damage_state_int, fraction
+
 
 class SchemaMapperResult():
     """
@@ -69,6 +133,7 @@ class SchemaMapper():
         self._ds_mapping_data = ds_mapping_data
 
         self._cached_mappings = {}
+        self._cached_mappings_taxonomy = {}
 
     @classmethod
     def from_taxonomy_and_damage_state_conversion_files(
@@ -130,7 +195,7 @@ class SchemaMapper():
             source_taxonomy = dataset['source_taxonomy']
             target_taxonomy = dataset['target_taxonomy']
 
-            conv_matrix = pd.DataFrame(dataset['conv_matrix'])
+            conv_matrix = DamageStateMappingMatrix(dataset['conv_matrix'])
 
             setting_tuple = SourceTargetSchemaTaxonomyTuple(
                 source_schema=source_schema,
@@ -212,14 +277,35 @@ class SchemaMapper():
         self._cached_mappings[cachekey] = results
         return results
 
-    def _do_map_schema_1(
+    def _map_schema_1_just_taxonomy(
             self,
             source_schema,
             source_taxonomy,
-            source_damage_state,
             target_schema):
 
-        mapping_results = []
+        key = CacheKeyTaxonomy(
+            source_schema=source_schema,
+            source_taxonomy=source_taxonomy,
+            target_schema=target_schema
+        )
+
+        if key not in self._cached_mappings_taxonomy.keys():
+            result = self._do_map_schema_1_just_taxonomy(
+                source_schema=source_schema,
+                source_taxonomy=source_taxonomy,
+                target_schema=target_schema
+            )
+            self._cached_mappings_taxonomy[key] = result
+            return result
+
+        return self._cached_mappings_taxonomy[key]
+
+    def _do_map_schema_1_just_taxonomy(
+            self,
+            source_schema,
+            source_taxonomy,
+            target_schema):
+
         source_target_schema_tuple = SourceTargetSchemaTuple(
             source_schema=source_schema,
             target_schema=target_schema,
@@ -241,7 +327,22 @@ class SchemaMapper():
                     'for the source taxonomy {0}'
                 ).format(source_taxonomy))
 
-        tax_conv_row = tax_conv_matrix[source_taxonomy]
+        return tax_conv_matrix[source_taxonomy]
+
+    def _do_map_schema_1(
+            self,
+            source_schema,
+            source_taxonomy,
+            source_damage_state,
+            target_schema):
+
+        mapping_results = []
+
+        tax_conv_row = self._map_schema_1_just_taxonomy(
+            source_schema=source_schema,
+            source_taxonomy=source_taxonomy,
+            target_schema=target_schema
+        )
 
         for target_taxonomy in tax_conv_row.keys():
             n_buildings_in_target_taxonomy = (
@@ -267,34 +368,33 @@ class SchemaMapper():
                         ).format(target_taxonomy, source_taxonomy))
 
                 ds_conv_matrix = self._ds_mapping_data[schema_taxonomy_setting]
-                str_source_damage_state = str(source_damage_state)
 
-                if str_source_damage_state not in ds_conv_matrix.index:
+                if not ds_conv_matrix.contains_source_damage_state(
+                    source_damage_state
+                ):
                     raise Exception(
                         (
                             'There is no data for the damage state schema' +
                             ' mapping for damage state {0}'
                         ).format(source_damage_state))
 
-                ds_conv_row = ds_conv_matrix.loc[str_source_damage_state]
-
-                for str_target_damage_state in ds_conv_row.keys():
-                    # the keys in there are strings
+                for target_damage_state, ds_fraction in (
+                        ds_conv_matrix.yield_target_damage_state_with_fraction(
+                            source_damage_state
+                        )
+                ):
                     n_buildings_in_target_damage_state = (
                         n_buildings_in_target_taxonomy *
-                        ds_conv_row[str_target_damage_state]
+                        ds_fraction
                     )
 
-                    if ds_conv_row[str_target_damage_state] > 0:
-                        target_damage_state = int(str_target_damage_state)
+                    single_mapping_result = SchemaMapperResult(
+                        schema=target_schema,
+                        taxonomy=target_taxonomy,
+                        damage_state=target_damage_state,
+                        n_buildings=n_buildings_in_target_damage_state
+                    )
 
-                        single_mapping_result = SchemaMapperResult(
-                            schema=target_schema,
-                            taxonomy=target_taxonomy,
-                            damage_state=target_damage_state,
-                            n_buildings=n_buildings_in_target_damage_state
-                        )
-
-                        mapping_results.append(single_mapping_result)
+                    mapping_results.append(single_mapping_result)
 
         return mapping_results
