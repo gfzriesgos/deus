@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-import collections 
+import collections
 import pandas
 import geopandas
 
-TaxDsTuple = collections.namedtuple('TaxDsTuple', 'taxonmy damagestate')
+TaxDsTuple = collections.namedtuple('TaxDsTuple', 'taxonomy damage state')
 
 all_cells = geopandas.read_file('exposure_so_far.json')
 
@@ -21,8 +21,4 @@ for expo in all_expos:
         tax_ds_tuples_counts[TaxDsTuple(taxonomy, ds)] += 1
 
     any_more_than_1 = any([v > 1 for v in tax_ds_tuples_counts.values()])
-    assert any_more_than_1 == False
-
-
-
-
+    assert any_more_than_1 is False

@@ -5,19 +5,34 @@ import json
 
 import pandas as pd
 
+
 def main():
-    arg_parser = argparse.ArgumentParser('Script to convert a conversion matrix for taxonomies to json files')
-    arg_parser.add_argument('inputfile', help='The xlsx with the matrix of the conversion (must be readable by pandas)')
-    arg_parser.add_argument('source_schema', help='The name of the source schema (taxonomies are rows in the input file).')
-    arg_parser.add_argument('target_schema', help='The name of the target schema (taxonomies are the columns in the input file)')
+    arg_parser = argparse.ArgumentParser(
+        'Script to convert a conversion matrix for taxonomies to json files'
+    )
+    arg_parser.add_argument(
+        'inputfile',
+        help='The xlsx with the matrix of the conversion '
+             + '(must be readable by pandas)'
+    )
+    arg_parser.add_argument(
+        'source_schema',
+        help='The name of the source schema '
+             + '(taxonomies are rows in the input file).'
+    )
+    arg_parser.add_argument(
+        'target_schema',
+        help='The name of the target schema '
+             + '(taxonomies are the columns in the input file)'
+    )
 
     args = arg_parser.parse_args()
 
     # if it is csv, we need another read function
     data = pd.read_excel(args.inputfile)
 
-    # we are not interested in a total 
-    data = data[ set(data.columns) - set(['Total'])]
+    # we are not interested in a total
+    data = data[set(data.columns) - set(['Total'])]
 
     source_taxonomies = list(data['Taxonomy'].unique())
     target_taxonomies = list(set(data.columns) - set(['Taxonomy']))
@@ -27,7 +42,6 @@ def main():
         'source_taxonomies': source_taxonomies,
         'target_taxonomies': target_taxonomies,
     }
-
 
     data = data.set_index('Taxonomy')
 
@@ -43,6 +57,7 @@ def main():
     out = json.dumps(result, indent=4)
 
     print(out)
+
 
 if __name__ == '__main__':
     main()
