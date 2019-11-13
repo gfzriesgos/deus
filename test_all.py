@@ -195,9 +195,9 @@ class TestAll(unittest.TestCase):
 
         search_taxonomy = [
             x for x in taxonomies
-            if x.schema == 'SARA_v1.0'
-            and x.taxonomy == 'MCF/DNO/_1'
-            and x.n_buildings == 6
+            if x["schema"] == 'SARA_v1.0'
+            and x["taxonomy"] == 'MCF/DNO/_1'
+            and x["n_buildings"] == 6
         ]
 
         self.assertEqual(1, len(search_taxonomy))

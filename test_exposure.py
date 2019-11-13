@@ -186,9 +186,9 @@ class TestExposure(unittest.TestCase):
         self.assertEqual(51, lat)
         self.assertEqual(2, len(exposure_cell.taxonomies))
         first_tax = exposure_cell.taxonomies[0]
-        self.assertEqual(0, first_tax.damage_state)
+        self.assertEqual(0, first_tax["damage_state"])
         second_tax = exposure_cell.taxonomies[1]
-        self.assertEqual(1, second_tax.damage_state)
+        self.assertEqual(1, second_tax["damage_state"])
 
     def test_exposure_cell_from_series(self):
         '''
@@ -225,15 +225,15 @@ class TestExposure(unittest.TestCase):
         self.assertEqual(51, lat)
         self.assertEqual(2, len(exposure_cell.taxonomies))
         first_tax = exposure_cell.taxonomies[0]
-        self.assertEqual(0, first_tax.damage_state)
+        self.assertEqual(0, first_tax["damage_state"])
         second_tax = exposure_cell.taxonomies[1]
-        self.assertEqual(1, second_tax.damage_state)
+        self.assertEqual(1, second_tax["damage_state"])
 
     def test_exposure_cell(self):
         '''
         Test of an exposure cell.
         '''
-        tdb1 = exposure.TaxonomyDataBag(
+        tdb1 = dict(
             schema='SARA_v1.0',
             taxonomy='W+WS/H:1,2',
             damage_state=0,
@@ -245,7 +245,7 @@ class TestExposure(unittest.TestCase):
             population=446.5,
             name='Colina'
         )
-        tdb2 = exposure.TaxonomyDataBag(
+        tdb2 = dict(
             schema='SARA_v1.0',
             taxonomy='W+WS/H:1,2',
             damage_state=1,
@@ -324,17 +324,17 @@ class TestExposure(unittest.TestCase):
         })
 
         schema = 'SARA_v1.0'
-        tdb = exposure.TaxonomyDataBag.from_simple_series(
+        tdb = exposure.tb_from_simple_series(
             series=series,
             key='W+WS/H:1,2_D3',
             schema=schema
         )
 
-        self.assertEqual('SARA_v1.0', tdb.schema)
-        self.assertEqual('W+WS/H:1,2', tdb.taxonomy)
-        self.assertEqual(3, tdb.damage_state)
-        self.assertEqual(100.0, tdb.n_buildings)
-        self.assertEqual('Colina', tdb.name)
+        self.assertEqual('SARA_v1.0', tdb["schema"])
+        self.assertEqual('W+WS/H:1,2', tdb["taxonomy"])
+        self.assertEqual(3, tdb["damage_state"])
+        self.assertEqual(100.0, tdb["n_buildings"])
+        self.assertEqual('Colina', tdb["name"])
 
     def test_remove_prefix_d_for_damage_state(self):
         '''
@@ -363,28 +363,26 @@ class TestExposure(unittest.TestCase):
 
         schema = 'SARA_v1.0'
 
-        tdb = exposure.TaxonomyDataBag.from_series(
-            series, schema
-        )
+        tdb = exposure.tb_from_series(series, schema)
 
-        self.assertEqual('SARA_v1.0', tdb.schema)
-        self.assertEqual('W+WS/H:1,2', tdb.taxonomy)
-        self.assertEqual(0, tdb.damage_state)
-        self.assertEqual(100.0, tdb.n_buildings)
-        self.assertEqual('AREA # 13301', tdb.area_id)
-        self.assertEqual('Colina', tdb.region)
-        self.assertLess(107.4, tdb.dwellings)
-        self.assertLess(tdb.dwellings, 107.6)
-        self.assertEqual(360000, tdb.repl_cost_usd_bdg)
-        self.assertLess(446.4, tdb.population)
-        self.assertLess(tdb.population, 446.6)
-        self.assertEqual('Colina', tdb.name)
+        self.assertEqual('SARA_v1.0', tdb["schema"])
+        self.assertEqual('W+WS/H:1,2', tdb["taxonomy"])
+        self.assertEqual(0, tdb["damage_state"])
+        self.assertEqual(100.0, tdb["n_buildings"])
+        self.assertEqual('AREA # 13301', tdb["area_id"])
+        self.assertEqual('Colina', tdb["region"])
+        self.assertLess(107.4, tdb["dwellings"])
+        self.assertLess(tdb["dwellings"], 107.6)
+        self.assertEqual(360000, tdb["repl_cost_usd_bdg"])
+        self.assertLess(446.4, tdb["population"])
+        self.assertLess(tdb["population"], 446.6)
+        self.assertEqual('Colina', tdb["name"])
 
     def test_taxonomy_data_bag(self):
         '''
         Test of the taxonomy data bag.
         '''
-        tdb = exposure.TaxonomyDataBag(
+        tdb = dict(
             schema='SARA_v1.0',
             taxonomy='W+WS/H:1,2',
             damage_state=0,
@@ -397,18 +395,18 @@ class TestExposure(unittest.TestCase):
             name='Colina'
         )
 
-        self.assertEqual('SARA_v1.0', tdb.schema)
-        self.assertEqual('W+WS/H:1,2', tdb.taxonomy)
-        self.assertEqual(0, tdb.damage_state)
-        self.assertEqual(100.0, tdb.n_buildings)
-        self.assertEqual('AREA # 13301', tdb.area_id)
-        self.assertEqual('Colina', tdb.region)
-        self.assertLess(107.4, tdb.dwellings)
-        self.assertLess(tdb.dwellings, 107.6)
-        self.assertEqual(360000, tdb.repl_cost_usd_bdg)
-        self.assertLess(446.4, tdb.population)
-        self.assertLess(tdb.population, 446.6)
-        self.assertEqual('Colina', tdb.name)
+        self.assertEqual('SARA_v1.0', tdb["schema"])
+        self.assertEqual('W+WS/H:1,2', tdb["taxonomy"])
+        self.assertEqual(0, tdb["damage_state"])
+        self.assertEqual(100.0, tdb["n_buildings"])
+        self.assertEqual('AREA # 13301', tdb["area_id"])
+        self.assertEqual('Colina', tdb["region"])
+        self.assertLess(107.4, tdb["dwellings"])
+        self.assertLess(tdb["dwellings"], 107.6)
+        self.assertEqual(360000, tdb["repl_cost_usd_bdg"])
+        self.assertLess(446.4, tdb["population"])
+        self.assertLess(tdb["population"], 446.6)
+        self.assertEqual('Colina', tdb["name"])
 
     def test_fill_cell_step_by_step(self):
         '''
@@ -418,7 +416,7 @@ class TestExposure(unittest.TestCase):
         prodecure by applying the fragility functions
         and the intensities).
         '''
-        tdb = exposure.TaxonomyDataBag(
+        tdb = dict(
             schema='SARA_v1.0',
             taxonomy='W+WS/H:1,2',
             damage_state=0,
@@ -443,16 +441,16 @@ class TestExposure(unittest.TestCase):
 
         self.assertEqual(1, len(exposure_cell.taxonomies))
         first_tax = exposure_cell.taxonomies[0]
-        self.assertEqual(100.0, first_tax.n_buildings)
+        self.assertEqual(100.0, first_tax["n_buildings"])
 
         # add it another time to sum up
         exposure_cell.add_taxonomy(tdb)
 
         self.assertEqual(1, len(exposure_cell.taxonomies))
         first_tax = exposure_cell.taxonomies[0]
-        self.assertEqual(200.0, first_tax.n_buildings)
+        self.assertEqual(200.0, first_tax["n_buildings"])
 
-        tdb2 = exposure.TaxonomyDataBag(
+        tdb2 = dict(
             schema='SARA_v1.0',
             taxonomy='W+WS/H:1,2',
             damage_state=1,
@@ -467,9 +465,9 @@ class TestExposure(unittest.TestCase):
         exposure_cell.add_taxonomy(tdb2)
         self.assertEqual(2, len(exposure_cell.taxonomies))
         first_tax = exposure_cell.taxonomies[0]
-        self.assertEqual(200.0, first_tax.n_buildings)
+        self.assertEqual(200.0, first_tax["n_buildings"])
         second_tax = exposure_cell.taxonomies[1]
-        self.assertEqual(100.0, second_tax.n_buildings)
+        self.assertEqual(100.0, second_tax["n_buildings"])
 
     def test_to_empty_exposure_cell(self):
         '''

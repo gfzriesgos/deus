@@ -114,7 +114,7 @@ class ExposureCell:
 
         self._tax_idx_by_taxonomy_key = {}
         for idx, taxonomy in enumerate(taxonomies):
-            key = taxonomy.to_key()
+            key = tb_to_key(taxonomy)
             self._tax_idx_by_taxonomy_key[key] = idx
 
     def get_lon_lat_of_centroid(self):
@@ -148,14 +148,16 @@ class ExposureCell:
         Here is logic to merge with taxonomies that are
         already included.
         '''
-        key = taxonomy.to_key()
+        key = tb_to_key(taxonomy)
         if key in self._tax_idx_by_taxonomy_key.keys():
             idx_to_insert = self._tax_idx_by_taxonomy_key.get(key)
-            self.taxonomies[idx_to_insert].n_buildings += taxonomy.n_buildings
+            self.taxonomies[idx_to_insert]["n_buildings"] += \
+                taxonomy["n_buildings"]
         else:
             new_idx = self._len_tax
             self._len_tax += 1
-            self.taxonomies.append(taxonomy)
+            # add a new object, not the reference
+            self.taxonomies.append(taxonomy.copy())
             self._tax_idx_by_taxonomy_key[key] = new_idx
 
     def update_single_taxonomy(
@@ -169,8 +171,10 @@ class ExposureCell:
         intensities and fragility functions.
         Also updates the transition cell.
         '''
-        taxonomy = taxonomy_bag.taxonomy
-        old_damage_state = taxonomy_bag.damage_state
+        basis_tb = taxonomy_bag.copy()
+
+        taxonomy = taxonomy_bag["taxonomy"]
+        old_damage_state = taxonomy_bag["damage_state"]
 
         intensity, units = intensity_with_units
 
@@ -180,7 +184,7 @@ class ExposureCell:
             old_damage_state
         )
 
-        n_left = taxonomy_bag.n_buildings
+        n_left = taxonomy_bag["n_buildings"]
 
         for single_damage_state in damage_states_to_care:
             probability = single_damage_state.get_probability_for_intensity(
@@ -192,18 +196,16 @@ class ExposureCell:
 
             n_left -= n_buildings_in_damage_state
 
-            self.add_taxonomy(
-                taxonomy_bag.with_updated_mapping(
-                    schema=taxonomy_bag.schema,
-                    taxonomy=taxonomy,
-                    damage_state=single_damage_state.to_state,
-                    n_buildings=n_buildings_in_damage_state
-                )
-            )
+            taxonomy_bag["taxonomy"] = taxonomy
+            taxonomy_bag["damage_state"] = single_damage_state.to_state
+            taxonomy_bag["n_buildings"] = n_buildings_in_damage_state
+
+            self.add_taxonomy(taxonomy_bag)
+
             if n_buildings_in_damage_state > 0:
                 transition_cell.add_transition(
                     transition.Transition(
-                        schema=taxonomy_bag.schema,
+                        schema=taxonomy_bag["schema"],
                         taxonomy=taxonomy,
                         from_damage_state=single_damage_state.from_state,
                         to_damage_state=single_damage_state.to_state,
@@ -211,14 +213,10 @@ class ExposureCell:
                     )
                 )
         if n_left > 0:
-            self.add_taxonomy(
-                taxonomy_bag.with_updated_mapping(
-                    schema=taxonomy_bag.schema,
-                    taxonomy=taxonomy,
-                    damage_state=taxonomy_bag.damage_state,
-                    n_buildings=n_left
-                )
-            )
+            basis_tb["taxonomy"] = taxonomy
+            basis_tb["n_buildings"] = n_left
+
+            self.add_taxonomy(basis_tb)
 
     def update(self, intensity_provider, fragility_provider):
         '''
@@ -235,7 +233,7 @@ class ExposureCell:
 
         for taxonomy_bag in self.taxonomies:
             updated_cell.update_single_taxonomy(
-                taxonomy_bag,
+                taxonomy_bag.copy(),
                 intensity_with_units,
                 fragility_provider,
                 transition_cell,
@@ -250,9 +248,9 @@ class ExposureCell:
         mapped_cell = self.without_taxonomies(schema=target_schema)
 
         for taxonomy_bag in self.taxonomies:
-            taxonomy = taxonomy_bag.taxonomy
-            damage_state = taxonomy_bag.damage_state
-            n_buildings = taxonomy_bag.n_buildings
+            taxonomy = taxonomy_bag["taxonomy"]
+            damage_state = taxonomy_bag["damage_state"]
+            n_buildings = taxonomy_bag["n_buildings"]
 
             mapping_results = schema_mapper.map_schema(
                 source_taxonomy=taxonomy,
@@ -263,12 +261,13 @@ class ExposureCell:
             )
 
             for res in mapping_results:
-                new_taxonomy_bag = taxonomy_bag.with_updated_mapping(
-                    schema=target_schema,
-                    taxonomy=res.taxonomy,
-                    damage_state=res.damage_state,
-                    n_buildings=res.n_buildings
-                )
+                new_taxonomy_bag = taxonomy_bag.copy()
+
+                new_taxonomy_bag["schema"] = target_schema
+                new_taxonomy_bag["taxonomy"] = res.taxonomy
+                new_taxonomy_bag["damage_state"] = res.damage_state
+                new_taxonomy_bag["n_buildings"] = res.n_buildings
+
                 mapped_cell.add_taxonomy(new_taxonomy_bag)
         return mapped_cell
 
@@ -287,7 +286,7 @@ class ExposureCell:
 
         for key in series.keys():
             if key not in keys_without_tax:
-                taxonomy_bag = TaxonomyDataBag.from_simple_series(
+                taxonomy_bag = tb_from_simple_series(
                     schema=schema,
                     series=series,
                     key=key
@@ -313,10 +312,10 @@ class ExposureCell:
         })
 
         for taxonomy_bag in self.taxonomies:
-            key = taxonomy_bag.taxonomy + \
+            key = taxonomy_bag["taxonomy"] + \
                     '_D' + \
-                    str(taxonomy_bag.damage_state)
-            series[key] = taxonomy_bag.n_buildings
+                    str(taxonomy_bag["damage_state"])
+            series[key] = taxonomy_bag["n_buildings"]
 
         return series
 
@@ -332,21 +331,21 @@ class ExposureCell:
             'name': self.name,
             'geometry': self.geometry,
             'expo': {
-                'Taxonomy': [x.taxonomy for x in self.taxonomies],
+                'Taxonomy': [x["taxonomy"] for x in self.taxonomies],
                 'Damage': [
-                    'D' + str(x.damage_state)
+                    'D' + str(x["damage_state"])
                     for x in self.taxonomies
                 ],
-                'Buildings': [x.n_buildings for x in self.taxonomies],
-                'id': [x.area_id for x in self.taxonomies],
-                'Region': [x.region for x in self.taxonomies],
-                'Dwellings': [x.dwellings for x in self.taxonomies],
+                'Buildings': [x["n_buildings"] for x in self.taxonomies],
+                'id': [x["area_id"] for x in self.taxonomies],
+                'Region': [x["region"] for x in self.taxonomies],
+                'Dwellings': [x["dwellings"] for x in self.taxonomies],
                 'Repl-cost-USD-bdg': [
-                    x.repl_cost_usd_bdg
+                    x["repl_cost_usd_bdg"]
                     for x in self.taxonomies
                 ],
-                'Population': [x.population for x in self.taxonomies],
-                'name': [x.name for x in self.taxonomies],
+                'Population': [x["population"] for x in self.taxonomies],
+                'name': [x["name"] for x in self.taxonomies],
             }
         })
         return series
@@ -366,7 +365,7 @@ class ExposureCell:
         taxonomies = []
 
         for _, taxonomy_dataset in expo.iterrows():
-            taxonomy_bag = TaxonomyDataBag.from_series(
+            taxonomy_bag = tb_from_series(
                 schema=schema,
                 series=taxonomy_dataset
             )
@@ -387,104 +386,53 @@ TaxonomyDataBagKey = collections.namedtuple(
 )
 
 
-class TaxonomyDataBag:
+def tb_from_series(series, schema):
     '''
-    Data structure to store the taxonomy, the schema,
-    the damage state, the number of buildings and some other
-    data.
+    Reads the taxonomy data bag from a series.
     '''
-    def __init__(
-            self,
-            schema,
-            taxonomy,
-            damage_state,
-            n_buildings,
-            area_id=None,
-            region=None,
-            dwellings=None,
-            repl_cost_usd_bdg=None,
-            population=None,
-            name=None):
-        self.schema = schema
-        self.taxonomy = taxonomy
-        self.damage_state = damage_state
-        self.n_buildings = n_buildings
+    n_buildings = series['Buildings']
 
-        if math.isnan(self.n_buildings):
-            self.n_buildings = 0.0
+    if math.isnan(n_buildings):
+        n_buildings = 0.0
 
-        self.area_id = area_id
-        self.region = region
-        self.dwellings = dwellings
-        self.repl_cost_usd_bdg = repl_cost_usd_bdg
-        self.population = population
-        self.name = name
+    return {
+        "schema": schema,
+        "taxonomy": series['Taxonomy'],
+        "damage_state": remove_prefix_d_for_damage_state(series['Damage']),
+        "n_buildings": n_buildings,
+        "area_id": series['id'],
+        "region": series['Region'],
+        "dwellings": series['Dwellings'],
+        "repl_cost_usd_bdg": series['Repl-cost-USD-bdg'],
+        "population": series['Population'],
+        "name": series['name']
+    }
 
-    def to_key(self):
-        return TaxonomyDataBagKey(
-            self.schema,
-            self.taxonomy,
-            self.damage_state
-        )
 
-    def with_updated_mapping(
-            self,
-            schema,
-            taxonomy,
-            damage_state,
-            n_buildings):
-        '''
-        Returns a copy of this data but with updated
-        schema, taxonomy, damage state and number of buildings.
-        '''
-        return TaxonomyDataBag(
-            schema=schema,
-            taxonomy=taxonomy,
-            damage_state=damage_state,
-            n_buildings=n_buildings,
-            area_id=self.area_id,
-            region=self.region,
-            dwellings=self.dwellings,
-            repl_cost_usd_bdg=self.repl_cost_usd_bdg,
-            population=self.population,
-            name=self.name
-        )
+def tb_from_simple_series(series, key, schema):
+    '''
+    Reads the taxonomy data bag from a simple series.
+    '''
+    n_buildings = series[key]
+    key = key.replace(r'\/', '/')
+    damage_state = \
+        extract_damage_state_from_taxonomy_damage_state_string(key)
 
-    @classmethod
-    def from_series(cls, series, schema):
-        '''
-        Reads the taxonomy data bag from a series.
-        '''
-        return cls(
-            schema=schema,
-            taxonomy=series['Taxonomy'],
-            damage_state=remove_prefix_d_for_damage_state(series['Damage']),
-            n_buildings=series['Buildings'],
-            area_id=series['id'],
-            region=series['Region'],
-            dwellings=series['Dwellings'],
-            repl_cost_usd_bdg=series['Repl-cost-USD-bdg'],
-            population=series['Population'],
-            name=series['name']
-        )
+    return {
+        "schema": schema,
+        "taxonomy": extract_taxonomy_from_taxonomy_damage_state_string(key),
+        "damage_state": damage_state,
+        "n_buildings": n_buildings,
+        "name": series['name']
+    }
 
-    @classmethod
-    def from_simple_series(cls, series, key, schema):
-        '''
-        Reads the taxonomy data bag from a simple series.
-        '''
-        n_buildings = series[key]
-        key = key.replace(r'\/', '/')
-        damage_state = \
-            extract_damage_state_from_taxonomy_damage_state_string(key)
 
-        return cls(
-            schema=schema,
-            taxonomy=extract_taxonomy_from_taxonomy_damage_state_string(key),
-            damage_state=damage_state,
-            n_buildings=n_buildings,
-            name=series['name']
-        )
+def tb_to_key(taxonomy_bag):
+    return TaxonomyDataBagKey(
+        taxonomy_bag["schema"],
+        taxonomy_bag["taxonomy"],
+        taxonomy_bag["damage_state"]
+    )
 
 
 def remove_prefix_d_for_damage_state(damage_state_with_prefix_d):
