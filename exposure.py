@@ -110,6 +110,7 @@ class ExposureCell:
         self.name = name
         self.geometry = geometry
         self.taxonomies = taxonomies
+        self._len_tax = len(taxonomies)
 
         self._tax_idx_by_taxonomy_key = {}
         for idx, taxonomy in enumerate(taxonomies):
@@ -152,7 +153,8 @@ class ExposureCell:
             idx_to_insert = self._tax_idx_by_taxonomy_key.get(key)
             self.taxonomies[idx_to_insert].n_buildings += taxonomy.n_buildings
         else:
-            new_idx = len(self.taxonomies)
+            new_idx = self._len_tax
+            self._len_tax += 1
             self.taxonomies.append(taxonomy)
             self._tax_idx_by_taxonomy_key[key] = new_idx
 
