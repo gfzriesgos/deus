@@ -8,7 +8,7 @@ the intensity provider for rasters.
 import georasters as gr
 
 
-class RasterIntensityProvider():
+class RasterIntensityProvider:
     """
     A intensity provider that reads from
     the rasters.

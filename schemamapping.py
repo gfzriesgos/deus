@@ -37,7 +37,7 @@ def convert_dict_to_use_int_keys(d):
         yield k, v
 
 
-class DamageStateMappingMatrix():
+class DamageStateMappingMatrix:
     """
     This is a mapper for the damage state mapping matrix.
     It is necessary, because it is used in a transposed
@@ -81,7 +81,7 @@ class DamageStateMappingMatrix():
                 yield target_damage_state_int, fraction
 
 
-class SchemaMapperResult():
+class SchemaMapperResult:
     """
     Class to store the mapping results in.
     """
@@ -91,26 +91,10 @@ class SchemaMapperResult():
             taxonomy,
             damage_state,
             n_buildings):
-        self._schema = schema
-        self._taxonomy = taxonomy
-        self._damage_state = damage_state
-        self._n_buildings = n_buildings
-
-    def get_schema(self):
-        """Returns the schema."""
-        return self._schema
-
-    def get_taxonomy(self):
-        """Returns the taxonomy."""
-        return self._taxonomy
-
-    def get_damage_state(self):
-        """Returns the damage state (as number)."""
-        return self._damage_state
-
-    def get_n_buildings(self):
-        """Returns the number of buildings."""
-        return self._n_buildings
+        self.schema = schema
+        self.taxonomy = taxonomy
+        self.damage_state = damage_state
+        self.n_buildings = n_buildings
 
 
 SourceTargetSchemaTuple = collections.namedtuple(
@@ -124,7 +108,7 @@ SourceTargetSchemaTaxonomyTuple = collections.namedtuple(
 )
 
 
-class SchemaMapper():
+class SchemaMapper:
     """
     Mapper class to map from one schema to anohter.
     """
@@ -241,10 +225,10 @@ class SchemaMapper():
         for result in results_for_1_building:
             results_for_n_buildings.append(
                 SchemaMapperResult(
-                    result.get_schema(),
-                    result.get_taxonomy(),
-                    result.get_damage_state(),
-                    result.get_n_buildings() * n_buildings
+                    result.schema,
+                    result.taxonomy,
+                    result.damage_state,
+                    result.n_buildings * n_buildings
                 )
             )
 

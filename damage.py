@@ -9,7 +9,7 @@ import json
 import geopandas as gpd
 
 
-class DamageProvider():
+class DamageProvider:
     '''
     Class to access loss data depending
     on the building class, the from and to
@@ -66,7 +66,7 @@ class DamageProvider():
         return cls(data)
 
 
-class DamageCellCollector():
+class DamageCellCollector:
     '''
     Class to collect the cells with the
     computed loss.

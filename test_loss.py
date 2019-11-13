@@ -60,11 +60,11 @@ class TestLoss(unittest.TestCase):
             loss_provider=AlwaysOneDollarPerTransitionLossProvider()
         )
 
-        self.assertEqual('$', loss_cell1.get_loss_unit())
-        self.assertEqual(10, loss_cell1.get_loss_value())
-        self.assertEqual('Colina', loss_cell1.get_name())
-        self.assertEqual('CHL.14.1.1_1', loss_cell1.get_gid())
-        self.assertEqual(geometry1, loss_cell1.get_geometry())
+        self.assertEqual('$', loss_cell1.loss_unit)
+        self.assertEqual(10, loss_cell1.loss_value)
+        self.assertEqual('Colina', loss_cell1.name)
+        self.assertEqual('CHL.14.1.1_1', loss_cell1.gid)
+        self.assertEqual(geometry1, loss_cell1.geometry)
 
         loss_list = loss.LossCellList([loss_cell1])
 

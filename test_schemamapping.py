@@ -118,7 +118,7 @@ class TestSchemaMappingWithMissing(unittest.TestCase):
                 schema_mapper
             )
 
-            self.assertEqual(target_schema, mapped_exposure_cell.get_schema())
+            self.assertEqual(target_schema, mapped_exposure_cell.schema)
             new_series = mapped_exposure_cell.to_simple_series()
             target_taxonomy_d2 = target_taxonomy + '_D2'
             self.assertLess(99.9, new_series[target_taxonomy_d2])
@@ -392,13 +392,13 @@ class TestSchemaMapping(unittest.TestCase):
         single_mapping_result = mapping_results[0]
 
         self.assertEqual(
-            single_mapping_result.get_schema(),
+            single_mapping_result.schema,
             self.source_schema
         )
-        self.assertEqual(single_mapping_result.get_taxonomy(), self.s1_b1)
-        self.assertEqual(single_mapping_result.get_damage_state(), 0)
-        self.assertLess(99.999, single_mapping_result.get_n_buildings())
-        self.assertLess(single_mapping_result.get_n_buildings(), 100.001)
+        self.assertEqual(single_mapping_result.taxonomy, self.s1_b1)
+        self.assertEqual(single_mapping_result.damage_state, 0)
+        self.assertLess(99.999, single_mapping_result.n_buildings)
+        self.assertLess(single_mapping_result.n_buildings, 100.001)
 
     def test_mapping_s1_b1_to_s2_b1_for_d0(self):
         """
@@ -423,13 +423,13 @@ class TestSchemaMapping(unittest.TestCase):
         single_mapping_result = mapping_results[0]
 
         self.assertEqual(
-            single_mapping_result.get_schema(),
+            single_mapping_result.schema,
             self.target_schema
         )
-        self.assertEqual(single_mapping_result.get_taxonomy(), self.s2_b1)
-        self.assertEqual(single_mapping_result.get_damage_state(), 0)
-        self.assertLess(99.999, single_mapping_result.get_n_buildings())
-        self.assertLess(single_mapping_result.get_n_buildings(), 100.001)
+        self.assertEqual(single_mapping_result.taxonomy, self.s2_b1)
+        self.assertEqual(single_mapping_result.damage_state, 0)
+        self.assertLess(99.999, single_mapping_result.n_buildings)
+        self.assertLess(single_mapping_result.n_buildings, 100.001)
 
     def test_mapping_s1_b1_to_s2_b1_for_d1(self):
         """
@@ -453,25 +453,25 @@ class TestSchemaMapping(unittest.TestCase):
 
         d1_mapping_result = [
             x for x in mapping_results
-            if x.get_damage_state() == 1
+            if x.damage_state == 1
         ][0]
 
         d2_mapping_result = [
             x for x in mapping_results
-            if x.get_damage_state() == 2
+            if x.damage_state == 2
         ][0]
 
-        self.assertEqual(d1_mapping_result.get_schema(), self.target_schema)
-        self.assertEqual(d1_mapping_result.get_taxonomy(), self.s2_b1)
-        self.assertEqual(d1_mapping_result.get_damage_state(), 1)
-        self.assertLess(49.999, d1_mapping_result.get_n_buildings())
-        self.assertLess(d1_mapping_result.get_n_buildings(), 50.001)
+        self.assertEqual(d1_mapping_result.schema, self.target_schema)
+        self.assertEqual(d1_mapping_result.taxonomy, self.s2_b1)
+        self.assertEqual(d1_mapping_result.damage_state, 1)
+        self.assertLess(49.999, d1_mapping_result.n_buildings)
+        self.assertLess(d1_mapping_result.n_buildings, 50.001)
 
-        self.assertEqual(d2_mapping_result.get_schema(), self.target_schema)
-        self.assertEqual(d2_mapping_result.get_taxonomy(), self.s2_b1)
-        self.assertEqual(d2_mapping_result.get_damage_state(), 2)
-        self.assertLess(49.999, d2_mapping_result.get_n_buildings())
-        self.assertLess(d2_mapping_result.get_n_buildings(), 50.001)
+        self.assertEqual(d2_mapping_result.schema, self.target_schema)
+        self.assertEqual(d2_mapping_result.taxonomy, self.s2_b1)
+        self.assertEqual(d2_mapping_result.damage_state, 2)
+        self.assertLess(49.999, d2_mapping_result.n_buildings)
+        self.assertLess(d2_mapping_result.n_buildings, 50.001)
 
     def test_mapping_s1_b2_for_d1(self):
         """
@@ -493,63 +493,63 @@ class TestSchemaMapping(unittest.TestCase):
 
         b2_1_d1_mapping_result = [
             x for x in mapping_results
-            if x.get_damage_state() == 1
-            and x.get_taxonomy() == self.s2_b2_1
+            if x.damage_state == 1
+            and x.taxonomy == self.s2_b2_1
         ][0]
 
         b2_1_d2_mapping_result = [
             x for x in mapping_results
-            if x.get_damage_state() == 2
-            and x.get_taxonomy() == self.s2_b2_1
+            if x.damage_state == 2
+            and x.taxonomy == self.s2_b2_1
         ][0]
 
         b2_2_d1_mapping_result = [
             x for x in mapping_results
-            if x.get_damage_state() == 1
-            and x.get_taxonomy() == self.s2_b2_2
+            if x.damage_state == 1
+            and x.taxonomy == self.s2_b2_2
         ][0]
 
         b2_2_d2_mapping_result = [
             x for x in mapping_results
-            if x.get_damage_state() == 2
-            and x.get_taxonomy() == self.s2_b2_2
+            if x.damage_state == 2
+            and x.taxonomy == self.s2_b2_2
         ][0]
 
         self.assertEqual(
-            b2_1_d1_mapping_result.get_schema(),
+            b2_1_d1_mapping_result.schema,
             self.target_schema
         )
-        self.assertEqual(b2_1_d1_mapping_result.get_taxonomy(), self.s2_b2_1)
-        self.assertEqual(b2_1_d1_mapping_result.get_damage_state(), 1)
-        self.assertLess(18.749, b2_1_d1_mapping_result.get_n_buildings())
-        self.assertLess(b2_1_d1_mapping_result.get_n_buildings(), 18.751)
+        self.assertEqual(b2_1_d1_mapping_result.taxonomy, self.s2_b2_1)
+        self.assertEqual(b2_1_d1_mapping_result.damage_state, 1)
+        self.assertLess(18.749, b2_1_d1_mapping_result.n_buildings)
+        self.assertLess(b2_1_d1_mapping_result.n_buildings, 18.751)
 
         self.assertEqual(
-            b2_1_d2_mapping_result.get_schema(),
+            b2_1_d2_mapping_result.schema,
             self.target_schema
         )
-        self.assertEqual(b2_1_d2_mapping_result.get_taxonomy(), self.s2_b2_1)
-        self.assertEqual(b2_1_d2_mapping_result.get_damage_state(), 2)
-        self.assertLess(6.249, b2_1_d2_mapping_result.get_n_buildings())
-        self.assertLess(b2_1_d2_mapping_result.get_n_buildings(), 6.251)
+        self.assertEqual(b2_1_d2_mapping_result.taxonomy, self.s2_b2_1)
+        self.assertEqual(b2_1_d2_mapping_result.damage_state, 2)
+        self.assertLess(6.249, b2_1_d2_mapping_result.n_buildings)
+        self.assertLess(b2_1_d2_mapping_result.n_buildings, 6.251)
 
         self.assertEqual(
-            b2_2_d1_mapping_result.get_schema(),
+            b2_2_d1_mapping_result.schema,
             self.target_schema
         )
-        self.assertEqual(b2_2_d1_mapping_result.get_taxonomy(), self.s2_b2_2)
-        self.assertEqual(b2_2_d1_mapping_result.get_damage_state(), 1)
-        self.assertLess(18.749, b2_2_d1_mapping_result.get_n_buildings())
-        self.assertLess(b2_2_d1_mapping_result.get_n_buildings(), 18.751)
+        self.assertEqual(b2_2_d1_mapping_result.taxonomy, self.s2_b2_2)
+        self.assertEqual(b2_2_d1_mapping_result.damage_state, 1)
+        self.assertLess(18.749, b2_2_d1_mapping_result.n_buildings)
+        self.assertLess(b2_2_d1_mapping_result.n_buildings, 18.751)
 
         self.assertEqual(
-            b2_2_d2_mapping_result.get_schema(),
+            b2_2_d2_mapping_result.schema,
             self.target_schema
         )
-        self.assertEqual(b2_2_d2_mapping_result.get_taxonomy(), self.s2_b2_2)
-        self.assertEqual(b2_2_d2_mapping_result.get_damage_state(), 2)
-        self.assertLess(56.249, b2_2_d2_mapping_result.get_n_buildings())
-        self.assertLess(b2_2_d2_mapping_result.get_n_buildings(), 56.251)
+        self.assertEqual(b2_2_d2_mapping_result.taxonomy, self.s2_b2_2)
+        self.assertEqual(b2_2_d2_mapping_result.damage_state, 2)
+        self.assertLess(56.249, b2_2_d2_mapping_result.n_buildings)
+        self.assertLess(b2_2_d2_mapping_result.n_buildings, 56.251)
 
 
 if __name__ == '__main__':

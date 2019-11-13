@@ -57,7 +57,7 @@ class TestComposition(unittest.TestCase):
             dataframe=dataframe
         )
 
-        exposure_cell = exposure_cell_list.get_exposure_cells()[0]
+        exposure_cell = exposure_cell_list.exposure_cells[0]
 
         fragility_data = {
             'meta': {
@@ -93,11 +93,11 @@ class TestComposition(unittest.TestCase):
             fragility_provider
         )
 
-        for taxonomy_bag in updated_cell.get_taxonomies():
-            ds = taxonomy_bag.get_damage_state()
+        for taxonomy_bag in updated_cell.taxonomies:
+            ds = taxonomy_bag.damage_state
             # we can't have D1 here
             self.assertNotEqual(1, ds)
-            n_buildings = taxonomy_bag.get_n_buildings()
+            n_buildings = taxonomy_bag.n_buildings
             # the most buildings will be in damage state 3
             # some (~ 4) in damage state 2
             # and below 1 remain in damage state 0
@@ -137,7 +137,7 @@ class TestComposition(unittest.TestCase):
             dataframe=dataframe
         )
 
-        exposure_cell = exposure_cell_list.get_exposure_cells()[0]
+        exposure_cell = exposure_cell_list.exposure_cells[0]
 
         fragility_data = {
             'meta': {
@@ -176,12 +176,12 @@ class TestComposition(unittest.TestCase):
         # this is the very same result as in the last test
         # but this time the data remains in D1 instead of D0
 
-        for taxonomy_bag in updated_cell.get_taxonomies():
-            ds = taxonomy_bag.get_damage_state()
+        for taxonomy_bag in updated_cell.taxonomies:
+            ds = taxonomy_bag.damage_state
             # we can't have D1 here
             self.assertNotEqual(0, ds)
             self.assertIn(ds, [1, 2, 3])
-            n_buildings = taxonomy_bag.get_n_buildings()
+            n_buildings = taxonomy_bag.n_buildings
             # the most buildings will be in damage state 3
             # some (~ 4) in damage state 2
             # and below 1 remain in damage state 1

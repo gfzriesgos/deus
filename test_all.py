@@ -74,7 +74,7 @@ class TestAll(unittest.TestCase):
 
         frag = fragility.Fragility(data)
         fragprov = frag.to_fragility_provider()
-        schema = fragprov.get_schema()
+        schema = fragprov.schema
 
         self.assertEqual('SARA_v1.0', schema)
         taxonomy_data_urm1 = fragprov.get_damage_states_for_taxonomy('URM1')
@@ -188,16 +188,16 @@ class TestAll(unittest.TestCase):
         self.assertEqual(lat, lat2)
 
         self.assertEqual(
-            empty_exposure_cell.get_name(),
+            empty_exposure_cell.name,
             'example point1')
 
-        taxonomies = exposure_cell.get_taxonomies()
+        taxonomies = exposure_cell.taxonomies
 
         search_taxonomy = [
             x for x in taxonomies
-            if x.get_schema() == 'SARA_v1.0'
-            and x.get_taxonomy() == 'MCF/DNO/_1'
-            and x.get_n_buildings() == 6
+            if x.schema == 'SARA_v1.0'
+            and x.taxonomy == 'MCF/DNO/_1'
+            and x.n_buildings == 6
         ]
 
         self.assertEqual(1, len(search_taxonomy))
@@ -253,8 +253,8 @@ class TestAll(unittest.TestCase):
             intensity_provider, fragility_provider)
 
         self.assertEqual(
-            updated_exposure_cell.get_schema(),
-            exposure_cell.get_schema())
+            updated_exposure_cell.schema,
+            exposure_cell.schema)
 
         updated_series = updated_exposure_cell.to_simple_series()
 
@@ -534,7 +534,7 @@ class TestAll(unittest.TestCase):
         self.assertEqual(units['pga'], 'g')
 
 
-class MockedIntensityProvider():
+class MockedIntensityProvider:
     '''Just a dummy implementation.'''
     def get_nearest(self, lon, lat):
         '''Also a dummy implementation.'''

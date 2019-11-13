@@ -13,7 +13,7 @@ from scipy.stats import lognorm
 import numpy as np
 
 
-class LogncdfFactory():
+class LogncdfFactory:
     '''
     This is function factory for the log normal cdf.
     '''
@@ -28,7 +28,7 @@ SUPPORTED_FRAGILITY_FUNCTION_FACTORIES = {
 }
 
 
-class DamageState():
+class DamageState:
     '''
     Class to represent the damage states.
     '''
@@ -75,7 +75,7 @@ class DamageState():
         return self.fragility_function(value)
 
 
-class Fragility():
+class Fragility:
     '''
     Class to represent all of the fragility data.
     '''
@@ -202,14 +202,14 @@ class Fragility():
                         damage_states.append(ds_new)
 
 
-class FragilityProvider():
+class FragilityProvider:
     '''
     Class to give access to the taxonomies and
     the damage states with the fragility functions.
     '''
     def __init__(self, damage_states_by_taxonomy, schema):
         self._damage_states_by_taxonomy = damage_states_by_taxonomy
-        self._schema = schema
+        self.schema = schema
 
     def get_damage_states_for_taxonomy(self, taxonomy):
         '''
@@ -223,9 +223,3 @@ class FragilityProvider():
         Returns the taxonomies from the data.
         '''
         return self._damage_states_by_taxonomy.keys()
-
-    def get_schema(self):
-        '''
-        Returns the schema of the fragility data.
-        '''
-        return self._schema

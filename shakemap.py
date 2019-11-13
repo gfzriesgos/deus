@@ -16,7 +16,7 @@ import intensitydatawrapper
 import intensityprovider
 
 
-class Shakemaps():
+class Shakemaps:
     '''
     Factory class for reading shakemaps.
     '''
@@ -36,7 +36,7 @@ class Shakemaps():
         return EqShakemap(root)
 
 
-class EqShakemap():
+class EqShakemap:
     '''
     Class to handle the xml access to
     the shakemap xml elements.
@@ -88,7 +88,7 @@ class EqShakemap():
         return intensityprovider.IntensityProvider(intensity_data=wrapped_data)
 
 
-class ShakemapGridField():
+class ShakemapGridField:
     '''
     Class to represent a shakemap
     grid field.
@@ -115,7 +115,7 @@ class ShakemapGridField():
         return self._xml.get('units')
 
 
-class ShakemapGridData():
+class ShakemapGridData:
     '''
     Class for the xml element with the grid data.
     '''
