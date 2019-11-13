@@ -186,7 +186,7 @@ class ExposureCell():
         key = taxonomy.to_key()
         if key in self._tax_idx_by_taxonomy_key.keys():
             idx_to_insert = self._tax_idx_by_taxonomy_key.get(key)
-            self._taxonomies[idx_to_insert].merge(taxonomy)
+            self._taxonomies[idx_to_insert]._n_buildings += taxonomy.get_n_buildings()
         else:
             new_idx = len(self._taxonomies)
             self._taxonomies.append(taxonomy)
@@ -543,14 +543,6 @@ class TaxonomyDataBag():
         Returns the name of the cell.
         '''
         return self._name
-
-    def merge(self, other_taxonomy):
-        '''
-        Adds the number of buildings.
-        Here is no check if the other taxonomy data bag
-        can be merged or not.
-        '''
-        self._n_buildings += other_taxonomy.get_n_buildings()
 
     @classmethod
     def from_series(cls, series, schema):

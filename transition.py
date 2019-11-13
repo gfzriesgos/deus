@@ -66,7 +66,7 @@ class TransitionCell():
         key = transition.to_key()
         if key in self._transition_idx_by_transition_key.keys():
             idx_to_insert = self._transition_idx_by_transition_key[key]
-            self._transitions[idx_to_insert].merge(transition)
+            self._transitions[idx_to_insert]._n_buildings += transition.get_n_buildings()
         else:
             new_idx = len(self._transitions)
             self._transitions.append(transition)
@@ -180,13 +180,6 @@ class Transition():
         Returns the number of affected buildings.
         '''
         return self._n_buildings
-
-    def merge(self, other_transition):
-        '''
-        Adds the number of buildings to this transition.
-        Here it does not check if the merge is valid or not.
-        '''
-        self._n_buildings += other_transition.get_n_buildings()
 
 
 class TransitionCellList():
