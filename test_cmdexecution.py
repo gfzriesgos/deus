@@ -10,7 +10,7 @@ import unittest
 import exposure
 
 
-class TestCmdExecution(unittest.TestCase):
+class TestDeusCmdExecution(unittest.TestCase):
     '''
     Test class to run deus as a command line tool.
     '''
@@ -329,6 +329,94 @@ class TestCmdExecution(unittest.TestCase):
                 '--loss_output_file',
                 loss_output_filename,
                 test_shakemap,
+                test_exposure_file,
+                schema,
+                test_fragility_file,
+            ],
+            check=True,
+        )
+
+        input_n_buildings = get_n_buildings_by_cell_gid(
+            schema,
+            test_exposure_file
+        )
+        output_n_buildings = get_n_buildings_by_cell_gid(
+            schema,
+            updated_exposure_output_filename
+        )
+
+        self.assertEqual(input_n_buildings, output_n_buildings)
+
+
+class TestVolcanoCmdExecution(unittest.TestCase):
+    '''
+    Test class to run deus as a command line tool.
+    '''
+
+    def test_execute_volcano_for_ecuador(self):
+        """
+        This is the testcase for running the computation
+        for the ashfall data.
+        """
+        schema = 'Torres_Corredor_et_al_2017'
+
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+
+        testinput_dir = os.path.join(current_dir, 'testinputs')
+        test_intensity = os.path.join(
+            testinput_dir,
+            'ashfall_shapefile',
+            'E1_AF_kPa_VEI4.shp'
+        )
+        test_intensity_column = 'FEB2008'
+        test_exposure_file = os.path.join(
+            testinput_dir,
+            'exposure_model_ashfall.json'
+        )
+        test_fragility_file = os.path.join(
+            testinput_dir,
+            'fragility_torres.json'
+        )
+
+        output_dir = os.path.join(current_dir, 'testoutputs')
+
+        updated_exposure_output_filename = os.path.join(
+            output_dir,
+            'updated_exposure_ecuador_torres.json'
+        )
+        transition_output_filename = os.path.join(
+            output_dir,
+            'transitions_ecuador_torres.json'
+        )
+        loss_output_filename = os.path.join(
+            output_dir,
+            'losses_ecuador_torres.json'
+        )
+
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
+
+        if os.path.exists(updated_exposure_output_filename):
+            os.unlink(updated_exposure_output_filename)
+
+        if os.path.exists(transition_output_filename):
+            os.unlink(transition_output_filename)
+
+        if os.path.exists(loss_output_filename):
+            os.unlink(loss_output_filename)
+
+        subprocess.run(
+            [
+                'python3',
+                'volcanus.py',
+                '--updated_exposure_output_file',
+                updated_exposure_output_filename,
+                '--transition_output_file',
+                transition_output_filename,
+                '--loss_output_file',
+                loss_output_filename,
+                test_intensity,
+                test_intensity_column,
                 test_exposure_file,
                 schema,
                 test_fragility_file,

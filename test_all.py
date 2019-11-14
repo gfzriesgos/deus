@@ -7,6 +7,7 @@ import unittest
 
 # import other test classes
 from test_basics import *
+from test_ashfall import *
 from test_cmdexecution import *
 from test_composition import *
 from test_exposure import *

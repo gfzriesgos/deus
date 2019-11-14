@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 
-'''
-This is the Damage-Exposure-Update-Service.
-
-Please use -h for usage.
-'''
+"""
+This is the very same as deus, but specialized to
+work with ashfall data.
+"""
 
 import argparse
 import glob
@@ -12,12 +11,13 @@ import os
 
 import tellus
 
+import ashfall
 import exposure
 import fragility
+import intensitydatawrapper
 import intensityprovider
 import loss
 import schemamapping
-import shakemap
 import transition
 
 
@@ -33,7 +33,10 @@ def main():
         'classes of the Buildings')
     argparser.add_argument(
         'intensity_file',
-        help='File with hazard intensities, for example a shakemap')
+        help='File ashfalls data')
+    argparser.add_argument(
+        'intensity_column',
+        help='Column in the intensity file')
     argparser.add_argument(
         'exposure_file',
         help='File with the exposure data')
@@ -62,19 +65,10 @@ def main():
 
     args = argparser.parse_args()
 
-    intensity_provider = shakemap.Shakemaps.from_file(
-        args.intensity_file).to_intensity_provider()
-    # add aliases
-    # ID for inundation (out of the maximum wave height)
-    # SA_01 and SA_03 out of the PGA
-    intensity_provider = intensityprovider.AliasIntensityProvider(
-        intensity_provider,
-        aliases={
-            'SA_01': ['PGA'],
-            'SA_03': ['PGA'],
-            'ID': ['MWH', 'INUN_MEAN_POLY'],
-        }
-    )
+    intensity_provider = ashfall.Ashfall.from_file(
+        args.intensity_file,
+        args.intensity_column
+    ).to_intensity_provider()
     fragility_provider = fragility.Fragility.from_file(
         args.fragilty_file).to_fragility_provider()
     exposure_cell_provider = exposure.ExposureCellList.from_file(
@@ -88,7 +82,6 @@ def main():
         args
     )
     worker.run()
-
 
 if __name__ == '__main__':
     main()

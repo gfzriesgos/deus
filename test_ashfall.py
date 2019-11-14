@@ -1,24 +1,17 @@
 #!/usr/bin/env python3
 
-"""
-Additional testcase for the intensity data wrappers.
-"""
-
 import os
 import unittest
 
-import geopandas
-
-import intensitydatawrapper
-import intensityprovider
+import ashfall
 
 
-class TestReadFromShapefile(unittest.TestCase):
+class TestAshfall(unittest.TestCase):
     """
-    Tests reading intensities from a shapefile.
+    The testcase for the ashfall.
     """
 
-    def test_read_ashfall(self):
+    def test_ashfall_example_file(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))
         input_file_name = os.path.join(
             current_dir,
@@ -28,18 +21,9 @@ class TestReadFromShapefile(unittest.TestCase):
         )
         column = 'FEB2008'
 
-        geodata = geopandas.read_file(input_file_name)
-
-        intensity_data_wrapper = \
-            intensitydatawrapper.GeopandasDataFrameWrapperWithColumnUnit(
-                geodata,
-                column=column,
-                name='LOAD',
-                unit='kPa'
-            )
-        intensity_provider = intensityprovider.IntensityProvider(
-            intensity_data_wrapper,
-        )
+        intensity_provider = ashfall.Ashfall.from_file(
+            input_file_name, column
+        ).to_intensity_provider()
 
         intensities, units = intensity_provider.get_nearest(
             lon=-78.398558176,
