@@ -16,15 +16,29 @@ import schemamapping
 import shakemap
 import transition
 
+
 class Child():
-    def __init__(self, intensity_provider, fragility_provider, exposure_cell_provider, loss_provider, args_with_output_path):
+    """
+    This is a tellus child class that represents
+    a deus instance.
+    """
+    def __init__(
+            self,
+            intensity_provider,
+            fragility_provider,
+            exposure_cell_provider,
+            loss_provider,
+            args_with_output_paths):
         self.intensity_provider = intensity_provider
         self.fragility_provider = fragility_provider
         self.exposure_cell_provider = exposure_cell_provider
         self.loss_provider = loss_provider
-        self.args_with_output_path = args_with_output_path
+        self.args_with_output_paths = args_with_output_paths
 
     def run(self):
+        """
+        All the work is done here.
+        """
         current_dir = os.path.dirname(os.path.realpath(__file__))
 
         schema_mapper = create_schema_mapper(current_dir)
@@ -33,7 +47,9 @@ class Child():
         transition_cells = transition.TransitionCellList([])
         loss_cells = loss.LossCellList([])
 
-        for original_exposure_cell in self.exposure_cell_provider.get_exposure_cells():
+        for original_exposure_cell in (
+            self.exposure_cell_provider.get_exposure_cells()
+        ):
             mapped_exposure_cell = original_exposure_cell.map_schema(
                 target_schema=self.fragility_provider.get_schema(),
                 schema_mapper=schema_mapper
@@ -55,14 +71,15 @@ class Child():
             )
 
         write_result(
-            self.args_with_output_path.updated_exposure_output_file,
+            self.args_with_output_paths.updated_exposure_output_file,
             updated_exposure_cells)
         write_result(
-            self.args_with_output_path.transition_output_file,
+            self.args_with_output_paths.transition_output_file,
             transition_cells)
         write_result(
-            self.args_with_output_path.loss_output_file,
+            self.args_with_output_paths.loss_output_file,
             loss_cells)
+
 
 def create_schema_mapper(current_dir):
     '''
@@ -81,6 +98,7 @@ def create_schema_mapper(current_dir):
             .SchemaMapper
             .from_taxonomy_and_damage_state_conversion_files(
                 tax_mapping_files, ds_mapping_files))
+
 
 def write_result(
         output_file,
