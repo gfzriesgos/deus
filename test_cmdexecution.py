@@ -523,7 +523,6 @@ class TestVolcanusAndThenDeus(unittest.TestCase):
     the ashfall volcanus.
     """
 
-    @unittest.skip('missing ds mapping files')
     def test_execute_deus_two_times(self):
         '''
         Runs deus two times (update the updated exposure model).
