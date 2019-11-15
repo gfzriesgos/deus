@@ -110,9 +110,9 @@ def main():
     if COMPUTE_LOSS:
         loss_cells = loss.LossCellList([])
 
-    for original_exposure_cell in exposure_cell_provider.get_exposure_cells():
+    for original_exposure_cell in exposure_cell_provider.exposure_cells:
         mapped_exposure_cell = original_exposure_cell.map_schema(
-            target_schema=fragility_provider.get_schema(),
+            target_schema=fragility_provider.schema,
             schema_mapper=schema_mapper
         )
         single_updated_exposure_cell, single_transition_cell = \

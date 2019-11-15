@@ -7,7 +7,7 @@ for the classes in the project.
 '''
 
 
-class AlwaysOneDollarPerTransitionLossProvider():
+class AlwaysOneDollarPerTransitionLossProvider:
     '''
     A loss provider that will just return 1 $ for
     each transition.
@@ -28,7 +28,7 @@ class AlwaysOneDollarPerTransitionLossProvider():
         return '$'
 
 
-class AlwaysTheSameIntensityProvider():
+class AlwaysTheSameIntensityProvider:
     def __init__(self, kind, value, unit):
         self._kind = kind
         self._value = value

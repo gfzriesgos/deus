@@ -39,7 +39,7 @@ class TestTransition(unittest.TestCase):
             exposure_cell1
         )
 
-        self.assertEqual(0, len(transition_cell1.get_transitions()))
+        self.assertEqual(0, len(transition_cell1.transitions))
 
         transition_to_add = transition.Transition(
             schema='SARA_v1.0',
@@ -50,24 +50,24 @@ class TestTransition(unittest.TestCase):
         )
         transition_cell1.add_transition(transition_to_add)
 
-        self.assertEqual(1, len(transition_cell1.get_transitions()))
-        first_transition = transition_cell1.get_transitions()[0]
+        self.assertEqual(1, len(transition_cell1.transitions))
+        first_transition = transition_cell1.transitions[0]
 
-        self.assertEqual(schema, first_transition.get_schema())
-        self.assertEqual('W+WS/H:1,2', first_transition.get_taxonomy())
-        self.assertEqual(0, first_transition.get_from_damage_state())
-        self.assertEqual(1, first_transition.get_to_damage_state())
-        self.assertEqual(10, first_transition.get_n_buildings())
+        self.assertEqual(schema, first_transition.schema)
+        self.assertEqual('W+WS/H:1,2', first_transition.taxonomy)
+        self.assertEqual(0, first_transition.from_damage_state)
+        self.assertEqual(1, first_transition.to_damage_state)
+        self.assertEqual(10, first_transition.n_buildings)
 
         transition_cell1.add_transition(transition_to_add)
 
-        self.assertEqual(1, len(transition_cell1.get_transitions()))
-        first_transition = transition_cell1.get_transitions()[0]
-        self.assertEqual(20, first_transition.get_n_buildings())
+        self.assertEqual(1, len(transition_cell1.transitions))
+        first_transition = transition_cell1.transitions[0]
+        self.assertEqual(20, first_transition.n_buildings)
 
-        self.assertEqual('Colina', transition_cell1.get_name())
-        self.assertEqual('CHL.14.1.1_1', transition_cell1.get_gid())
-        self.assertEqual(geometry1, transition_cell1.get_geometry())
+        self.assertEqual('Colina', transition_cell1.name)
+        self.assertEqual('CHL.14.1.1_1', transition_cell1.gid)
+        self.assertEqual(geometry1, transition_cell1.geometry)
 
         transition_to_add2 = transition.Transition(
             schema='SARA_v1.0',

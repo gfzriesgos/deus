@@ -31,7 +31,7 @@ import re
 import geopandas as gpd
 
 
-class GeopandasDataFrameWrapper():
+class GeopandasDataFrameWrapper:
     '''
     Wraps a geopandas data frame
     to support the common intensity data protocol.
@@ -93,7 +93,7 @@ class GeopandasDataFrameWrapper():
         return series[unit_column]
 
 
-class RasterDataWrapper():
+class RasterDataWrapper:
     '''
     This is a wrapper to read the data from
     raster.
@@ -170,7 +170,7 @@ class RasterDataWrapper():
         )
 
 
-class DictWithListDataWrapper():
+class DictWithListDataWrapper:
     '''
     Wrapper for accessing the intensity data using
     a dict with lists for the data
