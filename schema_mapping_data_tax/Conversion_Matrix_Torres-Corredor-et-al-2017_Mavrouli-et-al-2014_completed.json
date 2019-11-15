@@ -1,0 +1,97 @@
+{
+    "source_schema": "Torres_Corredor_et_al_2017",
+    "target_schema": "Mavrouli_et_al_2014",
+    "source_taxonomies": [
+        "LM_B",
+        "LM_R",
+        "LM_M",
+        "P_B",
+        "P_R",
+        "P_M",
+        "L_B",
+        "L_R",
+        "L_M"
+    ],
+    "target_taxonomies": [
+        "RC_LD",
+        "W_MR_MD",
+        "RC_MD",
+        "W_MR_LD",
+        "W_MR_HD",
+        "RC_S_HD"
+    ],
+    "conv_matrix": {
+        "LM_B": {
+            "RC_LD": 0.08,
+            "W_MR_MD": 0.2,
+            "RC_MD": 0.15,
+            "W_MR_LD": 0.1,
+            "W_MR_HD": 0.24,
+            "RC_S_HD": 0.23
+        },
+        "LM_R": {
+            "RC_LD": 0.15,
+            "W_MR_MD": 0.25,
+            "RC_MD": 0.25,
+            "W_MR_LD": 0.15,
+            "W_MR_HD": 0.1,
+            "RC_S_HD": 0.1
+        },
+        "LM_M": {
+            "RC_LD": 0.25,
+            "W_MR_MD": 0.05,
+            "RC_MD": 0.15,
+            "W_MR_LD": 0.45,
+            "W_MR_HD": 0.05,
+            "RC_S_HD": 0.05
+        },
+        "P_B": {
+            "RC_LD": 0.175,
+            "W_MR_MD": 0.025,
+            "RC_MD": 0.175,
+            "W_MR_LD": 0.025,
+            "W_MR_HD": 0.1,
+            "RC_S_HD": 0.5
+        },
+        "P_R": {
+            "RC_LD": 0.175,
+            "W_MR_MD": 0.1,
+            "RC_MD": 0.5,
+            "W_MR_LD": 0.025,
+            "W_MR_HD": 0.025,
+            "RC_S_HD": 0.175
+        },
+        "P_M": {
+            "RC_LD": 0.5,
+            "W_MR_MD": 0.025,
+            "RC_MD": 0.175,
+            "W_MR_LD": 0.1,
+            "W_MR_HD": 0.025,
+            "RC_S_HD": 0.175
+        },
+        "L_B": {
+            "RC_LD": 0.25,
+            "W_MR_MD": 0.0,
+            "RC_MD": 0.25,
+            "W_MR_LD": 0.0,
+            "W_MR_HD": 0.05,
+            "RC_S_HD": 0.45
+        },
+        "L_R": {
+            "RC_LD": 0.25,
+            "W_MR_MD": 0.05,
+            "RC_MD": 0.45,
+            "W_MR_LD": 0.0,
+            "W_MR_HD": 0.0,
+            "RC_S_HD": 0.25
+        },
+        "L_M": {
+            "RC_LD": 0.45,
+            "W_MR_MD": 0.0,
+            "RC_MD": 0.25,
+            "W_MR_LD": 0.05,
+            "W_MR_HD": 0.0,
+            "RC_S_HD": 0.25
+        }
+    }
+}
