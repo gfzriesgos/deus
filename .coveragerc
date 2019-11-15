@@ -2,6 +2,7 @@
 branch = True
 omit =
     test_*.py
+    testimplementations.py
 
 [report]
 exclude_lines =
@@ -12,3 +13,4 @@ exclude_lines =
 ignore_errors = True
 omit =
     test_*.py
+    testimplementations.py
