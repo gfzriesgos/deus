@@ -92,7 +92,9 @@ class Fragility:
             data = json.load(input_file)
         return cls(data)
 
-    def to_fragility_provider(self):
+    def to_fragility_provider_with_specified_fragility_function(
+            self,
+            fragility_function):
         '''
         Transforms the data, so that a
         provider for the supported taxonomies
@@ -146,8 +148,7 @@ class Fragility:
                     to_state=to_state,
                     intensity_field=intensity_field,
                     intensity_unit=intensity_unit,
-                    fragility_function=SUPPORTED_FRAGILITY_FUNCTION_FACTORIES[
-                        shape](mean, stddev)
+                    fragility_function=fragility_function(mean, stddev)
                 )
 
                 damage_states_by_taxonomy[taxonomy].append(damage_state)
@@ -156,6 +157,22 @@ class Fragility:
         schema = self._data['meta']['id']
 
         return FragilityProvider(damage_states_by_taxonomy, schema)
+
+    def to_fragility_provider(self):
+        '''
+        Transforms the data, so that a
+        provider for the supported taxonomies
+        and the damage states (with the fragility functions)
+        are returned.
+        '''
+        shape = self._data['meta']['shape']
+        fragility_function = SUPPORTED_FRAGILITY_FUNCTION_FACTORIES[
+            shape
+        ]
+
+        return self.to_fragility_provider_with_specified_fragility_function(
+            fragility_function
+        )
 
     @staticmethod
     def _add_damage_states_if_missing(damage_states_by_taxonomy):

@@ -30,6 +30,7 @@ from test_fragility import *
 from test_intensity import *
 from test_loss import *
 from test_performance import *
+from test_performance_optimization import *
 from test_schemamapping import *
 from test_shakemap import *
 from test_transition import *
