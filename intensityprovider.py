@@ -11,7 +11,7 @@ import numpy as np
 from scipy.spatial import cKDTree
 
 
-class RasterIntensityProvider():
+class RasterIntensityProvider:
     '''
     Class to provide the intensities on
     an location by reading from a raster.
@@ -47,7 +47,7 @@ class RasterIntensityProvider():
         return intensities, units
 
 
-class IntensityProvider():
+class IntensityProvider:
     '''
     Class for providing the intensities on
     a location.
@@ -108,7 +108,7 @@ class IntensityProvider():
         return intensities, units
 
 
-class StackedIntensityProvider():
+class StackedIntensityProvider:
     '''
     Class for combining several intensity providers
     into one single instance.
@@ -139,7 +139,7 @@ class StackedIntensityProvider():
         return intensities, units
 
 
-class AliasIntensityProvider():
+class AliasIntensityProvider:
     '''
     Intensity provider that adds intensities as aliases
     for exisiting intensities.
@@ -179,7 +179,7 @@ class AliasIntensityProvider():
         return intensities, units
 
 
-class ConversionIntensityProvider():
+class ConversionIntensityProvider:
     '''
     Intensity provider that can convert intensities
     to new intensity measures.

@@ -1,4 +1,4 @@
-FROM python:3.6.9-buster
+FROM python:3.7-buster
 
 ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
 ENV C_INCLUDE_PATH=/usr/include/gdal

@@ -7,7 +7,7 @@ with raster data.
 '''
 
 
-class RasterWrapperRio():
+class RasterWrapperRio:
     '''
     This is a wrapper using the rasterio
     api to get on the data.
@@ -46,7 +46,7 @@ class RasterWrapperRio():
         return self._data[0, idx[0], idx[1]]
 
 
-class RasterWrapper():
+class RasterWrapper:
     '''
     This is a wrapper using the georasters
     api to get on the data.

@@ -159,8 +159,8 @@ class TestCmdExecution(unittest.TestCase):
             'SUPPASRI2013_v2.0',
             updated_exposure_output_filename
         )
-        for exposure_cell in exposure_data.get_exposure_cells():
-            self.assertTrue(exposure_cell.get_taxonomies())
+        for exposure_cell in exposure_data.exposure_cells:
+            self.assertTrue(exposure_cell.taxonomies)
 
     def test_execute_deus_two_times(self):
         '''

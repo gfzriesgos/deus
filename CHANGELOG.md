@@ -1,3 +1,11 @@
+# 2019-11-13:
+
+- Added new replacement cost files for the riesgos ecuador show case
+
+# 2019-11-11:
+
+- Added the schema mapping files for the SARA W-WWD-H1-2 taxonomy
+
 # 2019-11-08:
 
 - Replaced the replacement costs for sara with the country specific

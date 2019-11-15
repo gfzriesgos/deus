@@ -10,7 +10,7 @@ import geopandas as gpd
 import pandas as pd
 
 
-class LossCellList():
+class LossCellList:
     '''
     List with the spatial cells with the loss data.
     '''
@@ -38,58 +38,28 @@ class LossCellList():
         return gpd.GeoDataFrame(dataframe, geometry=dataframe['geometry'])
 
 
-class LossCell():
+class LossCell:
     '''
     Spatial cell with loss data.
     '''
 
     def __init__(self, gid, name, geometry, loss_value, loss_unit):
-        self._gid = gid
-        self._name = name
-        self._geometry = geometry
-        self._loss_value = loss_value
-        self._loss_unit = loss_unit
-
-    def get_gid(self):
-        '''
-        Returns the gid.
-        '''
-        return self._gid
-
-    def get_name(self):
-        '''
-        Returns the name of the cell.
-        '''
-        return self._name
-
-    def get_geometry(self):
-        '''
-        Returns the geometry of the cell.
-        '''
-        return self._geometry
-
-    def get_loss_value(self):
-        '''
-        Returns the computed loss value for this cell.
-        '''
-        return self._loss_value
-
-    def get_loss_unit(self):
-        '''
-        Returns the unit for the loss in this cell.
-        '''
-        return self._loss_unit
+        self.gid = gid
+        self.name = name
+        self.geometry = geometry
+        self.loss_value = loss_value
+        self.loss_unit = loss_unit
 
     def to_series(self):
         '''
         Converts this cell to a pandas series.
         '''
         series = pd.Series({
-            'gid': self._gid,
-            'name': self._name,
-            'geometry': self._geometry,
-            'loss_value': self._loss_value,
-            'loss_unit': self._loss_unit,
+            'gid': self.gid,
+            'name': self.name,
+            'geometry': self.geometry,
+            'loss_value': self.loss_value,
+            'loss_unit': self.loss_unit,
         })
         return series
 
@@ -101,27 +71,27 @@ class LossCell():
         '''
         loss_value = 0
 
-        for transition in transition_cell.get_transitions():
+        for transition in transition_cell.transitions:
             single_loss_value = loss_provider.get_loss(
-                schema=transition_cell.get_schema(),
-                taxonomy=transition.get_taxonomy(),
-                from_damage_state=transition.get_from_damage_state(),
-                to_damage_state=transition.get_to_damage_state()
+                schema=transition_cell.schema,
+                taxonomy=transition.taxonomy,
+                from_damage_state=transition.from_damage_state,
+                to_damage_state=transition.to_damage_state
             )
-            n_loss_value = single_loss_value * transition.get_n_buildings()
+            n_loss_value = single_loss_value * transition.n_buildings
 
             loss_value += n_loss_value
 
         return cls(
-            gid=transition_cell.get_gid(),
-            name=transition_cell.get_name(),
-            geometry=transition_cell.get_geometry(),
+            gid=transition_cell.gid,
+            name=transition_cell.name,
+            geometry=transition_cell.geometry,
             loss_value=loss_value,
             loss_unit=loss_provider.get_unit()
         )
 
 
-class LossProvider():
+class LossProvider:
     '''
     Class to access loss data depending
     on the schema, the taxonomy, the from

@@ -13,7 +13,7 @@ from scipy.stats import lognorm
 import numpy as np
 
 
-class LogncdfFactory():
+class LogncdfFactory:
     '''
     This is function factory for the log normal cdf.
     '''
@@ -28,7 +28,7 @@ SUPPORTED_FRAGILITY_FUNCTION_FACTORIES = {
 }
 
 
-class DamageState():
+class DamageState:
     '''
     Class to represent the damage states.
     '''
@@ -75,7 +75,7 @@ class DamageState():
         return self.fragility_function(value)
 
 
-class Fragility():
+class Fragility:
     '''
     Class to represent all of the fragility data.
     '''
@@ -92,7 +92,9 @@ class Fragility():
             data = json.load(input_file)
         return cls(data)
 
-    def to_fragility_provider(self):
+    def to_fragility_provider_with_specified_fragility_function(
+            self,
+            fragility_function):
         '''
         Transforms the data, so that a
         provider for the supported taxonomies
@@ -146,8 +148,7 @@ class Fragility():
                     to_state=to_state,
                     intensity_field=intensity_field,
                     intensity_unit=intensity_unit,
-                    fragility_function=SUPPORTED_FRAGILITY_FUNCTION_FACTORIES[
-                        shape](mean, stddev)
+                    fragility_function=fragility_function(mean, stddev)
                 )
 
                 damage_states_by_taxonomy[taxonomy].append(damage_state)
@@ -156,6 +157,22 @@ class Fragility():
         schema = self._data['meta']['id']
 
         return FragilityProvider(damage_states_by_taxonomy, schema)
+
+    def to_fragility_provider(self):
+        '''
+        Transforms the data, so that a
+        provider for the supported taxonomies
+        and the damage states (with the fragility functions)
+        are returned.
+        '''
+        shape = self._data['meta']['shape']
+        fragility_function = SUPPORTED_FRAGILITY_FUNCTION_FACTORIES[
+            shape
+        ]
+
+        return self.to_fragility_provider_with_specified_fragility_function(
+            fragility_function
+        )
 
     @staticmethod
     def _add_damage_states_if_missing(damage_states_by_taxonomy):
@@ -202,14 +219,14 @@ class Fragility():
                         damage_states.append(ds_new)
 
 
-class FragilityProvider():
+class FragilityProvider:
     '''
     Class to give access to the taxonomies and
     the damage states with the fragility functions.
     '''
     def __init__(self, damage_states_by_taxonomy, schema):
         self._damage_states_by_taxonomy = damage_states_by_taxonomy
-        self._schema = schema
+        self.schema = schema
 
     def get_damage_states_for_taxonomy(self, taxonomy):
         '''
@@ -223,9 +240,3 @@ class FragilityProvider():
         Returns the taxonomies from the data.
         '''
         return self._damage_states_by_taxonomy.keys()
-
-    def get_schema(self):
-        '''
-        Returns the schema of the fragility data.
-        '''
-        return self._schema

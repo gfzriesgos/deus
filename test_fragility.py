@@ -15,7 +15,7 @@ class TestFragility(unittest.TestCase):
             './testinputs/fragility_sara.json')
         fr_provider = fr_file.to_fragility_provider()
 
-        schema = fr_provider.get_schema()
+        schema = fr_provider.schema
 
         self.assertEqual('SARA_v1.0', schema)
 
@@ -23,7 +23,7 @@ class TestFragility(unittest.TestCase):
             './testinputs/fragility_suppasri.json')
         fr_provider2 = fr_file2.to_fragility_provider()
 
-        schema2 = fr_provider2.get_schema()
+        schema2 = fr_provider2.schema
 
         self.assertEqual('SUPPASRI2013_v2.0', schema2)
 
