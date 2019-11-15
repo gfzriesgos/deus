@@ -131,12 +131,12 @@ class TestShakemap(unittest.TestCase):
         lh_provider = shake_map_lahar.to_intensity_provider()
 
         lh_intensity, lh_units = lh_provider.get_nearest(
-            lon=-78.5075157783, lat=-0.499855281537
+            lon=-78.64682219, lat=-0.864361486349
         )
 
         self.assertEqual('m/s', lh_units['MAXVELOCITY'])
-        self.assertLess(0.029, lh_intensity['MAXVELOCITY'])
-        self.assertLess(lh_intensity['MAXVELOCITY'], 0.031)
+        self.assertLess(3.28, lh_intensity['MAXVELOCITY'])
+        self.assertLess(lh_intensity['MAXVELOCITY'], 3.30)
 
 
 if __name__ == '__main__':

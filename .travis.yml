@@ -24,6 +24,7 @@ stages:
   - pylintcheck
   - test
   - dockerbuild
+  - codecov
 
 jobs:
   include:
@@ -49,3 +50,9 @@ jobs:
       install: skip
       script:
         - docker build -f metadata/Dockerfile .
+    - stage: codecov
+      script:
+        - pip3 install coverage codecov
+        - coverage run test_all.py
+      after_success:
+        - codecov -t ${CODECOV_TOKEN}

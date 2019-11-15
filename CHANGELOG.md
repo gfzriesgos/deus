@@ -1,3 +1,7 @@
+# 2019-11-14:
+
+- Added another sub program to work with ashfall data
+
 # 2019-11-13:
 
 - Added new replacement cost files for the riesgos ecuador show case

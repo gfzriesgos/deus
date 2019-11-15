@@ -93,6 +93,60 @@ class GeopandasDataFrameWrapper:
         return series[unit_column]
 
 
+class GeopandasDataFrameWrapperWithColumnUnit:
+    '''
+    Like the GeopandasDataFrameWrapper it
+    wraps a geopandas dataframe, but
+    this only cares about one single
+    column
+    '''
+    def __init__(
+            self,
+            gdf,
+            column,
+            name,
+            unit):
+        self._gdf = gdf
+        self._column = column
+        self._name = name
+        self._unit = unit
+
+    def get_list_x_coordinates(self):
+        '''
+        Returns a list / series / array of the x coordinates.
+        '''
+        return self._get_centroid().x
+
+    def get_list_y_coordinates(self):
+        '''
+        Returns a list / series / array of the y coordinates.
+        '''
+        return self._get_centroid().y
+
+    def _get_centroid(self):
+        return self._gdf['geometry'].centroid
+
+    def get_data_columns(self):
+        '''
+        Returns a generator to go over all of the
+        data columns for the intensity data.
+        '''
+        yield self._name
+
+    def get_value_for_column_and_index(self, column, index):
+        '''
+        Returns the value for the column and the index.
+        '''
+        series = self._gdf.iloc[index]
+        return series[self._column]
+
+    def get_unit_for_column_and_index(self, column, index):
+        '''
+        Returns the unit for the column and the index.
+        '''
+        return self._unit
+
+
 class RasterDataWrapper:
     '''
     This is a wrapper to read the data from
