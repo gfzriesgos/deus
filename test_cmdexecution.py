@@ -434,7 +434,6 @@ class TestVolcanoCmdExecution(unittest.TestCase):
     Test class to run volcanus as a command line tool.
     '''
 
-    @unittest.skip('missing ds mapping files')
     def test_execute_volcano_for_ecuador(self):
         """
         This is the testcase for running the computation
@@ -524,6 +523,7 @@ class TestVolcanusAndThenDeus(unittest.TestCase):
     the ashfall volcanus.
     """
 
+    @unittest.skip('missing ds mapping files')
     def test_execute_deus_two_times(self):
         '''
         Runs deus two times (update the updated exposure model).
@@ -540,8 +540,7 @@ class TestVolcanusAndThenDeus(unittest.TestCase):
         )
         test_intensity_column = 'FEB2008'
         test_shakemap = os.path.join(
-            current_dir,
-            'testinputs',
+            testinput_dir,
             'shakemap_lahar.xml'
         )
         test_exposure_file = os.path.join(
@@ -555,7 +554,7 @@ class TestVolcanusAndThenDeus(unittest.TestCase):
 
         test_fragility_file2 = os.path.join(
             testinput_dir,
-            'testinputs/fragility_marvrouli.json'
+            'fragility_marvrouli.json'
         )
 
         output_dir = os.path.join(current_dir, 'testoutputs')
