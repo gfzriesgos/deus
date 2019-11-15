@@ -48,10 +48,10 @@ class Child():
         loss_cells = loss.LossCellList([])
 
         for original_exposure_cell in (
-            self.exposure_cell_provider.get_exposure_cells()
+            self.exposure_cell_provider.exposure_cells
         ):
             mapped_exposure_cell = original_exposure_cell.map_schema(
-                target_schema=self.fragility_provider.get_schema(),
+                target_schema=self.fragility_provider.schema,
                 schema_mapper=schema_mapper
             )
             single_updated_exposure_cell, single_transition_cell = \
