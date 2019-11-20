@@ -1,3 +1,12 @@
+# 2019-11-20:
+
+- Updated replacement costs
+
+# 2019-11-19:
+
+- Switched the intensity input for volcanus wps to geojson
+  to fix a problem with giving both shapefiles and geojson
+
 # 2019-11-14:
 
 - Added another sub program to work with ashfall data
