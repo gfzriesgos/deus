@@ -22,6 +22,7 @@ class TransitionCell:
         self.geometry = geometry
         self.transitions = transitions
         self._transition_idx_by_transition_key = {}
+        self.len_transitions = len(transitions)
 
         for idx, transition in enumerate(transitions):
             key = transition.to_key()
@@ -38,8 +39,9 @@ class TransitionCell:
             self.transitions[idx_to_insert].n_buildings += \
                 transition.n_buildings
         else:
-            new_idx = len(self.transitions)
+            new_idx = self.len_transitions
             self.transitions.append(transition)
+            self.len_transitions += 1
             self._transition_idx_by_transition_key[key] = new_idx
 
     def to_series(self):

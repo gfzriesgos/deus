@@ -166,11 +166,12 @@ def read_shakemap_data_and_units(grid_fields, grid_data):
     with units for the different fields.
     '''
     names = [x.get_name().upper() for x in grid_fields]
+    len_names = len(names)
     units = {x.get_name().upper(): x.get_units() for x in grid_fields}
     data = collections.defaultdict(list)
     values = read_shakemap_data_from_str(grid_data.get_text())
     for idx, value in enumerate(values):
-        name_idx = idx % len(names)
+        name_idx = idx % len_names
         name = names[name_idx]
         data[name].append(value)
     return data, units
