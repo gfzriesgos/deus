@@ -87,7 +87,7 @@ class Child():
         # and merge all of them together
         for other_df in [transition_cells_df, loss_cells_df]:
             for column in other_df.columns:
-                if not column in updated_exposure_cells_df.columns:
+                if column in not updated_exposure_cells_df.columns:
                     updated_exposure_cells_df[column] = other_df[column]
 
         write_result(

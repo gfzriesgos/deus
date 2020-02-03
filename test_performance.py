@@ -48,7 +48,9 @@ class TestPerformance(unittest.TestCase):
             'transitions_ts_perf.json'
         )
         loss_output_filename = os.path.join(output_dir, 'losses_ts_perf.json')
-        merged_output_filename = os.path.join(output_dir, 'merged_ts_perf.json')
+        merged_output_filename = os.path.join(
+            output_dir, 'merged_ts_perf.json'
+        )
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
