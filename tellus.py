@@ -70,15 +70,30 @@ class Child():
                 )
             )
 
+        updated_exposure_cells_df = updated_exposure_cells.to_dataframe()
+        transition_cells_df = transition_cells.to_dataframe()
+        loss_cells_df = loss_cells.to_dataframe()
+
         write_result(
             self.args_with_output_paths.updated_exposure_output_file,
-            updated_exposure_cells)
+            updated_exposure_cells_df)
         write_result(
             self.args_with_output_paths.transition_output_file,
-            transition_cells)
+            transition_cells_df)
         write_result(
             self.args_with_output_paths.loss_output_file,
-            loss_cells)
+            loss_cells_df)
+
+        # and merge all of them together
+        for other_df in [transition_cells_df, loss_cells_df]:
+            for column in other_df.columns:
+                if not column in updated_exposure_cells_df.columns:
+                    updated_exposure_cells_df[column] = other_df[column]
+
+        write_result(
+            self.args_with_output_paths.merged_output_file,
+            updated_exposure_cells_df
+        )
 
 
 def create_schema_mapper(current_dir):
@@ -108,4 +123,4 @@ def write_result(
     '''
     if os.path.exists(output_file):
         os.unlink(output_file)
-    cells.to_dataframe().to_file(output_file, 'GeoJSON')
+    cells.to_file(output_file, 'GeoJSON')

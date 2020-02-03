@@ -1,3 +1,8 @@
+# 2020-02-03:
+
+- Added a new output parameter that contains all the outputs of the older three
+  (updated exposure model, transitions & damage).
+
 # 2019-11-20:
 
 - Updated replacement costs
