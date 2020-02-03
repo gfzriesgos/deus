@@ -6,6 +6,7 @@ Name comes from https://de.wikipedia.org/wiki/Tellus
 """
 
 import glob
+import json
 import os
 
 import exposure
@@ -124,3 +125,12 @@ def write_result(
     if os.path.exists(output_file):
         os.unlink(output_file)
     cells.to_file(output_file, 'GeoJSON')
+
+    # And because we want to reduce the size of the json files
+    # as much possible, we will read them and wrote them without
+    # any non necessary whitespace (to_file from geopandas
+    # introduces some not needed whitespace).
+    with open(output_file, 'rt') as read_handle:
+        data = json.load(read_handle)
+    with open(output_file, 'wt') as write_handle:
+        json.dump(data, write_handle)
