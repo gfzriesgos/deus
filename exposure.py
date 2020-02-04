@@ -6,6 +6,7 @@ Module for the exposure related classes.
 
 import collections
 import math
+import multiprocessing
 import re
 
 import pandas as pd
@@ -28,17 +29,23 @@ class ExposureCellList:
         '''
         self.exposure_cells.append(exposure_cell)
 
+    def set_with_idx(self, idx, exposure_cell):
+        '''
+        Sets the exposure cell with an index.
+        '''
+        self.exposure_cells[idx] = exposure_cell
+
     def map_schema(self, target_schema, schema_mapper):
         '''
         Maps one whole list to a different schema.
         '''
-        elements = []
-        for exposure_cell in self.exposure_cells:
+        elements = [None] * len(self.exposure_cells)
+        for idx, exposure_cell in enumerate(self.exposure_cells):
             mapped_cell = exposure_cell.map_schema(
                 target_schema,
                 schema_mapper
             )
-            elements.append(mapped_cell)
+            elements[idx] = mapped_cell
         return ExposureCellList(elements)
 
     @classmethod
@@ -46,13 +53,13 @@ class ExposureCellList:
         '''
         Reads the list from a dataframe.
         '''
-        elements = []
-        for _, row in dataframe.iterrows():
-            exposure_cell = ExposureCell.from_series(
-                series=row,
-                schema=schema
-            )
-            elements.append(exposure_cell)
+        elements = [None] * len(dataframe)
+        mapper = RowMapping(schema)
+        with multiprocessing.Pool() as p:
+            mapping_results = p.map(mapper.map_row, dataframe.iterrows())
+
+        for idx, exposure_cell in mapping_results:
+            elements[idx] = exposure_cell
         return cls(elements)
 
     @classmethod
@@ -495,3 +502,25 @@ def sort_by_to_damage_state_desc(damage_state):
     desc.
     '''
     return damage_state.to_state * -1
+
+
+class RowMapping:
+    '''
+    This is a class used as a wrapper for multiprocessing
+    mapping.
+    '''
+    def __init__(self, schema):
+        self.schema = schema
+
+    def map_row(self, idx_with_row):
+        '''
+        It takes a tuple of an index and the row
+        and creates the exposure cell for the row
+        (as given with enumerate(df.iterrows())).
+        It returns the given index and the cell.
+        '''
+        idx, row = idx_with_row
+
+        cell = ExposureCell.from_series(series=row, schema=self.schema)
+
+        return idx, cell

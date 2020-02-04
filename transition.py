@@ -137,6 +137,15 @@ class TransitionCellList:
         '''
         self.transition_cells.append(transition_cell)
 
+    def set_with_idx(self, idx, transition_cell):
+        '''
+        Sets the transition cell at a given index.
+        This method does not check for boundaries,
+        so be sure that transition_cells (given to the
+        constructor) is big enough.
+        '''
+        self.transition_cells[idx] = transition_cell
+
     def to_dataframe(self):
         '''
         Creates a geopandas dataframe, so that the
