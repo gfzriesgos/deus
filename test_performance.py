@@ -48,6 +48,9 @@ class TestPerformance(unittest.TestCase):
             'transitions_ts_perf.json'
         )
         loss_output_filename = os.path.join(output_dir, 'losses_ts_perf.json')
+        merged_output_filename = os.path.join(
+            output_dir, 'merged_ts_perf.json'
+        )
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
@@ -61,6 +64,9 @@ class TestPerformance(unittest.TestCase):
         if os.path.exists(loss_output_filename):
             os.unlink(loss_output_filename)
 
+        if os.path.exists(merged_output_filename):
+            os.unlink(merged_output_filename)
+
         start = datetime.datetime.now()
 
         subprocess.run(
@@ -73,6 +79,8 @@ class TestPerformance(unittest.TestCase):
                 transition_output_filename,
                 '--loss_output_file',
                 loss_output_filename,
+                '--merged_output_file',
+                merged_output_filename,
                 test_shakemap,
                 test_exposure_file,
                 schema,

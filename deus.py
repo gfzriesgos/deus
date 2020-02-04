@@ -55,6 +55,10 @@ def main():
         '--loss_output_file',
         default='output_loss.json',
         help='Filename for the output with the computed loss')
+    argparser.add_argument(
+        '--merged_output_file',
+        default='output_merged.json',
+        help='Filename for the merged output from all others')
     current_dir = os.path.dirname(os.path.realpath(__file__))
     loss_data_dir = os.path.join(current_dir, 'loss_data')
     files = glob.glob(os.path.join(loss_data_dir, '*.json'))
