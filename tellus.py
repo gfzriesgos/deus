@@ -7,6 +7,7 @@ Name comes from https://de.wikipedia.org/wiki/Tellus
 
 import glob
 import json
+import multiprocessing
 import os
 
 import exposure
@@ -75,15 +76,21 @@ class Child():
         transition_cells_df = transition_cells.to_dataframe()
         loss_cells_df = loss_cells.to_dataframe()
 
-        write_result(
-            self.args_with_output_paths.updated_exposure_output_file,
-            updated_exposure_cells_df)
-        write_result(
-            self.args_with_output_paths.transition_output_file,
-            transition_cells_df)
-        write_result(
-            self.args_with_output_paths.loss_output_file,
-            loss_cells_df)
+        with multiprocessing.Pool() as p:
+            p.map(
+                ResultWriter.write, [
+                    ResultWriter(
+                        self.args_with_output_paths.updated_exposure_output_file,
+                        updated_exposure_cells_df),
+                    ResultWriter(
+                        self.args_with_output_paths.transition_output_file,
+                        transition_cells_df),
+                    ResultWriter(
+                        self.args_with_output_paths.loss_output_file,
+                        loss_cells_df),
+                ]
+            )
+
 
         # and merge all of them together
         for other_df in [transition_cells_df, loss_cells_df]:
@@ -91,10 +98,10 @@ class Child():
                 if column not in updated_exposure_cells_df.columns:
                     updated_exposure_cells_df[column] = other_df[column]
 
-        write_result(
+        ResultWriter(
             self.args_with_output_paths.merged_output_file,
             updated_exposure_cells_df
-        )
+        ).write()
 
 
 def create_schema_mapper(current_dir):
@@ -116,21 +123,27 @@ def create_schema_mapper(current_dir):
                 tax_mapping_files, ds_mapping_files))
 
 
-def write_result(
-        output_file,
-        cells):
+class ResultWriter:
     '''
-    Write the updated exposure.
+    This is a class to write results to files.
     '''
-    if os.path.exists(output_file):
-        os.unlink(output_file)
-    cells.to_file(output_file, 'GeoJSON')
+    def __init__(self, output_file, cells):
+        self.output_file = output_file
+        self.cells = cells
 
-    # And because we want to reduce the size of the json files
-    # as much possible, we will read them and wrote them without
-    # any non necessary whitespace (to_file from geopandas
-    # introduces some not needed whitespace).
-    with open(output_file, 'rt') as read_handle:
-        data = json.load(read_handle)
-    with open(output_file, 'wt') as write_handle:
-        json.dump(data, write_handle)
+    def write(self):
+        '''
+        Write the updated exposure.
+        '''
+        if os.path.exists(self.output_file):
+            os.unlink(self.output_file)
+        self.cells.to_file(self.output_file, 'GeoJSON')
+
+        # And because we want to reduce the size of the json files
+        # as much possible, we will read them and wrote them without
+        # any non necessary whitespace (to_file from geopandas
+        # introduces some not needed whitespace).
+        with open(self.output_file, 'rt') as read_handle:
+            data = json.load(read_handle)
+        with open(self.output_file, 'wt') as write_handle:
+            json.dump(data, write_handle)
