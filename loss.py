@@ -29,6 +29,15 @@ class LossCellList:
         '''
         self._loss_cells.append(loss_cell)
 
+    def set_with_idx(self, idx, loss_cell):
+        '''
+        Sets the loss cell at a given index.
+        This method does not check for boundaries,
+        so be sure that loss_cells (given to the
+        constructor) is big enough.
+        '''
+        self._loss_cells[idx] = loss_cell
+
     def to_dataframe(self):
         '''
         Converts the loss cell list to a dataframe.
