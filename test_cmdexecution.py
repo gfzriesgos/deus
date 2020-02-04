@@ -52,18 +52,22 @@ class TestDeusCmdExecution(unittest.TestCase):
             output_dir,
             'losses_multiple_imts.json'
         )
+        merged_output_filename = os.path.join(
+            output_dir,
+            'merged_multiple_imts.json'
+        )
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
 
-        if os.path.exists(updated_exposure_output_filename):
-            os.unlink(updated_exposure_output_filename)
-
-        if os.path.exists(transition_output_filename):
-            os.unlink(transition_output_filename)
-
-        if os.path.exists(loss_output_filename):
-            os.unlink(loss_output_filename)
+        for output_filename in [
+            updated_exposure_output_filename,
+            transition_output_filename,
+            loss_output_filename,
+            merged_output_filename,
+        ]:
+            if os.path.exists(output_filename):
+                os.unlink(output_filename)
 
         subprocess.run(
             [
@@ -75,6 +79,8 @@ class TestDeusCmdExecution(unittest.TestCase):
                 transition_output_filename,
                 '--loss_output_file',
                 loss_output_filename,
+                '--merged_output_file',
+                merged_output_filename,
                 test_shakemap,
                 test_exposure_file,
                 schema,
@@ -124,18 +130,19 @@ class TestDeusCmdExecution(unittest.TestCase):
             'transitions_ts.json'
         )
         loss_output_filename = os.path.join(output_dir, 'losses_ts.json')
+        merged_output_filename = os.path.join(output_dir, 'merged_ts.json')
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
 
-        if os.path.exists(updated_exposure_output_filename):
-            os.unlink(updated_exposure_output_filename)
-
-        if os.path.exists(transition_output_filename):
-            os.unlink(transition_output_filename)
-
-        if os.path.exists(loss_output_filename):
-            os.unlink(loss_output_filename)
+        for output_filename in [
+            updated_exposure_output_filename,
+            transition_output_filename,
+            loss_output_filename,
+            merged_output_filename,
+        ]:
+            if os.path.exists(output_filename):
+                os.unlink(output_filename)
 
         subprocess.run(
             [
@@ -147,6 +154,8 @@ class TestDeusCmdExecution(unittest.TestCase):
                 transition_output_filename,
                 '--loss_output_file',
                 loss_output_filename,
+                '--merged_output_file',
+                merged_output_filename,
                 test_shakemap,
                 test_exposure_file,
                 schema,
@@ -192,6 +201,7 @@ class TestDeusCmdExecution(unittest.TestCase):
             'transitions.json'
         )
         loss_output_filename = os.path.join(output_dir, 'losses.json')
+        merged_output_filename = os.path.join(output_dir, 'merged.json')
 
         updated_exposure_output_filename2 = os.path.join(
             output_dir,
@@ -205,27 +215,26 @@ class TestDeusCmdExecution(unittest.TestCase):
             output_dir,
             'losses2.json'
         )
+        merged_output_filename2 = os.path.join(
+            output_dir,
+            'merged2.json'
+        )
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
 
-        if os.path.exists(updated_exposure_output_filename):
-            os.unlink(updated_exposure_output_filename)
-
-        if os.path.exists(transition_output_filename):
-            os.unlink(transition_output_filename)
-
-        if os.path.exists(loss_output_filename):
-            os.unlink(loss_output_filename)
-
-        if os.path.exists(updated_exposure_output_filename2):
-            os.unlink(updated_exposure_output_filename2)
-
-        if os.path.exists(transition_output_filename2):
-            os.unlink(transition_output_filename2)
-
-        if os.path.exists(loss_output_filename2):
-            os.unlink(loss_output_filename2)
+        for output_filename in [
+            updated_exposure_output_filename,
+            transition_output_filename,
+            loss_output_filename,
+            merged_output_filename,
+            updated_exposure_output_filename2,
+            transition_output_filename2,
+            loss_output_filename2,
+            merged_output_filename2,
+        ]:
+            if os.path.exists(output_filename):
+                os.unlink(output_filename)
 
         subprocess.run(
             [
@@ -237,6 +246,8 @@ class TestDeusCmdExecution(unittest.TestCase):
                 transition_output_filename,
                 '--loss_output_file',
                 loss_output_filename,
+                '--merged_output_file',
+                merged_output_filename,
                 test_shakemap,
                 test_exposure_file,
                 schema,
@@ -254,6 +265,8 @@ class TestDeusCmdExecution(unittest.TestCase):
                 transition_output_filename2,
                 '--loss_output_file',
                 loss_output_filename2,
+                '--merged_output_file',
+                merged_output_filename2,
                 test_shakemap,
                 updated_exposure_output_filename,
                 schema,
@@ -305,18 +318,22 @@ class TestDeusCmdExecution(unittest.TestCase):
             output_dir,
             'losses_peru_suppasri.json'
         )
+        merged_output_filename = os.path.join(
+            output_dir,
+            'merged_peru_suppasri.json'
+        )
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
 
-        if os.path.exists(updated_exposure_output_filename):
-            os.unlink(updated_exposure_output_filename)
-
-        if os.path.exists(transition_output_filename):
-            os.unlink(transition_output_filename)
-
-        if os.path.exists(loss_output_filename):
-            os.unlink(loss_output_filename)
+        for output_filename in [
+            updated_exposure_output_filename,
+            transition_output_filename,
+            loss_output_filename,
+            merged_output_filename,
+        ]:
+            if os.path.exists(output_filename):
+                os.unlink(output_filename)
 
         subprocess.run(
             [
@@ -328,6 +345,8 @@ class TestDeusCmdExecution(unittest.TestCase):
                 transition_output_filename,
                 '--loss_output_file',
                 loss_output_filename,
+                '--merged_output_file',
+                merged_output_filename,
                 test_shakemap,
                 test_exposure_file,
                 schema,
@@ -386,18 +405,22 @@ class TestDeusCmdExecutionInEcuador(unittest.TestCase):
             output_dir,
             'losses_lahar.json'
         )
+        merged_output_filename = os.path.join(
+            output_dir,
+            'merged_lahar.json'
+        )
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
 
-        if os.path.exists(updated_exposure_output_filename):
-            os.unlink(updated_exposure_output_filename)
-
-        if os.path.exists(transition_output_filename):
-            os.unlink(transition_output_filename)
-
-        if os.path.exists(loss_output_filename):
-            os.unlink(loss_output_filename)
+        for output_filename in [
+            updated_exposure_output_filename,
+            transition_output_filename,
+            loss_output_filename,
+            merged_output_filename,
+        ]:
+            if os.path.exists(output_filename):
+                os.unlink(output_filename)
 
         subprocess.run(
             [
@@ -409,6 +432,8 @@ class TestDeusCmdExecutionInEcuador(unittest.TestCase):
                 transition_output_filename,
                 '--loss_output_file',
                 loss_output_filename,
+                '--merged_output_file',
+                merged_output_filename,
                 test_shakemap,
                 test_exposure_file,
                 schema,
@@ -473,18 +498,22 @@ class TestVolcanoCmdExecution(unittest.TestCase):
             output_dir,
             'losses_ecuador_torres.json'
         )
+        merged_output_filename = os.path.join(
+            output_dir,
+            'merged_ecuador_torres.json'
+        )
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
 
-        if os.path.exists(updated_exposure_output_filename):
-            os.unlink(updated_exposure_output_filename)
-
-        if os.path.exists(transition_output_filename):
-            os.unlink(transition_output_filename)
-
-        if os.path.exists(loss_output_filename):
-            os.unlink(loss_output_filename)
+        for output_filename in [
+            updated_exposure_output_filename,
+            transition_output_filename,
+            loss_output_filename,
+            merged_output_filename,
+        ]:
+            if os.path.exists(output_filename):
+                os.unlink(output_filename)
 
         subprocess.run(
             [
@@ -496,6 +525,8 @@ class TestVolcanoCmdExecution(unittest.TestCase):
                 transition_output_filename,
                 '--loss_output_file',
                 loss_output_filename,
+                '--merged_output_file',
+                merged_output_filename,
                 test_intensity,
                 test_intensity_column,
                 test_exposure_file,
@@ -570,6 +601,10 @@ class TestVolcanusAndThenDeus(unittest.TestCase):
             output_dir,
             'losses_ecuador_torres_1.json'
         )
+        merged_output_filename = os.path.join(
+            output_dir,
+            'merged_ecuador_torres_1.json'
+        )
         updated_exposure_output_filename2 = os.path.join(
             output_dir,
             'updated_exposure_lahar_after_ash.json'
@@ -582,27 +617,26 @@ class TestVolcanusAndThenDeus(unittest.TestCase):
             output_dir,
             'losses_lahar_after_ash.json'
         )
+        merged_output_filename2 = os.path.join(
+            output_dir,
+            'merged_lahar_after_ash.json'
+        )
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
 
-        if os.path.exists(updated_exposure_output_filename):
-            os.unlink(updated_exposure_output_filename)
-
-        if os.path.exists(updated_exposure_output_filename2):
-            os.unlink(updated_exposure_output_filename2)
-
-        if os.path.exists(transition_output_filename):
-            os.unlink(transition_output_filename)
-
-        if os.path.exists(transition_output_filename2):
-            os.unlink(transition_output_filename2)
-
-        if os.path.exists(loss_output_filename):
-            os.unlink(loss_output_filename)
-
-        if os.path.exists(loss_output_filename2):
-            os.unlink(loss_output_filename2)
+        for output_filename in [
+            updated_exposure_output_filename,
+            updated_exposure_output_filename2,
+            transition_output_filename,
+            transition_output_filename2,
+            loss_output_filename,
+            loss_output_filename2,
+            merged_output_filename,
+            merged_output_filename2,
+        ]:
+            if os.path.exists(output_filename):
+                os.unlink(output_filename)
 
         subprocess.run(
             [
@@ -614,6 +648,8 @@ class TestVolcanusAndThenDeus(unittest.TestCase):
                 transition_output_filename,
                 '--loss_output_file',
                 loss_output_filename,
+                '--merged_output_file',
+                merged_output_filename,
                 test_intensity,
                 test_intensity_column,
                 test_exposure_file,
@@ -644,6 +680,8 @@ class TestVolcanusAndThenDeus(unittest.TestCase):
                 transition_output_filename2,
                 '--loss_output_file',
                 loss_output_filename2,
+                '--merged_output_file',
+                merged_output_filename2,
                 test_shakemap,
                 updated_exposure_output_filename,
                 schema,
