@@ -52,9 +52,8 @@ class LossCell:
     Spatial cell with loss data.
     '''
 
-    def __init__(self, gid, name, geometry, loss_value, loss_unit):
+    def __init__(self, gid, geometry, loss_value, loss_unit):
         self.gid = gid
-        self.name = name
         self.geometry = geometry
         self.loss_value = loss_value
         self.loss_unit = loss_unit
@@ -65,7 +64,6 @@ class LossCell:
         '''
         series = pd.Series({
             'gid': self.gid,
-            'name': self.name,
             'geometry': self.geometry,
             'loss_value': self.loss_value,
             'loss_unit': self.loss_unit,
@@ -93,7 +91,6 @@ class LossCell:
 
         return cls(
             gid=transition_cell.gid,
-            name=transition_cell.name,
             geometry=transition_cell.geometry,
             loss_value=loss_value,
             loss_unit=loss_provider.get_unit()
