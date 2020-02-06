@@ -15,10 +15,9 @@ class TransitionCell:
     Cell with gid, name and geometry
     to store the transitions in.
     '''
-    def __init__(self, schema, gid, name, geometry, transitions):
+    def __init__(self, schema, gid, geometry, transitions):
         self.schema = schema
         self.gid = gid
-        self.name = name
         self.geometry = geometry
         self.transitions = transitions
         self._transition_idx_by_transition_key = {}
@@ -50,7 +49,6 @@ class TransitionCell:
         '''
         series = pd.Series({
             'gid': self.gid,
-            'name': self.name,
             'geometry': self.geometry,
             'schema': self.schema,
             'transitions': {
@@ -78,13 +76,12 @@ class TransitionCell:
     def from_exposure_cell(cls, exposure_cell):
         '''
         Creates an transition cell by using the
-        names, the gid, the schema and the geometry of
+        the gid, the schema and the geometry of
         the exposure cell.
         '''
         return cls(
             schema=exposure_cell.schema,
             gid=exposure_cell.gid,
-            name=exposure_cell.name,
             geometry=exposure_cell.geometry,
             transitions=[]
         )

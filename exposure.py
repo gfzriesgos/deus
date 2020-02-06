@@ -111,10 +111,9 @@ class ExposureCell:
     '''
     Spatial cell with the exposure data.
     '''
-    def __init__(self, schema, gid, name, geometry, taxonomies):
+    def __init__(self, schema, gid, geometry, taxonomies):
         self.schema = schema
         self.gid = gid
-        self.name = name
         self.geometry = geometry
         self.taxonomies = taxonomies
         self._len_tax = len(taxonomies)
@@ -136,7 +135,7 @@ class ExposureCell:
 
     def without_taxonomies(self, schema=None):
         '''
-        New cell with the same name and geometry
+        New cell with the same geometry
         but without the taxonomy data.
         '''
         if schema is None:
@@ -144,7 +143,6 @@ class ExposureCell:
         return ExposureCell(
             schema=schema,
             gid=self.gid,
-            name=self.name,
             geometry=self.geometry,
             taxonomies=[]
         )
@@ -284,7 +282,6 @@ class ExposureCell:
         Read the exposure cell from a simple series.
         '''
         gid = series['gc_id']
-        name = series['name']
         geometry = series['geometry']
 
         taxonomies = []
@@ -302,7 +299,6 @@ class ExposureCell:
         return cls(
             schema=schema,
             gid=gid,
-            name=name,
             geometry=geometry,
             taxonomies=taxonomies
         )
@@ -314,7 +310,6 @@ class ExposureCell:
         '''
         series = pd.Series({
             'gc_id': self.gid,
-            'name': self.name,
             'geometry': self.geometry,
         })
 
@@ -335,7 +330,6 @@ class ExposureCell:
         '''
         series = pd.Series({
             'gid': self.gid,
-            'name': self.name,
             'geometry': self.geometry,
             'expo': {
                 'Taxonomy': [x["taxonomy"] for x in self.taxonomies],
@@ -345,14 +339,12 @@ class ExposureCell:
                 ],
                 'Buildings': [x["n_buildings"] for x in self.taxonomies],
                 'id': [x["area_id"] for x in self.taxonomies],
-                'Region': [x["region"] for x in self.taxonomies],
                 'Dwellings': [x["dwellings"] for x in self.taxonomies],
                 'Repl-cost-USD-bdg': [
                     x["repl_cost_usd_bdg"]
                     for x in self.taxonomies
                 ],
                 'Population': [x["population"] for x in self.taxonomies],
-                'name': [x["name"] for x in self.taxonomies],
             }
         })
         return series
@@ -365,7 +357,6 @@ class ExposureCell:
         store taxonomies, damage states and the number of buildings.
         '''
         gid = series['gid']
-        name = series['name']
         geometry = series['geometry']
         expo = pd.DataFrame(series['expo'])
 
@@ -381,7 +372,6 @@ class ExposureCell:
         return cls(
             schema=schema,
             gid=gid,
-            name=name,
             geometry=geometry,
             taxonomies=taxonomies
         )
@@ -408,11 +398,9 @@ def tb_from_series(series, schema):
         "damage_state": remove_prefix_d_for_damage_state(series['Damage']),
         "n_buildings": n_buildings,
         "area_id": series['id'],
-        "region": series['Region'],
         "dwellings": series['Dwellings'],
         "repl_cost_usd_bdg": series['Repl-cost-USD-bdg'],
         "population": series['Population'],
-        "name": series['name']
     }
 
 
@@ -430,7 +418,6 @@ def tb_from_simple_series(series, key, schema):
         "taxonomy": extract_taxonomy_from_taxonomy_damage_state_string(key),
         "damage_state": damage_state,
         "n_buildings": n_buildings,
-        "name": series['name']
     }
 
 
