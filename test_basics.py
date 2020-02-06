@@ -171,10 +171,6 @@ class TestBasics(unittest.TestCase):
         self.assertEqual(lon, lon2)
         self.assertEqual(lat, lat2)
 
-        self.assertEqual(
-            empty_exposure_cell.name,
-            'example point1')
-
         taxonomies = exposure_cell.taxonomies
 
         search_taxonomy = [
@@ -272,9 +268,6 @@ class TestBasics(unittest.TestCase):
         self.assertEqual(
             updated_series['geometry'],
             transition_series['geometry'])
-        self.assertEqual(
-            updated_series['name'],
-            transition_series['name'])
 
         def filter_transitions(from_damage_state, to_damage_state, taxonomy):
             tst = transition_series['transitions']
@@ -532,7 +525,6 @@ def get_example_exposure_cell():
     '''
     data = pd.DataFrame({
         'geometry': ['POINT(12.0 15.0)'],
-        'name': ['example point1'],
         'gc_id': ['abcdefg'],
         r'MCF\/DNO\/_1': [6],
         r'MUR+STDRE\/': [13],
@@ -554,7 +546,6 @@ def get_exposure_cell_for_sara():
 
     exposure_cell_data = gpd.GeoDataFrame(pd.DataFrame({
         'geometry': ['POINT(12.0 15.0)'],
-        'name': ['example point1'],
         'gc_id': ['abcdefg'],
         'MUR_H1': [100.0],
         'ER_ETR_H1_2_D2': [200.0]

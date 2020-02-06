@@ -31,7 +31,6 @@ class TestLoss(unittest.TestCase):
         '''
         geometry1 = wkt.loads('POINT(14 51)')
         series1 = pd.Series({
-            'name': 'Colina',
             'gc_id': 'CHL.14.1.1_1',
             'geometry': geometry1,
             'W+WS/H:1,2': 100.0,
@@ -62,7 +61,6 @@ class TestLoss(unittest.TestCase):
 
         self.assertEqual('$', loss_cell1.loss_unit)
         self.assertEqual(10, loss_cell1.loss_value)
-        self.assertEqual('Colina', loss_cell1.name)
         self.assertEqual('CHL.14.1.1_1', loss_cell1.gid)
         self.assertEqual(geometry1, loss_cell1.geometry)
 
@@ -71,7 +69,6 @@ class TestLoss(unittest.TestCase):
         loss_dataframe = loss_list.to_dataframe()
 
         self.assertEqual(geometry1, loss_dataframe['geometry'][0])
-        self.assertEqual('Colina', loss_dataframe['name'][0])
         self.assertEqual(10, loss_dataframe['loss_value'][0])
         self.assertEqual('$', loss_dataframe['loss_unit'][0])
 

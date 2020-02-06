@@ -26,7 +26,6 @@ class TestExposure(unittest.TestCase):
         geometry2 = wkt.loads('POINT(15 52)')
 
         dataframe = pd.DataFrame({
-            'name': ['Colina', 'Quilpue'],
             'gc_id': ['CHL.14.1.1_1', 'CHL.14.2.1-1'],
             'geometry': [geometry1, geometry2],
             'W+WS/H:1,2': [100.0, 80.0],
@@ -44,9 +43,6 @@ class TestExposure(unittest.TestCase):
 
         self.assertTrue(all(
             dataframe['geometry'] == recreated_dataframe['geometry']
-        ))
-        self.assertTrue(all(
-            dataframe['name'] == recreated_dataframe['name']
         ))
         self.assertTrue(all(
             dataframe['gc_id'] == recreated_dataframe['gc_id']
@@ -68,30 +64,25 @@ class TestExposure(unittest.TestCase):
         geometry2 = wkt.loads('POINT(15 52)')
 
         dataframe = pd.DataFrame({
-            'name': ['Colina', 'Quilpue'],
             'gid': ['CHL.14.1.1_1', 'CHL.14.2.1-1'],
             'geometry': [geometry1, geometry2],
             'expo': [
                 {
                     'id': ['AREA # 13301', 'AREA # 13301'],
-                    'Region': ['Colina', 'Colina'],
                     'Taxonomy': ['W+WS/H:1,2', 'W+WS/H:1,2'],
                     'Dwellings': [107.5, 107.5],
                     'Buildings': [100.0, 50.0],
                     'Repl-cost-USD-bdg': [360000, 450000],
                     'Population': [446.5, 446.5],
-                    'name': ['Colina', 'Colina'],
                     'Damage': ['D0', 'D1']
                 },
                 {
                     'id': ['AREA # 13302', 'AREA # 13302'],
-                    'Region': ['Quilpue', 'Quilpue'],
                     'Taxonomy': ['W+WS/H:1,2', 'W+WS/H:1,2'],
                     'Dwellings': [107.5, 107.5],
                     'Buildings': [80.0, 55.0],
                     'Repl-cost-USD-bdg': [360000, 450000],
                     'Population': [446.5, 446.5],
-                    'name': ['Quilpue', 'Quilpue'],
                     'Damage': ['D0', 'D1']
                 }
             ]
@@ -110,9 +101,6 @@ class TestExposure(unittest.TestCase):
             dataframe['geometry'] == recreated_dataframe['geometry']
         ))
         self.assertTrue(all(
-            dataframe['name'] == recreated_dataframe['name']
-        ))
-        self.assertTrue(all(
             dataframe['gid'] == recreated_dataframe['gid']
         ))
         self.assertTrue(all(
@@ -125,7 +113,6 @@ class TestExposure(unittest.TestCase):
         '''
         geometry1 = wkt.loads('POINT(14 51)')
         series1 = pd.Series({
-            'name': 'Colina',
             'gc_id': 'CHL.14.1.1_1',
             'geometry': geometry1,
             'W+WS/H:1,2': 100.0,
@@ -139,7 +126,6 @@ class TestExposure(unittest.TestCase):
 
         geometry2 = wkt.loads('POINT(15 52)')
         series2 = pd.Series({
-            'name': 'Quilpue',
             'gc_id': 'CHL.14.1.1_1',
             'geometry': geometry2,
             'W+WS/H:1,2': 80.0,
@@ -165,7 +151,6 @@ class TestExposure(unittest.TestCase):
         '''
         geometry = wkt.loads('POINT(14 51)')
         series = pd.Series({
-            'name': 'Colina',
             'gc_id': 'CHL.14.1.1_1',
             'geometry': geometry,
             'W+WS/H:1,2': 100.0,
@@ -179,7 +164,6 @@ class TestExposure(unittest.TestCase):
 
         self.assertEqual('SARA_v1.0', exposure_cell.schema)
         self.assertEqual('CHL.14.1.1_1', exposure_cell.gid)
-        self.assertEqual('Colina', exposure_cell.name)
         self.assertEqual(geometry, exposure_cell.geometry)
         lon, lat = exposure_cell.get_lon_lat_of_centroid()
         self.assertEqual(14, lon)
@@ -197,18 +181,15 @@ class TestExposure(unittest.TestCase):
         '''
         geometry = wkt.loads('POINT(14 51)')
         series = pd.Series({
-            'name': 'Colina',
             'gid': 'CHL.14.1.1_1',
             'geometry': geometry,
             'expo': {
                 'id': ['AREA # 13301', 'AREA # 13301'],
-                'Region': ['Colina', 'Colina'],
                 'Taxonomy': ['W+WS/H:1,2', 'W+WS/H:1,2'],
                 'Dwellings': [107.5, 107.5],
                 'Buildings': [100.0, 50.0],
                 'Repl-cost-USD-bdg': [360000, 450000],
                 'Population': [446.5, 446.5],
-                'name': ['Colina', 'Colina'],
                 'Damage': ['D0', 'D1']
             }
         })
@@ -218,7 +199,6 @@ class TestExposure(unittest.TestCase):
 
         self.assertEqual('SARA_v1.0', exposure_cell.schema)
         self.assertEqual('CHL.14.1.1_1', exposure_cell.gid)
-        self.assertEqual('Colina', exposure_cell.name)
         self.assertEqual(geometry, exposure_cell.geometry)
         lon, lat = exposure_cell.get_lon_lat_of_centroid()
         self.assertEqual(14, lon)
@@ -239,11 +219,9 @@ class TestExposure(unittest.TestCase):
             damage_state=0,
             n_buildings=100.0,
             area_id='AREA # 13301',
-            region='Colina',
             dwellings=107.5,
             repl_cost_usd_bdg=360000,
             population=446.5,
-            name='Colina'
         )
         tdb2 = dict(
             schema='SARA_v1.0',
@@ -251,24 +229,20 @@ class TestExposure(unittest.TestCase):
             damage_state=1,
             n_buildings=50.0,
             area_id='AREA # 13301',
-            region='Colina',
             dwellings=107.5,
             repl_cost_usd_bdg=360000,
             population=446.5,
-            name='Colina'
         )
         geometry = wkt.loads('POINT(14 51)')
         exposure_cell = exposure.ExposureCell(
             schema='SARA_v1.0',
             gid='CHL.14.1.1_1',
-            name='Colina',
             geometry=geometry,
             taxonomies=[tdb1, tdb2]
         )
 
         self.assertEqual('SARA_v1.0', exposure_cell.schema)
         self.assertEqual('CHL.14.1.1_1', exposure_cell.gid)
-        self.assertEqual('Colina', exposure_cell.name)
         self.assertEqual(geometry, exposure_cell.geometry)
         lon, lat = exposure_cell.get_lon_lat_of_centroid()
         self.assertEqual(14, lon)
@@ -317,7 +291,6 @@ class TestExposure(unittest.TestCase):
         '''
         series = pd.Series({
             'W+WS/H:1,2_D3': 100.0,
-            'name': 'Colina',
             'gid': 'xyz123',
             # won't be used here
             'geometry': 'POINT(1 1)',
@@ -334,7 +307,6 @@ class TestExposure(unittest.TestCase):
         self.assertEqual('W+WS/H:1,2', tdb["taxonomy"])
         self.assertEqual(3, tdb["damage_state"])
         self.assertEqual(100.0, tdb["n_buildings"])
-        self.assertEqual('Colina', tdb["name"])
 
     def test_remove_prefix_d_for_damage_state(self):
         '''
@@ -351,13 +323,11 @@ class TestExposure(unittest.TestCase):
         '''
         series = pd.Series({
             'id': 'AREA # 13301',
-            'Region': 'Colina',
             'Taxonomy': 'W+WS/H:1,2',
             'Dwellings': 107.5,
             'Buildings': 100.0,
             'Repl-cost-USD-bdg': 360000,
             'Population': 446.5,
-            'name': 'Colina',
             'Damage': 'D0'
         })
 
@@ -370,13 +340,11 @@ class TestExposure(unittest.TestCase):
         self.assertEqual(0, tdb["damage_state"])
         self.assertEqual(100.0, tdb["n_buildings"])
         self.assertEqual('AREA # 13301', tdb["area_id"])
-        self.assertEqual('Colina', tdb["region"])
         self.assertLess(107.4, tdb["dwellings"])
         self.assertLess(tdb["dwellings"], 107.6)
         self.assertEqual(360000, tdb["repl_cost_usd_bdg"])
         self.assertLess(446.4, tdb["population"])
         self.assertLess(tdb["population"], 446.6)
-        self.assertEqual('Colina', tdb["name"])
 
     def test_taxonomy_data_bag(self):
         '''
@@ -388,11 +356,9 @@ class TestExposure(unittest.TestCase):
             damage_state=0,
             n_buildings=100.0,
             area_id='AREA # 13301',
-            region='Colina',
             dwellings=107.5,
             repl_cost_usd_bdg=360000,
             population=446.5,
-            name='Colina'
         )
 
         self.assertEqual('SARA_v1.0', tdb["schema"])
@@ -400,13 +366,11 @@ class TestExposure(unittest.TestCase):
         self.assertEqual(0, tdb["damage_state"])
         self.assertEqual(100.0, tdb["n_buildings"])
         self.assertEqual('AREA # 13301', tdb["area_id"])
-        self.assertEqual('Colina', tdb["region"])
         self.assertLess(107.4, tdb["dwellings"])
         self.assertLess(tdb["dwellings"], 107.6)
         self.assertEqual(360000, tdb["repl_cost_usd_bdg"])
         self.assertLess(446.4, tdb["population"])
         self.assertLess(tdb["population"], 446.6)
-        self.assertEqual('Colina', tdb["name"])
 
     def test_fill_cell_step_by_step(self):
         '''
@@ -422,17 +386,14 @@ class TestExposure(unittest.TestCase):
             damage_state=0,
             n_buildings=100.0,
             area_id='AREA # 13301',
-            region='Colina',
             dwellings=107.5,
             repl_cost_usd_bdg=360000,
             population=446.5,
-            name='Colina'
         )
 
         geometry = wkt.loads('POINT(14 51)')
         exposure_cell = exposure.ExposureCell(
             schema='SARA_v1.0',
-            name='Colina',
             gid='CHL.14.1.1_1',
             geometry=geometry,
             taxonomies=[])
@@ -456,11 +417,9 @@ class TestExposure(unittest.TestCase):
             damage_state=1,
             n_buildings=100.0,
             area_id='AREA # 13301',
-            region='Colina',
             dwellings=107.5,
             repl_cost_usd_bdg=360000,
             population=446.5,
-            name='Colina'
         )
         exposure_cell.add_taxonomy(tdb2)
         self.assertEqual(2, len(exposure_cell.taxonomies))
@@ -474,11 +433,10 @@ class TestExposure(unittest.TestCase):
         Tests the creation of an empty
         exposure cell from an existing one.
         Should still have the same
-        name, id and geometry, but no taxonomy data.
+        id and geometry, but no taxonomy data.
         '''
         geometry1 = wkt.loads('POINT(14 51)')
         series1 = pd.Series({
-            'name': 'Colina',
             'gc_id': 'CHL.14.1.1_1',
             'geometry': geometry1,
             'W+WS/H:1,2': 100.0,
@@ -492,7 +450,6 @@ class TestExposure(unittest.TestCase):
 
         empty_exposure_cell = exposure_cell1.without_taxonomies()
 
-        self.assertEqual('Colina', empty_exposure_cell.name)
         self.assertEqual('CHL.14.1.1_1', empty_exposure_cell.gid)
         self.assertEqual(geometry1, empty_exposure_cell.geometry)
         self.assertEqual([], empty_exposure_cell.taxonomies)

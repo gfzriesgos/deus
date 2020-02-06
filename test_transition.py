@@ -24,7 +24,6 @@ class TestTransition(unittest.TestCase):
         '''
         geometry1 = wkt.loads('POINT(14 51)')
         series1 = pd.Series({
-            'name': 'Colina',
             'gc_id': 'CHL.14.1.1_1',
             'geometry': geometry1,
             'W+WS/H:1,2': 100.0,
@@ -65,7 +64,6 @@ class TestTransition(unittest.TestCase):
         first_transition = transition_cell1.transitions[0]
         self.assertEqual(20, first_transition.n_buildings)
 
-        self.assertEqual('Colina', transition_cell1.name)
         self.assertEqual('CHL.14.1.1_1', transition_cell1.gid)
         self.assertEqual(geometry1, transition_cell1.geometry)
 
@@ -81,7 +79,6 @@ class TestTransition(unittest.TestCase):
         transition_list = transition.TransitionCellList([transition_cell1])
         transition_dataframe = transition_list.to_dataframe()
 
-        self.assertEqual('Colina', transition_dataframe['name'][0])
         self.assertEqual('CHL.14.1.1_1', transition_dataframe['gid'][0])
         self.assertEqual(geometry1, transition_dataframe['geometry'][0])
         self.assertEqual(schema, transition_dataframe['schema'][0])
