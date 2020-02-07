@@ -7,7 +7,8 @@ import os
 import subprocess
 import unittest
 
-import exposure
+import geopandas
+import pandas
 
 
 class TestDeusCmdExecution(unittest.TestCase):
@@ -164,12 +165,15 @@ class TestDeusCmdExecution(unittest.TestCase):
             check=True,
         )
 
-        exposure_data = exposure.ExposureCellList.from_file(
-            'SUPPASRI2013_v2.0',
-            updated_exposure_output_filename
-        )
-        for exposure_cell in exposure_data.exposure_cells:
-            self.assertTrue(exposure_cell.taxonomies)
+        # We want to check that we have taxonomies in the resulting exposure
+        exposure_data = geopandas.read_file(updated_exposure_output_filename)
+        has_taxonomies = False
+        for _, row in exposure_data.iterrows():
+            expo = pandas.DataFrame(row.expo)
+            if 'Taxonomy' in expo.columns and len(expo.Taxonomy) > 0:
+                has_taxonomies = True
+                break
+        self.assertTrue(has_taxonomies)
 
     def test_execute_deus_two_times(self):
         '''
@@ -696,15 +700,13 @@ def get_n_buildings_by_cell_gid(schema, exposure_file):
     For testing that the number of building stays the
     same.
     '''
-    exposure_data = exposure.ExposureCellList.from_file(
-        schema,
-        exposure_file,
-    ).to_dataframe()
+    exposure_data = geopandas.read_file(exposure_file)
 
     buildings_by_cell_gid = {}
     for _, series in exposure_data.iterrows():
+        expo = pandas.DataFrame(series.expo)
         gid = series['gid']
-        buildings = sum(series['expo']['Buildings'])
+        buildings = sum(expo['Buildings'])
 
     return buildings_by_cell_gid
 

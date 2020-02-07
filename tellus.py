@@ -53,14 +53,27 @@ class Child():
             self.loss_provider
         )
 
-        just_updated_exposure = result_exposure[['gid', 'geometry', 'expo']]
-        write_result(self.args_with_output_paths.updated_exposure_output_file, just_updated_exposure)
-        just_transitions = result_exposure[['gid', 'geometry', 'transitions']]
-        write_result(self.args_with_output_paths.transition_output_file, just_transitions)
-        just_losses = result_exposure[['gid', 'geometry', 'loss_value', 'loss_unit']]
-        write_result(self.args_with_output_paths.loss_output_file, just_losses)
+        jobs_for_writing = [
+            FilterColumnsAndWriteResult(
+                result_exposure,
+                self.args_with_output_paths.updated_exposure_output_file,
+                ['gid', 'geometry', 'expo']),
+            FilterColumnsAndWriteResult(
+                result_exposure,
+                self.args_with_output_paths.transition_output_file,
+                ['gid', 'geometry', 'transitions']),
+            FilterColumnsAndWriteResult(
+                result_exposure,
+                self.args_with_output_paths.loss_output_file,
+                ['gid', 'geometry', 'loss_value', 'loss_unit']),
+            FilterColumnsAndWriteResult(
+                result_exposure,
+                self.args_with_output_paths.merged_output_file
+            ),
+        ]
 
-        write(self.args_with_output_paths.merged_output_file, result_exposure)
+        with multiprocessing.Pool() as pool:
+            pool.map(FilterColumnsAndWriteResult.run, jobs_for_writing)
 
 
 def create_schema_mapper(current_dir):
@@ -98,3 +111,17 @@ def write_result(output_file, cells):
         data = json.load(read_handle)
     with open(output_file, 'wt') as write_handle:
         json.dump(data, write_handle)
+
+
+class FilterColumnsAndWriteResult:
+    def __init__(self, raw_df, path, columns=None):
+        self.raw_df = raw_df
+        self.path = path
+        self.columns = columns
+
+    def run(self):
+        if self.columns:
+            df = self.raw_df[self.columns]
+        else:
+            df = self.raw_df
+        write_result(self.path, df)

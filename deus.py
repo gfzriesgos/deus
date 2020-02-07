@@ -12,9 +12,8 @@ import os
 
 import tellus
 
-import gpdexposure
-import exposure
 import fragility
+import gpdexposure
 import intensityprovider
 import loss
 import schemamapping
