@@ -12,8 +12,8 @@ import os
 import tellus
 
 import ashfall
-import exposure
 import fragility
+import gpdexposure
 import intensitydatawrapper
 import intensityprovider
 import loss
@@ -75,13 +75,13 @@ def main():
     ).to_intensity_provider()
     fragility_provider = fragility.Fragility.from_file(
         args.fragilty_file).to_fragility_provider()
-    exposure_cell_provider = exposure.ExposureCellList.from_file(
-        file_name=args.exposure_file, schema=args.exposure_schema)
+    old_exposure = gpdexposure.read_exposure(args.exposure_file)
 
     worker = tellus.Child(
         intensity_provider,
         fragility_provider,
-        exposure_cell_provider,
+        old_exposure,
+        args.exposure_schema,
         loss_provider,
         args
     )
