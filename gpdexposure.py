@@ -348,6 +348,12 @@ class Updater:
         Runs the update for the update on each series of the
         given dataframe.
         """
+        # In case that our subset is empty, we want to return None.
+        # Otherwise our apply would return an empty geodataframe
+        # with the columns of the input. But as this may contain
+        # a name, we don't want that.
+        if len(df) == 0:
+            return None
         list_of_series = df.apply(self.update_series, axis=1)
         return geopandas.GeoDataFrame(list_of_series)
 
