@@ -1,3 +1,10 @@
+# 2020-05-11:
+
+- Mapping and exposure update now handles the population and the replacement costs per building
+- Loss computation now uses the replacement costs per building (there is a fallback if there are non, so we reuse the data from the loss files that we already have)
+- updated the documentation
+- removed unused classes and their test cases
+
 # 2020-02-03:
 
 - Added a new output parameter that contains all the outputs of the older three
