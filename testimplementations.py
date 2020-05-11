@@ -15,7 +15,11 @@ class AlwaysOneDollarPerTransitionLossProvider:
     Useless for productive environment but easy for testing.
     '''
 
-    def get_loss(self, schema, taxonomy, from_damage_state, to_damage_state):
+    def get_fallback_replacement_cost(self, schema, taxonomy):
+        """Return a dummy replacement cost."""
+        return 1
+
+    def get_loss(self, schema, taxonomy, from_damage_state, to_damage_state, replacement_cost):
         '''
         Returns the loss for each transition (one building).
         '''

@@ -79,11 +79,16 @@ class LossCell:
         loss_value = 0
 
         for transition in transition_cell.transitions:
+            replacement_cost = loss_provider.get_fallback_replacement_cost(
+                schema=transition_cell.schema,
+                taxonomy=transition.taxonomy,
+            )
             single_loss_value = loss_provider.get_loss(
                 schema=transition_cell.schema,
                 taxonomy=transition.taxonomy,
                 from_damage_state=transition.from_damage_state,
-                to_damage_state=transition.to_damage_state
+                to_damage_state=transition.to_damage_state,
+                replacement_cost=replacement_cost,
             )
             n_loss_value = single_loss_value * transition.n_buildings
 
@@ -108,12 +113,34 @@ class LossProvider:
         self._data = data
         self._unit = unit
 
+    def get_fallback_replacement_cost(
+            self,
+            schema,
+            taxonomy):
+        """
+        Return the replacement cost as fallback.
+        
+        The idea is to provide the existing information that
+        we already have in case that the exposure model itself
+        does't provide a replacement cost.
+        """
+        if schema not in self._data:
+            raise Exception('schema is not known for loss computation')
+        data_for_schema = self._data[schema]['data']
+        if not taxonomy in data_for_schema['replacementCosts'].keys():
+            raise Exception(
+                'no taxonomy candidates found for %s', repr(taxonomy)
+            )
+
+        return data_for_schema['replacementCosts'][taxonomy]
+
     def get_loss(
             self,
             schema,
             taxonomy,
             from_damage_state,
-            to_damage_state):
+            to_damage_state,
+            replacement_cost):
         '''
         Returns the loss for the transition.
         '''
@@ -121,21 +148,19 @@ class LossProvider:
         if schema not in self._data:
             raise Exception('schema is not known for loss computation')
         data_for_schema = self._data[schema]['data']
+        steps = data_for_schema['steps']
 
-        tax_candidates = [
-            x for x in data_for_schema
-            if x['taxonomy'] == taxonomy]
+        str_from_damage_state = str(from_damage_state)
+        str_to_damage_state = str(to_damage_state)
 
-        if not tax_candidates:
-            raise Exception(
-                'no taxonomy candidates found for %s', repr(taxonomy)
-            )
+        coeff_from = 0
+        if str_from_damage_state in steps.keys():
+            coeff_from = steps[str_from_damage_state]
 
-        if 'loss_matrix' not in tax_candidates[0]:
-            raise Exception('could not found loss matrix for taxonomy')
+        coeff_to = steps[str_to_damage_state]
+        coeff = coeff_to - coeff_from
 
-        loss_matrix = tax_candidates[0]['loss_matrix']
-        return loss_matrix[str(from_damage_state)][str(to_damage_state)]
+        return replacement_cost * coeff
 
     def get_unit(self):
         '''

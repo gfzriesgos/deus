@@ -209,7 +209,8 @@ def get_updated_exposure_and_transitions(
             'taxonomy': numpy.empty(0, dtype=numpy.object),
             'from_damage_state': numpy.zeros(0),
             'to_damage_state': numpy.zeros(0),
-            'n_buildings': numpy.zeros(0)
+            'n_buildings': numpy.zeros(0),
+            'replacement_costs_usd_bdg': numpy.zeros(0),
         })
         return expo, result_transitions
     # So now we need to check for updates in our exposure model.
@@ -311,18 +312,21 @@ def get_updated_exposure_and_transitions(
     tran_from_state = numpy.empty(tran_n_keys, dtype=numpy.int)
     tran_to_state = numpy.empty(tran_n_keys, dtype=numpy.int)
     tran_buildings = numpy.zeros(tran_n_keys)
+    tran_replacement_costs = numpy.zeros(tran_n_keys)
 
     for idx, key in enumerate(transitions.keys()):
         tran_taxonomy[idx] = key.taxonomy
         tran_from_state[idx] = key.from_damage_state
         tran_to_state[idx] = key.to_damage_state
-        tran_buildings = transitions[key]
+        tran_buildings[idx] = transitions[key]
+        tran_replacement_costs[idx] = repl_per_tax[key.taxonomy]
 
     result_transitions = pandas.DataFrame({
         'taxonomy': tran_taxonomy,
         'from_damage_state': tran_from_state,
         'to_damage_state': tran_to_state,
-        'n_buildings': tran_buildings
+        'n_buildings': tran_buildings,
+        'replacement_costs_usd_bdg': tran_replacement_costs
     })
 
     return result_expo, result_transitions
@@ -354,11 +358,20 @@ def compute_loss(transitions, loss_provider, schema):
     """
     loss_value = 0
     for _, row in transitions.iterrows():
+
+        replacement_cost = row.replacement_costs_usd_bdg
+        if replacement_cost == 0:
+            replacement_cost = loss_provider.get_fallback_replacement_cost(
+                schema=schema,
+                taxonomy=row.taxonomy
+            )
+
         single_loss_value = loss_provider.get_loss(
             schema=schema,
             taxonomy=row.taxonomy,
             from_damage_state=row.from_damage_state,
-            to_damage_state=row.to_damage_state
+            to_damage_state=row.to_damage_state,
+            replacement_cost=replacement_cost
         )
         n_loss_value = single_loss_value * row.n_buildings
 
