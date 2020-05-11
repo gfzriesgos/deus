@@ -16,9 +16,7 @@ import fragility
 import gpdexposure
 import intensityprovider
 import loss
-import schemamapping
 import shakemap
-import transition
 
 
 def main():

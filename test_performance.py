@@ -8,8 +8,6 @@ import datetime
 import subprocess
 import unittest
 
-import exposure
-
 
 class TestPerformance(unittest.TestCase):
     '''

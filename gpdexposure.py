@@ -60,7 +60,6 @@ def update_exposure_transitions_and_losses(
     (also dataframe), losses (aggregated value for all transitions as well
     as units) and the output schema.
     """
-
     updater = Updater(
         source_schema,
         fragility_provider,
@@ -70,7 +69,6 @@ def update_exposure_transitions_and_losses(
     )
     # So we use the pandas apply to run our function. I'm not sure if we
     # can parallize this, but it is one of the fastest ways in python anyway.
-
     n_cpus = multiprocessing.cpu_count()
     with multiprocessing.Pool(n_cpus) as pool:
         splitted_exposure = numpy.array_split(exposure, n_cpus)
@@ -88,17 +86,27 @@ def update_exposure_transitions_and_losses(
 
 
 class ExpoTriple:
+    """
+    Class to store data for the schema mapping.
+
+    The contents are the number of buildings, the total population and
+    the total replacement costs (not per building).
+    """
+
     def __init__(self, n_buildings=0, total_population=0, total_repl=0):
+        """Init the instance."""
         self.n_buildings = n_buildings
         self.total_population = total_population
         self.total_repl = total_repl
 
 
 def empty_expo_triple():
+    """Return an empty ExpoTriple."""
     return ExpoTriple(0, 0, 0)
 
 
 def zero():
+    """Return 0."""
     return 0
 
 
@@ -112,8 +120,12 @@ def map_exposure(
     """
     if source_schema == target_schema:
         return expo
+    # The collector is the dict that we use to store all of
+    # the exposure output (and create a dataframe later).
     collector = collections.defaultdict(empty_expo_triple)
-    
+
+    # We can't be sure that those columns are there.
+    # So in case we miss them we add them with zeros.
     if 'Population' not in expo.columns:
         expo['Population'] = 0.0
     if 'Repl-cost-USD-bdg' not in expo.columns:
@@ -139,11 +151,22 @@ def map_exposure(
                 taxonomy=res.taxonomy,
                 damage_state=res.damage_state
             )
+            # We use a class instance here, so we modify in place
+            # (also visible in the dict).
             collected_values = collector[key]
-            # res.n_buildings is now only a number from 0 to 1
-            collected_values.n_buildings += (res.n_buildings * row.Buildings)
-            collected_values.total_population += (res.n_buildings * row.Population)
-            collected_values.total_repl += (res.n_buildings * row.Buildings * row['Repl-cost-USD-bdg'])
+            # res.n_buildings is now only a number from 0 to 1.
+            # So we need to do the multiplication ourselves
+            # (but we can reuse the mapping value for others...)
+            collected_values.n_buildings += \
+                (res.n_buildings * row.Buildings)
+            collected_values.total_population += \
+                (res.n_buildings * row.Population)
+            collected_values.total_repl += \
+                (
+                    res.n_buildings *
+                    row.Buildings *
+                    row['Repl-cost-USD-bdg']
+                )
 
     # Create resulting dataframe.
     n_collector_keys = len(collector.keys())
@@ -154,6 +177,8 @@ def map_exposure(
     population = numpy.zeros(n_collector_keys)
     repl_costs = numpy.zeros(n_collector_keys)
 
+    # But we have to collect the replacement costs over all
+    # damage states of the results (for each taxonomy).
     n_buildings_per_tax = collections.defaultdict(zero)
     total_repl_per_tax = collections.defaultdict(zero)
 
@@ -163,6 +188,8 @@ def map_exposure(
         n_buildings_per_tax[just_taxonomy] += value.n_buildings
         total_repl_per_tax[just_taxonomy] += value.total_repl
 
+    # After that we can populate the columns for the resulting
+    # dataframe.
     for idx, key in enumerate(collector.keys()):
         just_taxonomy = key.taxonomy
         taxonomy[idx] = just_taxonomy
@@ -171,6 +198,7 @@ def map_exposure(
         buildings[idx] = value.n_buildings
         population[idx] = value.total_population
 
+        # And the replacement costs (read from taxonomy level).
         n_bdg = n_buildings_per_tax[just_taxonomy]
         repl_cost = 0
         if n_bdg != 0:
@@ -195,6 +223,8 @@ def get_updated_exposure_and_transitions(
     This function returns the update exposure and all of
     the transitions that happend in this step.
     """
+    # Again, we can't be sure that those columns are there.
+    # We use just zeros if they are not.
     if 'Population' not in expo.columns:
         expo['Population'] = 0.0
     if 'Repl-cost-USD-bdg' not in expo.columns:
@@ -219,12 +249,15 @@ def get_updated_exposure_and_transitions(
     lon, lat = centroid.x, centroid.y
     intensity, units = intensity_provider.get_nearest(lon=lon, lat=lat)
 
+    # Calculate the replacement costs for each taxonomy
+    # before we care about the damage transitions.
     total_repl_per_tax = collections.defaultdict(zero)
     n_buildings_per_tax = collections.defaultdict(zero)
 
     for _, row in expo.iterrows():
         taxonomy = row.Taxonomy
-        total_repl_per_tax[taxonomy] += (row['Repl-cost-USD-bdg'] * row.Buildings)
+        total_repl_per_tax[taxonomy] += \
+            (row['Repl-cost-USD-bdg'] * row.Buildings)
         n_buildings_per_tax[taxonomy] += row.Buildings
 
     repl_per_tax = collections.defaultdict(zero)
@@ -234,9 +267,10 @@ def get_updated_exposure_and_transitions(
         if n_bdg != 0:
             repl_per_tax[taxonomy] = total_repl_per_tax[taxonomy] / n_bdg
 
+    # Now we can check for damage.
     transitions = collections.defaultdict(zero)
     collector = collections.defaultdict(empty_expo_triple)
-    
+
     for _, row in expo.iterrows():
         n_left = row.Buildings
         n_pop_left = row.Population
@@ -255,6 +289,7 @@ def get_updated_exposure_and_transitions(
                 intensity, units
             )
 
+            # We care about both the number of buildings and the population.
             n_buildings_in_damage_state = probability * n_left
             n_population_in_damage_state = probability * n_pop_left
             n_left -= n_buildings_in_damage_state
@@ -264,8 +299,10 @@ def get_updated_exposure_and_transitions(
                 key_n_buildings = TaxonomyDamageStateTuple(
                     taxonomy, single_damage_state.to_state
                 )
-                collector[key_n_buildings].n_buildings += n_buildings_in_damage_state
-                collector[key_n_buildings].total_population += n_population_in_damage_state
+                collector[key_n_buildings].n_buildings += \
+                    n_buildings_in_damage_state
+                collector[key_n_buildings].total_population += \
+                    n_population_in_damage_state
 
                 key_transitions = TransitionTuple(
                     taxonomy, old_damage_state, single_damage_state.to_state
@@ -288,7 +325,6 @@ def get_updated_exposure_and_transitions(
     expo_buildings = numpy.zeros(expo_n_building_keys)
     expo_population = numpy.zeros(expo_n_building_keys)
     expo_repl = numpy.zeros(expo_n_building_keys)
-
 
     for idx, key in enumerate(collector.keys()):
         just_taxonomy = key.taxonomy
@@ -360,6 +396,8 @@ def compute_loss(transitions, loss_provider, schema):
     for _, row in transitions.iterrows():
 
         replacement_cost = row.replacement_costs_usd_bdg
+        # We want to use the replacement costs if those are given.
+        # If we don't have replacement costs we can ask the loss_provider.
         if replacement_cost == 0:
             replacement_cost = loss_provider.get_fallback_replacement_cost(
                 schema=schema,

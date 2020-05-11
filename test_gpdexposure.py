@@ -194,7 +194,7 @@ class TestGpdExposureDamageStateUpdate(unittest.TestCase):
                     },
                     '3': {
                         '0': 0.0,
-                        # TAX1 D1 goes to 20% into TAX D3 
+                        # TAX1 D1 goes to 20% into TAX D3
                         '1': 0.2,
                         '2': 0.5,
                     }
@@ -258,7 +258,8 @@ class TestGpdExposureDamageStateUpdate(unittest.TestCase):
 
         self.assertEqual(4, len(expo))
 
-        # This here was the mapping only (but with applying the damage computation)
+        # This here was the mapping only
+        # (but with applying the damage computation)
         self.assertEqual(24, get_buildings(expo, 'TAX', 'D0'))
         self.assertBetween(139.19, get_buildings(expo, 'TAX', 'D1'), 140.01)
         self.assertBetween(140.79, get_buildings(expo, 'TAX', 'D2'), 140.81)
@@ -284,33 +285,40 @@ class TestGpdExposureDamageStateUpdate(unittest.TestCase):
         # Then we map the total replacement costs to the other schemas:
         #
         # totalRepl('TAX', 'D0') = (
-        #                            totalRepl('TAX1', 'D0') * p('TAX1', 'D0', 'TAX', 'D0') +
-        #                            totalRepl('TAX2', 'D0') * p('TAX2', 'D0', 'TAX', 'D0')
+        #                            totalRepl('TAX1', 'D0') *
+        #                              p('TAX1', 'D0', 'TAX', 'D0') +
+        #                            totalRepl('TAX2', 'D0') *
+        #                              p('TAX2', 'D0', 'TAX', 'D0')
         #                          )
         #                        = 5_000_000 * 1 + 6_000_000 * 1
         # totalRepl('TAX', 'D0') = 11_000_000
         # totalRepl('TAX', 'D1') = (
-        #                            totalRepl('TAX1', 'D1') * p('TAX1', 'D1', 'TAX', 'D1') +
-        #                            totalRepl('TAX2', 'D1') * p('TAX2', 'D1', 'TAX', 'D1')
+        #                            totalRepl('TAX1', 'D1') *
+        #                              p('TAX1', 'D1', 'TAX', 'D1') +
+        #                            totalRepl('TAX2', 'D1') *
+        #                              p('TAX2', 'D1', 'TAX', 'D1')
         #                          )
         #                        = 4_500_000 * 0.5 + 5_900_000 * 0.9
         #                        = 7_560_000
         # totalRepl('TAX', 'D2') = (
-        #                            totalRepl('TAX1', 'D1') * p('TAX1', 'D1', 'TAX', 'D2') +
-        #                            totalRepl('TAX2', 'D1') * p('TAX2', 'D1', 'TAX', 'D2')
+        #                            totalRepl('TAX1', 'D1') *
+        #                              p('TAX1', 'D1', 'TAX', 'D2') +
+        #                            totalRepl('TAX2', 'D1') *
+        #                              p('TAX2', 'D1', 'TAX', 'D2')
         #                          )
-        #                        = 4_500_000 * 0.3 + 5_900_000 * 0.1 
+        #                        = 4_500_000 * 0.3 + 5_900_000 * 0.1
         #                        = 1_940_000
-        # totalRepl('TAX', 'D3') = totalRepl('TAX1', 'D1') * p('TAX1', 'D1', 'TAX', 'D3')
+        # totalRepl('TAX', 'D3') = totalRepl('TAX1', 'D1') *
+        #                          p('TAX1', 'D1', 'TAX', 'D3')
         #                        = 4_500_000 * 0.2
         #                        = 900_000
         #
         # Then we sum those up.
         #
         # totalRepl('TAX') = (
-        #                      totalRepl('TAX', 'D0') + 
-        #                      totalRepl('TAX', 'D1') + 
-        #                      totalRepl('TAX', 'D2') + 
+        #                      totalRepl('TAX', 'D0') +
+        #                      totalRepl('TAX', 'D1') +
+        #                      totalRepl('TAX', 'D2') +
         #                      totalRepl('TAX', 'D3')
         #                    )
         #                  = 21_400_000
@@ -320,14 +328,63 @@ class TestGpdExposureDamageStateUpdate(unittest.TestCase):
         # replBdg('TAX') = totalRepl('TAX') / nBdg('TAX')
         # replBdg('TAX') = 21_400_000 / 400
         # replBdg('TAX') = 53_500
-        # 
+        #
         # As we are not going to change the replacement costs on applying
         # the damage, we stay with those values.
         #
-        self.assertBetween(53_499, get_replacement_costs_usd_bdg(expo, 'TAX', 'D0'), 53_501)
-        self.assertBetween(53_499, get_replacement_costs_usd_bdg(expo, 'TAX', 'D1'), 53_501)
-        self.assertBetween(53_499, get_replacement_costs_usd_bdg(expo, 'TAX', 'D2'), 53_501)
-        self.assertBetween(53_499, get_replacement_costs_usd_bdg(expo, 'TAX', 'D3'), 53_501)
+        self.assertBetween(
+            53_499,
+            get_replacement_costs_usd_bdg(expo, 'TAX', 'D0'),
+            53_501
+        )
+        self.assertBetween(
+            53_499,
+            get_replacement_costs_usd_bdg(expo, 'TAX', 'D1'),
+            53_501
+        )
+        self.assertBetween(
+            53_499,
+            get_replacement_costs_usd_bdg(expo, 'TAX', 'D2'),
+            53_501
+        )
+        self.assertBetween(
+            53_499,
+            get_replacement_costs_usd_bdg(expo, 'TAX', 'D3'),
+            53_501
+        )
+
+        transitions = pandas.DataFrame(result_exposure.iloc[0].transitions)
+
+        self.assertBetween(
+            71,
+            get_transition_n_bdg(transitions, 'TAX', 0, 1),
+            73
+        )
+        self.assertBetween(
+            63,
+            get_transition_n_bdg(transitions, 'TAX', 0, 2),
+            65
+        )
+        self.assertBetween(
+            39,
+            get_transition_n_bdg(transitions, 'TAX', 0, 3),
+            41
+        )
+        self.assertBetween(
+            44.7,
+            get_transition_n_bdg(transitions, 'TAX', 1, 2),
+            44.9
+        )
+        self.assertBetween(
+            27.9,
+            get_transition_n_bdg(transitions, 'TAX', 1, 3),
+            28.1
+        )
+        self.assertBetween(
+            7.9,
+            get_transition_n_bdg(transitions, 'TAX', 2, 3),
+            8.1
+        )
 
     def test_without_schema_mapping(self):
         """
@@ -357,10 +414,10 @@ class TestGpdExposureDamageStateUpdate(unittest.TestCase):
         # Normally the replacement costs per building would stay the very same
         # as the input values (as all of those are only taxonomy specific and
         # oriented on the replacement costs of D0).
-        # However, as there is the danger, that the replacement costs are different
-        # over the damage states (having not completely reliable input), we
-        # are going to compute weighted means before applying the damage state
-        # conversion.
+        # However, as there is the danger, that the replacement costs are
+        # different over the damage states (having not completely reliable
+        # input), we are going to compute weighted means before applying
+        # the damage state conversion.
         #
         # Again we go over the total replacement costs:
         # totalRepl('TAX1', 'D0') = replBdg('TAX1', 'D0') * nBdg('TAX1', 'D0')
@@ -372,13 +429,70 @@ class TestGpdExposureDamageStateUpdate(unittest.TestCase):
         # replBdg('TAX1') = totalRepl('TAX1') / nBdg('TAX1')
         # And those are the very same regardless of the damage state
 
-        self.assertBetween(47_499, get_replacement_costs_usd_bdg(expo, 'TAX1', 'D0'), 47_501)
-        self.assertBetween(47_499, get_replacement_costs_usd_bdg(expo, 'TAX1', 'D1'), 47_501)
-        self.assertBetween(47_499, get_replacement_costs_usd_bdg(expo, 'TAX1', 'D2'), 47_501)
+        self.assertBetween(
+            47_499,
+            get_replacement_costs_usd_bdg(expo, 'TAX1', 'D0'),
+            47_501
+        )
+        self.assertBetween(
+            47_499,
+            get_replacement_costs_usd_bdg(expo, 'TAX1', 'D1'),
+            47_501
+        )
+        self.assertBetween(
+            47_499,
+            get_replacement_costs_usd_bdg(expo, 'TAX1', 'D2'),
+            47_501
+        )
 
-        self.assertBetween(59_499, get_replacement_costs_usd_bdg(expo, 'TAX2', 'D0'), 59_501)
-        self.assertBetween(59_499, get_replacement_costs_usd_bdg(expo, 'TAX2', 'D1'), 59_501)
-        self.assertBetween(59_499, get_replacement_costs_usd_bdg(expo, 'TAX2', 'D2'), 59_501)
+        self.assertBetween(
+            59_499,
+            get_replacement_costs_usd_bdg(expo, 'TAX2', 'D0'),
+            59_501
+        )
+        self.assertBetween(
+            59_499,
+            get_replacement_costs_usd_bdg(expo, 'TAX2', 'D1'),
+            59_501
+        )
+        self.assertBetween(
+            59_499,
+            get_replacement_costs_usd_bdg(expo, 'TAX2', 'D2'),
+            59_501
+        )
+
+        transitions = pandas.DataFrame(result_exposure.iloc[0].transitions)
+
+        self.assertBetween(
+            37.49,
+            get_transition_n_bdg(transitions, 'TAX1', 0, 1),
+            37.51
+        )
+        self.assertBetween(
+            24,
+            get_transition_n_bdg(transitions, 'TAX1', 0, 2),
+            26
+        )
+        self.assertBetween(
+            24,
+            get_transition_n_bdg(transitions, 'TAX1', 1, 2),
+            26
+        )
+        self.assertBetween(
+            44.9,
+            get_transition_n_bdg(transitions, 'TAX2', 0, 1),
+            45.1
+        )
+        self.assertBetween(
+            39.9,
+            get_transition_n_bdg(transitions, 'TAX2', 0, 2),
+            40.1
+        )
+        self.assertBetween(
+            39.9,
+            get_transition_n_bdg(transitions, 'TAX2', 1, 2),
+            40.1
+        )
 
     def assertBetween(self, lower, x, upper):
         """
@@ -409,6 +523,15 @@ def get_replacement_costs_usd_bdg(expo, tax, ds):
     expo_tax = expo[expo.Taxonomy == tax]
     expo_ds = expo_tax[expo_tax.Damage == ds]
     return expo_ds['Repl-cost-USD-bdg'].iloc[0]
+
+
+def get_transition_n_bdg(transitions, tax, from_ds, to_ds):
+    """Return the number of buildings in the transition."""
+    filter_1 = transitions[transitions.taxonomy == tax]
+    filter_2 = filter_1[filter_1.from_damage_state == from_ds]
+    filter_3 = filter_2[filter_2.to_damage_state == to_ds]
+
+    return filter_3.n_buildings.iloc[0]
 
 
 class MakeFakeFunction:

@@ -19,7 +19,13 @@ class AlwaysOneDollarPerTransitionLossProvider:
         """Return a dummy replacement cost."""
         return 1
 
-    def get_loss(self, schema, taxonomy, from_damage_state, to_damage_state, replacement_cost):
+    def get_loss(
+            self,
+            schema,
+            taxonomy,
+            from_damage_state,
+            to_damage_state,
+            replacement_cost):
         '''
         Returns the loss for each transition (one building).
         '''

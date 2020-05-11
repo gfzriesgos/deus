@@ -12,10 +12,10 @@ import geopandas as gpd
 import pandas as pd
 from shapely import wkt
 
+import gpdexposure
 import intensitydatawrapper
 import rasterwrapper
 import fragility
-import exposure
 import intensityprovider
 
 
@@ -150,149 +150,6 @@ class TestBasics(unittest.TestCase):
 
         self.assertIsNotNone(ds_1_2)
 
-    def test_exposure_cell(self):
-        """
-        Test exposure cell
-        :return: None
-        """
-        exposure_cell = get_example_exposure_cell()
-
-        lon, lat = exposure_cell.get_lon_lat_of_centroid()
-
-        self.assertEqual(lon, 12.0)
-        self.assertEqual(lat, 15.0)
-
-        empty_exposure_cell = exposure_cell.without_taxonomies(
-            schema='SARA_v1.0'
-        )
-
-        lon2, lat2 = empty_exposure_cell.get_lon_lat_of_centroid()
-
-        self.assertEqual(lon, lon2)
-        self.assertEqual(lat, lat2)
-
-        taxonomies = exposure_cell.taxonomies
-
-        search_taxonomy = [
-            x for x in taxonomies
-            if x["schema"] == 'SARA_v1.0'
-            and x["taxonomy"] == 'MCF/DNO/_1'
-            and x["n_buildings"] == 6
-        ]
-
-        self.assertEqual(1, len(search_taxonomy))
-
-    def test_cell_update(self):
-        '''
-        Tests the update of the damage states for
-        a exposure cell.
-        :return: None
-        '''
-        exposure_cell = get_exposure_cell_for_sara()
-
-        fragility_data = {
-            'meta': {
-                'shape': 'logncdf',
-                'id': 'SARA_v1.0',
-            },
-            'data': [
-                {
-                    'taxonomy': 'MUR_H1',
-                    'D1_mean': -1.418,
-                    'D1_stddev': 0.31,
-                    'D2_mean': -0.709,
-                    'D2_stddev': 0.328,
-                    'D3_mean': -0.496,
-                    'D3_stddev': 0.322,
-                    'D4_mean': -0.231,
-                    'D4_stddev': 0.317,
-                    'imt': 'pga',
-                    'imu': 'g',
-                },
-                {
-                    'taxonomy': 'ER_ETR_H1_2',
-                    'D1_mean': -1.418,
-                    'D1_stddev': 0.31,
-                    'D2_mean': -0.709,
-                    'D2_stddev': 0.328,
-                    'D3_mean': -0.496,
-                    'D3_stddev': 0.317,
-                    'D4_mean': -0.231,
-                    'D4_stddev': 0.317,
-                    'imt': 'pga',
-                    'imu': 'g',
-                }
-            ],
-        }
-
-        fragility_provider = fragility.Fragility(
-            fragility_data).to_fragility_provider()
-        intensity_provider = MockedIntensityProvider()
-
-        updated_exposure_cell, transition_cell = exposure_cell.update(
-            intensity_provider, fragility_provider)
-
-        self.assertEqual(
-            updated_exposure_cell.schema,
-            exposure_cell.schema)
-
-        updated_series = updated_exposure_cell.to_simple_series()
-
-        self.assertLess(76.69, updated_series['MUR_H1_D4'])
-        self.assertLess(updated_series['MUR_H1_D4'], 76.70)
-
-        self.assertLess(21.87, updated_series['MUR_H1_D3'])
-        self.assertLess(updated_series['MUR_H1_D3'], 21.88)
-
-        self.assertLess(1.41, updated_series['MUR_H1_D2'])
-        self.assertLess(updated_series['MUR_H1_D2'], 1.42)
-
-        self.assertLess(0.022, updated_series['MUR_H1_D1'])
-        self.assertLess(updated_series['MUR_H1_D1'], 0.023)
-
-        self.assertLess(5.27e-8, updated_series['MUR_H1_D0'])
-        self.assertLess(updated_series['MUR_H1_D0'], 5.28e-8)
-
-        self.assertLess(153.38, updated_series['ER_ETR_H1_2_D4'])
-        self.assertLess(updated_series['ER_ETR_H1_2_D4'], 153.39)
-
-        self.assertLess(43.87, updated_series['ER_ETR_H1_2_D3'])
-        self.assertLess(updated_series['ER_ETR_H1_2_D3'], 43.88)
-
-        self.assertLess(2.74, updated_series['ER_ETR_H1_2_D2'])
-        self.assertLess(updated_series['ER_ETR_H1_2_D2'], 2.75)
-
-        transition_series = transition_cell.to_series()
-
-        self.assertEqual(updated_series['gc_id'], transition_series['gid'])
-        self.assertEqual(
-            updated_series['geometry'],
-            transition_series['geometry'])
-
-        def filter_transitions(from_damage_state, to_damage_state, taxonomy):
-            tst = transition_series['transitions']
-            result = [
-                tst['n_buildings'][i]
-                for i in range(len(tst['taxonomy']))
-                if tst['from_damage_state'][i] == from_damage_state
-                and tst['to_damage_state'][i] == to_damage_state
-                and tst['taxonomy'][i] == taxonomy][0]
-            return result
-
-        updates_mur_h1_0_1 = filter_transitions(0, 1, 'MUR_H1')
-        self.assertLess(0.022, updates_mur_h1_0_1)
-        self.assertLess(updates_mur_h1_0_1, 0.023)
-
-        # the other mur updates are similar, not so fancy anyway
-
-        updates_er_etr_h1_2_2_3 = filter_transitions(2, 3, 'ER_ETR_H1_2')
-        self.assertLess(43.87, updates_er_etr_h1_2_2_3)
-        self.assertLess(updates_er_etr_h1_2_2_3, 43.88)
-
-        updates_er_etr_h1_2_2_4 = filter_transitions(2, 4, 'ER_ETR_H1_2')
-        self.assertLess(153.38, updates_er_etr_h1_2_2_4)
-        self.assertLess(updates_er_etr_h1_2_2_4, 153.39)
-
     def test_sorting_of_damage_states(self):
         '''
         Tests the sorting of damage states
@@ -316,7 +173,7 @@ class TestBasics(unittest.TestCase):
 
         ds_list = [ds1, ds2]
 
-        ds_list.sort(key=exposure.sort_by_to_damage_state_desc)
+        ds_list.sort(key=gpdexposure.sort_by_to_damage_state_desc)
 
         self.assertEqual(3, ds_list[0].to_state)
         self.assertEqual(2, ds_list[1].to_state)
@@ -516,48 +373,6 @@ class MockedIntensityProvider:
     def get_nearest(self, lon, lat):
         '''Also a dummy implementation.'''
         return {'PGA': 1}, {'PGA': 'g'}
-
-
-def get_example_exposure_cell():
-    '''
-    Returns an example exposure cell.
-    :return: None
-    '''
-    data = pd.DataFrame({
-        'geometry': ['POINT(12.0 15.0)'],
-        'gc_id': ['abcdefg'],
-        r'MCF\/DNO\/_1': [6],
-        r'MUR+STDRE\/': [13],
-    })
-    geodata = gpd.GeoDataFrame(data)
-    geodata['geometry'] = geodata['geometry'].apply(wkt.loads)
-    series = geodata.iloc[0]
-    return exposure.ExposureCell.from_simple_series(
-        series=series,
-        schema='SARA_v1.0'
-    )
-
-
-def get_exposure_cell_for_sara():
-    '''
-    Returns an example cell with sara
-    schema.
-    '''
-
-    exposure_cell_data = gpd.GeoDataFrame(pd.DataFrame({
-        'geometry': ['POINT(12.0 15.0)'],
-        'gc_id': ['abcdefg'],
-        'MUR_H1': [100.0],
-        'ER_ETR_H1_2_D2': [200.0]
-    }))
-    exposure_cell_data['geometry'] = exposure_cell_data['geometry'].apply(
-        wkt.loads)
-    exposure_cell_series = exposure_cell_data.iloc[0]
-
-    return exposure.ExposureCell.from_simple_series(
-        series=exposure_cell_series,
-        schema='SARA_v1.0'
-    )
 
 
 if __name__ == "__main__":
