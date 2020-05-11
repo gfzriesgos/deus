@@ -47,18 +47,8 @@ You can also take a look into the [TODOs](TODO.md).
 
 ## Will there only be one deus?
 
-The current version of the code has only one deus and one main function.
-However as other hazards don't provide intensity masures in the shakemap
-formats it may be necessary to combine different files for one intensity provider.
-There is already a class for that (StackedIntenityProvider), but there is no main
-function that uses this.
+There is deus and there is volcanus (a special deus version "volcanus"
+that works with shapefiles for intensities - it uses a column LOAD and a unit of kPa -
+to allow a special ashfall service in the RIESGOS demonstrator).
 
-I think it will be possible to work with several deui (damage exposure update implementations),
-one for each kind of hazard.
-So, something like:
-
-- deus of earth quakes
-- deus of tsunamis
-- deus of lahars
-- deus of ashfalls
-- ...
+The two services only differ in the intensity provider.
