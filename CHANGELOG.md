@@ -1,3 +1,8 @@
+# 2020-05-12:
+
+- added usage of `im_min` and `im_max` values for computing probabilities
+  out of the fragility functions (i < `im_min` --> 0; i > `im_max` --> 1)
+
 # 2020-05-11:
 
 - Mapping and exposure update now handles the population and the replacement costs per building

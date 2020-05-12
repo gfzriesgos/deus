@@ -1,23 +1,19 @@
 #TODO-List
 
-
 This is more a scratch page to collect some ideas on what
 to do.
 It is not the definitive list of issues to fix.
 
-## Check Min- and Max values for fragility functions
-In the fragility functions there are min and max intensity values.
-If the given intensity is below the min value, than the propability
-for a change in the damage state is 0.
-Same is true for intensity values greater than the max value.
-This way the computation may speed up, because we don't have to compute
-the lognorm cdf for at least some transitions (most likely in the
-tsunami case, where most of the cells don't have an intensity).
+## Check if all of the cells needs to be updated
+As our intensities are only applied locally (and not in the full
+spatial coverage of our exposure model), we can skip the damage computation
+for a lot of cells (because lognorm cdf computation is expensive).
 
-However, we still need to go through all of the cells (at least for the
-schema mapping) and - to be honest - also through all of the taxonomies
-in the cells, because this values are taxonomy dependent and they
-can rely on different intensity measurements (PGA, SA(1.0), SA(0.3), ...).
+This is true especially for tsunami intensities as those only effects
+the coast line (and barely any cell behind).
+
+However, we have to keep in mind that our fragility functions care about
+different units for the intensities, depending on the taxonomy.
 
 ## grd file support
 
