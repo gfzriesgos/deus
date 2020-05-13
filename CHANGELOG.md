@@ -1,3 +1,10 @@
+# 2020-05-13:
+
+- removed `im_min` and `im_max` handling as those have a bad performance characteristic
+  and are too broad to be useful (they are specific for the taxonomy and *not* for
+  damage states)
+- Some changes to improve performance in the exposure handling
+
 # 2020-05-12:
 
 - added usage of `im_min` and `im_max` values for computing probabilities

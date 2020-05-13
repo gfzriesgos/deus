@@ -44,9 +44,7 @@ class DamageState:
                  to_state,
                  intensity_field,
                  intensity_unit,
-                 fragility_function,
-                 max_intensity=np.inf,
-                 min_intensity=-1*np.inf):
+                 fragility_function):
         self.taxonomy = taxonomy
         self.from_state = from_state
         self.to_state = to_state
@@ -54,9 +52,6 @@ class DamageState:
         self.intensity_unit = intensity_unit
 
         self.fragility_function = fragility_function
-
-        self.max_intensity = max_intensity
-        self.min_intensity = min_intensity
 
     def get_probability_for_intensity(self, intensity, units):
         '''
@@ -82,11 +77,6 @@ class DamageState:
 
         if unit != self.intensity_unit:
             raise Exception('Not supported unit')
-
-        if value < self.min_intensity:
-            return 0
-        if value > self.max_intensity:
-            return 1
 
         return self.fragility_function(value)
 
@@ -125,14 +115,6 @@ class Fragility:
             taxonomy = dataset['taxonomy']
             intensity_field = dataset['imt']
             intensity_unit = dataset['imu']
-
-            min_intensity = -1 * np.inf
-            max_intensity = np.inf
-
-            if 'im_min' in dataset.keys():
-                min_intensity = dataset['im_min']
-            if 'im_max' in dataset.keys():
-                max_intensity = dataset['im_max']
 
             for damage_state_mean_key in [
                     k for k in dataset.keys()
@@ -174,8 +156,6 @@ class Fragility:
                     intensity_field=intensity_field,
                     intensity_unit=intensity_unit,
                     fragility_function=fragility_function(mean, stddev),
-                    max_intensity=max_intensity,
-                    min_intensity=min_intensity,
                 )
 
                 damage_states_by_taxonomy[taxonomy].append(damage_state)
@@ -242,8 +222,6 @@ class Fragility:
                             intensity_field=ds_lower.intensity_field,
                             intensity_unit=ds_lower.intensity_unit,
                             fragility_function=ds_lower.fragility_function,
-                            max_intensity=ds_lower.max_intensity,
-                            min_intensity=ds_lower.min_intensity,
                         )
                         damage_states.append(ds_new)
 
