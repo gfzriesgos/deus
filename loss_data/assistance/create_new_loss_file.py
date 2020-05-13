@@ -30,7 +30,6 @@ def read_json(filename):
         return json.load(inputfile)
 
 
-
 loss_steps = {
     "SARA_v1.0": {
         "steps": {
@@ -78,7 +77,9 @@ for filename in glob.glob('old/*.json'):
         replacement_costs = {}
 
         for tax_data_set in data['data']:
-            max_value = loss_steps[meta_id]['get_max'](tax_data_set['loss_matrix'])
+            max_value = loss_steps[meta_id]['get_max'](
+                tax_data_set['loss_matrix']
+            )
             taxonomy = tax_data_set['taxonomy']
 
             replacement_costs[taxonomy] = max_value
