@@ -6,3 +6,4 @@ venv
 *.swp
 testoutputs
 *.swo
+profile_*.txt

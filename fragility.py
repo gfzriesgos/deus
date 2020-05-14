@@ -13,14 +13,46 @@ from scipy.stats import lognorm
 import numpy as np
 
 
+FactoryCacheKey = collections.namedtuple(
+    'FactoryCacheKey',
+    ['mean', 'stddev']
+)
+
+
 class LogncdfFactory:
     '''
     This is function factory for the log normal cdf.
     '''
 
+    def __init__(self):
+        self.cache = {}
+
     def __call__(self, mean, stddev):
+        key = FactoryCacheKey(mean, stddev)
+        if key in self.cache.keys():
+            return self.cache[key]
         func = lognorm(scale=np.exp(mean), s=stddev)
-        return func.cdf
+        result = CachedFunction(func.cdf)
+
+        self.cache[key] = result
+        return result
+
+
+class CachedFunction:
+    """Class to cache function calls."""
+
+    def __init__(self, inner_function):
+        """Init the instance with the given function."""
+        self.inner_function = inner_function
+        self.cache = {}
+
+    def __call__(self, value):
+        """Call the function with the value."""
+        if value in self.cache.keys():
+            return self.cache[value]
+        result = self.inner_function(value)
+        self.cache[value] = result
+        return result
 
 
 SUPPORTED_FRAGILITY_FUNCTION_FACTORIES = {
@@ -38,6 +70,16 @@ class DamageState:
     the min and max intensities. However in order to work with
     those values more easily, they are included here.
     '''
+
+    __slots__ = [
+        'taxonomy',
+        'from_state',
+        'to_state',
+        'intensity_field',
+        'intensity_unit',
+        'fragility_function'
+    ]
+
     def __init__(self,
                  taxonomy,
                  from_state,

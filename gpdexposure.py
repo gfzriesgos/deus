@@ -5,12 +5,15 @@ Module for the exposure using a geopandas dataframe.
 '''
 
 import collections
+import ctypes
 import multiprocessing
-import os
 
 import numpy
 import geopandas
 import pandas
+
+
+PARALLEL_PROCESSING = True
 
 
 def read_exposure(filename):
@@ -38,6 +41,60 @@ def int_x_to_str_Dx(damage_state_without_d_prefix):
     result is D2.
     """
     return 'D' + str(damage_state_without_d_prefix)
+
+
+ExpoKey = collections.namedtuple('ExpoKey', ['taxonomy', 'damage_state'])
+
+
+class ExpoValues(ctypes.Structure):
+    """Class to store the information for the values of an expo dict."""
+    _fields_ = [
+        ('buildings', ctypes.c_double),
+        ('population', ctypes.c_double),
+        ('replcostbdg', ctypes.c_double),
+    ]
+
+    def __repr__(self):
+        return 'ExpoValues(' + \
+            'buildings={0}, population={1}, replcostbdg={2})'.format(
+                repr(self.buildings),
+                repr(self.population),
+                repr(self.replcostbdg)
+            )
+
+
+def empty_expo_values():
+    """Return an empty expo value."""
+    return ExpoValues(0, 0, 0)
+
+
+TransitionKey = collections.namedtuple(
+    'TransitionKey',
+    ['taxonomy', 'from_damage_state', 'to_damage_state']
+)
+
+
+class TransitionValues(ctypes.Structure):
+    """Class to store the keys in the transition dict."""
+    _fields_ = [
+        ('buildings', ctypes.c_double),
+        ('replcostbdg', ctypes.c_double),
+    ]
+
+    def __repr__(self):
+        return 'TransitionValues(buildings={0}, replcostbdg={1})'.format(
+            repr(self.buildings), repr(self.replcostbdg)
+        )
+
+
+def empty_transition_values():
+    """Return an empty transition value."""
+    return TransitionValues(0, 0)
+
+
+def zero():
+    """Return 0."""
+    return 0
 
 
 def update_exposure_transitions_and_losses(
@@ -70,24 +127,19 @@ def update_exposure_transitions_and_losses(
     # So we use the pandas apply to run our function. I'm not sure if we
     # can parallize this, but it is one of the fastest ways in python anyway.
     n_cpus = multiprocessing.cpu_count()
-    with multiprocessing.Pool(n_cpus) as pool:
-        splitted_exposure = numpy.array_split(exposure, n_cpus)
-        df = pandas.concat(
-            pool.map(updater.update_df, splitted_exposure),
+    splitted_exposure = numpy.array_split(exposure, n_cpus)
+    if PARALLEL_PROCESSING:
+        with multiprocessing.Pool(n_cpus) as pool:
+            dataframe = pandas.concat(
+                pool.map(updater.update_df, splitted_exposure),
+                sort=False
+            )
+    else:
+        dataframe = pandas.concat(
+            [updater.update_df(x) for x in splitted_exposure],
             sort=False
         )
-        # This here is non parallized version, so that it is better to debug.
-        # However, normally we want to be parallel.
-        # df = pandas.concat(
-        #     [updater.update_df(x) for x in splitted_exposure],
-        #     sort=False
-        # )
-    return df
-
-
-def zero():
-    """Return 0."""
-    return 0
+    return dataframe
 
 
 def map_exposure(
@@ -100,27 +152,19 @@ def map_exposure(
     """
     if source_schema == target_schema:
         return expo
-    n_buildings = collections.defaultdict(zero)
-    total_pop = collections.defaultdict(zero)
-
-    # We can't be sure that those columns are there.
-    # So in case we miss them we add them with zeros.
-    if 'Population' not in expo.columns:
-        expo['Population'] = 0.0
-    if 'Repl-cost-USD-bdg' not in expo.columns:
-        expo['Repl-cost-USD-bdg'] = 0.0
+    result_expo = collections.defaultdict(empty_expo_values)
 
     # We have to collect the replacement costs over all
     # damage states of the results (for each taxonomy).
     n_buildings_per_tax = collections.defaultdict(zero)
     total_repl_per_tax = collections.defaultdict(zero)
 
-    for _, row in expo.iterrows():
+    for old_expo_key, old_expo_value in expo.items():
         # One taxonomy with a damage state can map to different other
         # taxonomies and different damage states.
         mapping_results = schema_mapper.map_schema(
-            source_taxonomy=row.Taxonomy,
-            source_damage_state=row.Damage,
+            source_taxonomy=old_expo_key.taxonomy,
+            source_damage_state=old_expo_key.damage_state,
             source_schema=source_schema,
             target_schema=target_schema,
             # We want to keep it as a number between 0 and 1
@@ -129,56 +173,29 @@ def map_exposure(
         )
 
         for res in mapping_results:
-
-            key = SchemaTaxonomyDamageStateTuple(
-                schema=target_schema,
-                taxonomy=res.taxonomy,
-                damage_state=res.damage_state
-            )
+            expo_key = ExpoKey(res.taxonomy, res.damage_state)
             # res.n_buildings is now only a number from 0 to 1.
             # So we need to do the multiplication ourselves
             # (but we can reuse the mapping value for others...)
-            new_buildings = res.n_buildings * row.Buildings
-            n_buildings[key] += new_buildings
-            total_pop[key] += (res.n_buildings * row.Population)
+            expo_value = result_expo[expo_key]
 
-            new_repl = new_buildings * row['Repl-cost-USD-bdg']
-
+            new_buildings = res.n_buildings * old_expo_value.buildings
+            expo_value.buildings += new_buildings
             n_buildings_per_tax[res.taxonomy] += new_buildings
+
+            new_pop = res.n_buildings * old_expo_value.population
+            expo_value.population += new_pop
+
+            new_repl = new_buildings * old_expo_value.replcostbdg
             total_repl_per_tax[res.taxonomy] += new_repl
 
-    # Create resulting dataframe.
-    n_collector_keys = len(n_buildings.keys())
-
-    taxonomy = numpy.empty(n_collector_keys, dtype=numpy.object)
-    damage = numpy.empty(n_collector_keys, dtype=numpy.int)
-    buildings = numpy.zeros(n_collector_keys)
-    population = numpy.zeros(n_collector_keys)
-    repl_costs = numpy.zeros(n_collector_keys)
-
-    # After that we can populate the columns for the resulting
-    # dataframe.
-    for idx, key in enumerate(n_buildings.keys()):
-        just_taxonomy = key.taxonomy
-        taxonomy[idx] = just_taxonomy
-        damage[idx] = key.damage_state
-        buildings[idx] = n_buildings[key]
-        population[idx] = total_pop[key]
-
-        # And the replacement costs (read from taxonomy level).
-        n_bdg = n_buildings_per_tax[just_taxonomy]
-        repl_cost = 0
+    for expo_key, expo_value in result_expo.items():
+        taxonomy = expo_key.taxonomy
+        n_bdg = n_buildings_per_tax[taxonomy]
         if n_bdg != 0:
-            repl_cost = total_repl_per_tax[just_taxonomy] / n_bdg
-        repl_costs[idx] = repl_cost
+            expo_value.replcostbdg = total_repl_per_tax[taxonomy] / n_bdg
 
-    return pandas.DataFrame({
-        'Taxonomy': taxonomy,
-        'Damage': damage,
-        'Buildings': buildings,
-        'Population': population,
-        'Repl-cost-USD-bdg': repl_costs,
-    })
+    return result_expo
 
 
 def get_updated_exposure_and_transitions(
@@ -192,23 +209,11 @@ def get_updated_exposure_and_transitions(
     """
     # Again, we can't be sure that those columns are there.
     # We use just zeros if they are not.
-    if 'Population' not in expo.columns:
-        expo['Population'] = 0.0
-    if 'Repl-cost-USD-bdg' not in expo.columns:
-        expo['Repl-cost-USD-bdg'] = 0.0
-    if expo.Buildings.sum() == 0:
+    result_transitions = collections.defaultdict(empty_transition_values)
+    if not any([expo_value.buildings for expo_value in expo.values()]) > 0:
         # If we don't have any buildings we can't update
         # them and so we even don't need to read the intensity
         # for this cell.
-        #
-        # We just have to create the empty transitions dataframe.
-        result_transitions = pandas.DataFrame({
-            'taxonomy': numpy.empty(0, dtype=numpy.object),
-            'from_damage_state': numpy.zeros(0),
-            'to_damage_state': numpy.zeros(0),
-            'n_buildings': numpy.zeros(0),
-            'replacement_costs_usd_bdg': numpy.zeros(0),
-        })
         return expo, result_transitions
     # So now we need to check for updates in our exposure model.
     # First lets get the intensity for this cell.
@@ -216,26 +221,26 @@ def get_updated_exposure_and_transitions(
     lon, lat = centroid.x, centroid.y
     intensity, units = intensity_provider.get_nearest(lon=lon, lat=lat)
 
+    result_expo = collections.defaultdict(empty_expo_values)
+
     # Calculate the replacement costs for each taxonomy
     # before we care about the damage transitions.
     total_repl_per_tax = collections.defaultdict(zero)
     n_buildings_per_tax = collections.defaultdict(zero)
 
-    # Now we can check for damage.
-    transitions = collections.defaultdict(zero)
-    n_buildings = collections.defaultdict(zero)
-    total_pop = collections.defaultdict(zero)
+    for old_expo_key, old_expo_value in expo.items():
+        n_left = old_expo_value.buildings
+        n_pop_left = old_expo_value.population
 
-    for _, row in expo.iterrows():
-        n_left = row.Buildings
-        n_pop_left = row.Population
+        old_damage_state = old_expo_key.damage_state
+        taxonomy = old_expo_key.taxonomy
 
-        old_damage_state = row.Damage
-        taxonomy = row.Taxonomy
-
+        # We use the input data for calculating the weighted mean
+        # for the replacment costs per building (in case they really
+        # differ somehow, but the schemamapping makes this possible).
         total_repl_per_tax[taxonomy] += \
-            (row['Repl-cost-USD-bdg'] * row.Buildings)
-        n_buildings_per_tax[taxonomy] += row.Buildings
+            (old_expo_value.replcostbdg * old_expo_value.buildings)
+        n_buildings_per_tax[taxonomy] += old_expo_value.buildings
 
         damage_states_to_care = get_sorted_damage_states(
             fragility_provider,
@@ -247,6 +252,7 @@ def get_updated_exposure_and_transitions(
             probability = single_damage_state.get_probability_for_intensity(
                 intensity, units
             )
+            expo_key = ExpoKey(taxonomy, single_damage_state.to_state)
 
             # We care about both the number of buildings and the population.
             n_buildings_in_damage_state = probability * n_left
@@ -255,129 +261,68 @@ def get_updated_exposure_and_transitions(
             n_pop_left -= n_population_in_damage_state
 
             if n_buildings_in_damage_state > 0:
-                key_n_buildings = TaxonomyDamageStateTuple(
-                    taxonomy, single_damage_state.to_state
-                )
-                n_buildings[key_n_buildings] += \
-                    n_buildings_in_damage_state
-                total_pop[key_n_buildings] += \
-                    n_population_in_damage_state
+                expo_value = result_expo[expo_key]
 
-                key_transitions = TransitionTuple(
+                expo_value.buildings += n_buildings_in_damage_state
+                expo_value.population += n_population_in_damage_state
+
+                transition_key = TransitionKey(
                     taxonomy, old_damage_state, single_damage_state.to_state
                 )
-                transitions[key_transitions] += n_buildings_in_damage_state
+                result_transitions[transition_key].buildings += \
+                    n_buildings_in_damage_state
+
         # If we have buildings left in the given damage state, than we must
         # add them in the n_buildings as well, but we don't need a transition.
         if n_left > 0:
-            key_n_buildings = TaxonomyDamageStateTuple(
-                taxonomy, old_damage_state
-            )
-            n_buildings[key_n_buildings] += n_left
-            total_pop[key_n_buildings] += n_pop_left
+            expo_key = ExpoKey(taxonomy, old_damage_state)
+            expo_value = result_expo[expo_key]
+            expo_value.buildings += n_left
+            expo_value.population += n_pop_left
 
+    # Replacement costs per building; specific for the taxonomies
     repl_per_tax = collections.defaultdict(zero)
 
+    # and update the replacement costs
     for taxonomy in total_repl_per_tax.keys():
         n_bdg = n_buildings_per_tax[taxonomy]
         if n_bdg != 0:
             repl_per_tax[taxonomy] = total_repl_per_tax[taxonomy] / n_bdg
 
-    # And now we create the resulting dataframes out of our dicts.
-    # First expo.
-    expo_n_building_keys = len(n_buildings.keys())
-    expo_taxonomy = numpy.empty(expo_n_building_keys, dtype=numpy.object)
-    expo_damage = numpy.empty(expo_n_building_keys, dtype=numpy.int)
-    expo_buildings = numpy.zeros(expo_n_building_keys)
-    expo_population = numpy.zeros(expo_n_building_keys)
-    expo_repl = numpy.zeros(expo_n_building_keys)
+    for expo_key, expo_value in result_expo.items():
+        taxonomy = expo_key.taxonomy
+        expo_value.replcostbdg = repl_per_tax[taxonomy]
 
-    for idx, key in enumerate(n_buildings.keys()):
-        just_taxonomy = key.taxonomy
-        expo_taxonomy[idx] = just_taxonomy
-        expo_damage[idx] = key.damage_state
-        expo_buildings[idx] = n_buildings[key]
-        expo_population[idx] = total_pop[key]
-        expo_repl[idx] = repl_per_tax[just_taxonomy]
-
-    result_expo = pandas.DataFrame({
-        'Taxonomy': expo_taxonomy,
-        'Damage': expo_damage,
-        'Buildings': expo_buildings,
-        'Population': expo_population,
-        'Repl-cost-USD-bdg': expo_repl,
-    })
-
-    # Then the transitions.
-    tran_n_keys = len(transitions.keys())
-    tran_taxonomy = numpy.empty(tran_n_keys, dtype=numpy.object)
-    tran_from_state = numpy.empty(tran_n_keys, dtype=numpy.int)
-    tran_to_state = numpy.empty(tran_n_keys, dtype=numpy.int)
-    tran_buildings = numpy.zeros(tran_n_keys)
-    tran_replacement_costs = numpy.zeros(tran_n_keys)
-
-    for idx, key in enumerate(transitions.keys()):
-        tran_taxonomy[idx] = key.taxonomy
-        tran_from_state[idx] = key.from_damage_state
-        tran_to_state[idx] = key.to_damage_state
-        tran_buildings[idx] = transitions[key]
-        tran_replacement_costs[idx] = repl_per_tax[key.taxonomy]
-
-    result_transitions = pandas.DataFrame({
-        'taxonomy': tran_taxonomy,
-        'from_damage_state': tran_from_state,
-        'to_damage_state': tran_to_state,
-        'n_buildings': tran_buildings,
-        'replacement_costs_usd_bdg': tran_replacement_costs
-    })
+    # We also put it into the transitions as those are used to
+    # compute the loss later.
+    for transition_key, transition_value in result_transitions.items():
+        taxonomy = transition_key.taxonomy
+        transition_value.replcostbdg = repl_per_tax[taxonomy]
 
     return result_expo, result_transitions
 
 
-# This is our key for handling all of our transitions.
-TransitionTuple = collections.namedtuple(
-    'TransitionTuple',
-    'taxonomy from_damage_state to_damage_state'
-)
-# This is our key for handling all of our n_buildings in
-# the update step (we don't need the schema here).
-TaxonomyDamageStateTuple = collections.namedtuple(
-    'TaxonomyDamageStateTuple',
-    'taxonomy damage_state'
-)
-
-# This is our key for the mapping (so we need the
-# schema).
-SchemaTaxonomyDamageStateTuple = collections.namedtuple(
-    'SchemaTaxonomyDamageStateTuple',
-    'schema taxonomy damage_state'
-)
-
-
 def compute_loss(transitions, loss_provider, schema):
-    """
-    Here we sum the loss over all the transitions.
-    """
+    """Sum up all the loss over all the transitions."""
     loss_value = 0
-    for _, row in transitions.iterrows():
-
-        replacement_cost = row.replacement_costs_usd_bdg
+    for transition_key, transition_value in transitions.items():
+        replacement_cost = transition_value.replcostbdg
         # We want to use the replacement costs if those are given.
         # If we don't have replacement costs we can ask the loss_provider.
         if replacement_cost == 0:
             replacement_cost = loss_provider.get_fallback_replacement_cost(
                 schema=schema,
-                taxonomy=row.taxonomy
+                taxonomy=transition_key.taxonomy
             )
 
         single_loss_value = loss_provider.get_loss(
             schema=schema,
-            taxonomy=row.taxonomy,
-            from_damage_state=row.from_damage_state,
-            to_damage_state=row.to_damage_state,
+            taxonomy=transition_key.taxonomy,
+            from_damage_state=transition_key.from_damage_state,
+            to_damage_state=transition_key.to_damage_state,
             replacement_cost=replacement_cost
         )
-        n_loss_value = single_loss_value * row.n_buildings
+        n_loss_value = single_loss_value * transition_value.buildings
 
         loss_value += n_loss_value
     return loss_value
@@ -387,10 +332,7 @@ def get_sorted_damage_states(
         fragility_provider,
         taxonomy,
         old_damage_state):
-    '''
-    Returns the sorted damage states
-    that are above the the current one.
-    '''
+    """Return the sorted damage states that are above the the current one."""
 
     damage_states = fragility_provider.get_damage_states_for_taxonomy(
         taxonomy
@@ -408,10 +350,7 @@ def get_sorted_damage_states(
 
 
 def sort_by_to_damage_state_desc(damage_state):
-    '''
-    Function to sort the damage states by to_damage_state
-    desc.
-    '''
+    """Sort the damage states with the highest first."""
     return damage_state.to_state * -1
 
 
@@ -436,7 +375,7 @@ class Updater:
         self.intensity_provider = intensity_provider
         self.loss_provider = loss_provider
 
-    def update_df(self, df):
+    def update_df(self, dataframe):
         """
         Runs the update for the update on each series of the
         given dataframe.
@@ -445,9 +384,9 @@ class Updater:
         # Otherwise our apply would return an empty geodataframe
         # with the columns of the input. But as this may contain
         # a name, we don't want that.
-        if len(df) == 0:
+        if dataframe.empty:
             return None
-        list_of_series = df.apply(self.update_series, axis=1)
+        list_of_series = dataframe.apply(self.update_series, axis=1)
         return geopandas.GeoDataFrame(list_of_series)
 
     def update_series(self, series):
@@ -456,8 +395,7 @@ class Updater:
         exposure.
         """
         # First we prepare our input.
-        old_exposure = pandas.DataFrame(series.expo)
-        old_exposure['Damage'] = old_exposure['Damage'].apply(str_Dx_to_int)
+        old_exposure = expo_from_series_to_dict(series.expo)
 
         # Then we need to map to the target schema.
         mapped_exposure = map_exposure(
@@ -477,16 +415,8 @@ class Updater:
         loss_value = compute_loss(
             transitions=transitions,
             loss_provider=self.loss_provider,
-            schema=self.fragility_provider.schema)
-
-        # At last step we need to convert the Damage column back to use the Dx
-        # conversion (which we don't use in the map_exposure and
-        # get_updated_exposure_and_transitions functions because of
-        # performance).
-        updated_exposure['Damage'] = updated_exposure[
-            'Damage'
-        ].apply(int_x_to_str_Dx)
-
+            schema=self.fragility_provider.schema
+        )
         # In earlier versions of deus the updated exposure, the transitions
         # and the losses were splitted. In this version we merge them right
         # here. Later on we can split them back up to produce the expected
@@ -503,9 +433,115 @@ class Updater:
             #  'Taxonomy': ['RC1', 'RC2', ...],
             #  ...
             # }
-            'expo': updated_exposure.to_dict(orient='list'),
+            'expo': updated_exposure_output_to_dict(updated_exposure),
             'schema': self.fragility_provider.schema,
-            'transitions': transitions.to_dict(orient='list'),
+            'transitions': transitions_output_to_dict(transitions),
             'loss_value': loss_value,
             'loss_unit': self.loss_provider.get_unit()
         })
+
+
+class MakeNNones:
+    """Helper class to create a list of n Nones for a default dict."""
+
+    def __init__(self, number):
+        """Init the instance."""
+        self.number = number
+
+    def __call__(self):
+        """Return n [None]."""
+        return [None] * self.number
+
+
+def updated_exposure_output_to_dict(updated_exposure):
+    """Convert to data to a dict for output."""
+    # The output format is something like this:
+    # {
+    #    'Buildings': [100, 200],
+    #    'Damage': ['D0', 'D1'],
+    #    'Population': [2000, 3000],
+    #    'Taxonomy': ['TAX1', 'TAX2']
+    # }
+    make_n_nones = MakeNNones(len(updated_exposure))
+    result = collections.defaultdict(make_n_nones)
+
+    idx = 0
+    for expo_key, expo_value in updated_exposure.items():
+        result['Taxonomy'][idx] = expo_key.taxonomy
+        result['Damage'][idx] = int_x_to_str_Dx(expo_key.damage_state)
+        result['Buildings'][idx] = expo_value.buildings
+        result['Population'][idx] = expo_value.population
+        result['Repl-cost-USD-bdg'][idx] = expo_value.replcostbdg
+        idx += 1
+
+    return result
+
+
+def transitions_output_to_dict(transitions):
+    """Convert the transitions to a dict for output."""
+    # The output format is something like this
+    # {
+    #    'taxonomy': ['TAX1', 'TAX2'],
+    #    'from_damage_state': [1, 2],
+    #    'to_damage_state': [3, 4],
+    #    'n_buildings': [10.2, 23.5],
+    #    'replacement_costs_usd_bdg': [6000, 5000],
+    # }
+    make_n_nones = MakeNNones(len(transitions))
+    result = collections.defaultdict(make_n_nones)
+
+    idx = 0
+    for transition_key, transition_value in transitions.items():
+        result['taxonomy'][idx] = transition_key.taxonomy
+        result['from_damage_state'][idx] = transition_key.from_damage_state
+        result['to_damage_state'][idx] = transition_key.to_damage_state
+        result['n_buildings'][idx] = transition_value.buildings
+        result['replacement_costs_usd_bdg'][idx] = transition_value.replcostbdg
+        idx += 1
+
+    return result
+
+
+def expo_from_series_to_dict(expo):
+    """
+    Convert the existing expo to an exposure dict (expo_keys & expo_values).
+
+    The resulting expo is the one to work with in the mapping & the
+    update function.
+    """
+    as_dict = collections.defaultdict(empty_expo_values)
+
+    if isinstance(expo['Taxonomy'], list):
+        idx_generator = range(len(expo['Taxonomy']))
+    else:
+        idx_generator = expo['Taxonomy'].keys()
+
+    for idx in idx_generator:
+        expo_key = ExpoKey(
+            get_from_series_expo(expo['Taxonomy'], idx, None),
+            str_Dx_to_int(get_from_series_expo(expo['Damage'], idx, None))
+        )
+        buildings = get_from_series_expo(expo.get('Buildings', []), idx, 0)
+        population = get_from_series_expo(expo.get('Population', []), idx, 0)
+        replcostbdg = get_from_series_expo(
+            expo.get('Repl-cost-USD-bdg', []),
+            idx,
+            0
+        )
+        expo_value = ExpoValues(buildings, population, replcostbdg)
+        as_dict[expo_key] = expo_value
+
+    return as_dict
+
+
+def get_from_series_expo(column, idx, default):
+    """
+    Get the values from the expo.
+
+    This is a helper function only.
+    """
+    if isinstance(column, list):
+        if idx < len(column):
+            return column[idx]
+        return default
+    return column.get(idx, default)
