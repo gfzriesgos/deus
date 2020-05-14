@@ -147,7 +147,6 @@ def map_exposure(
             n_buildings_per_tax[res.taxonomy] += new_buildings
             total_repl_per_tax[res.taxonomy] += new_repl
 
-
     # Create resulting dataframe.
     n_collector_keys = len(n_buildings.keys())
 
@@ -221,7 +220,6 @@ def get_updated_exposure_and_transitions(
     # before we care about the damage transitions.
     total_repl_per_tax = collections.defaultdict(zero)
     n_buildings_per_tax = collections.defaultdict(zero)
-
 
     # Now we can check for damage.
     transitions = collections.defaultdict(zero)
