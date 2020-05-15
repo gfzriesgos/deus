@@ -1,3 +1,22 @@
+# 2020-05-13:
+
+- removed `im_min` and `im_max` handling as those have a bad performance characteristic
+  and are too broad to be useful (they are specific for the taxonomy and *not* for
+  damage states)
+- Some changes to improve performance in the exposure handling
+
+# 2020-05-12:
+
+- added usage of `im_min` and `im_max` values for computing probabilities
+  out of the fragility functions (i < `im_min` --> 0; i > `im_max` --> 1)
+
+# 2020-05-11:
+
+- Mapping and exposure update now handles the population and the replacement costs per building
+- Loss computation now uses the replacement costs per building (there is a fallback if there are non, so we reuse the data from the loss files that we already have)
+- updated the documentation
+- removed unused classes and their test cases
+
 # 2020-02-03:
 
 - Added a new output parameter that contains all the outputs of the older three

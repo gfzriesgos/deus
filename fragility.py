@@ -13,14 +13,46 @@ from scipy.stats import lognorm
 import numpy as np
 
 
+FactoryCacheKey = collections.namedtuple(
+    'FactoryCacheKey',
+    ['mean', 'stddev']
+)
+
+
 class LogncdfFactory:
     '''
     This is function factory for the log normal cdf.
     '''
 
+    def __init__(self):
+        self.cache = {}
+
     def __call__(self, mean, stddev):
+        key = FactoryCacheKey(mean, stddev)
+        if key in self.cache.keys():
+            return self.cache[key]
         func = lognorm(scale=np.exp(mean), s=stddev)
-        return func.cdf
+        result = CachedFunction(func.cdf)
+
+        self.cache[key] = result
+        return result
+
+
+class CachedFunction:
+    """Class to cache function calls."""
+
+    def __init__(self, inner_function):
+        """Init the instance with the given function."""
+        self.inner_function = inner_function
+        self.cache = {}
+
+    def __call__(self, value):
+        """Call the function with the value."""
+        if value in self.cache.keys():
+            return self.cache[value]
+        result = self.inner_function(value)
+        self.cache[value] = result
+        return result
 
 
 SUPPORTED_FRAGILITY_FUNCTION_FACTORIES = {
@@ -31,7 +63,23 @@ SUPPORTED_FRAGILITY_FUNCTION_FACTORIES = {
 class DamageState:
     '''
     Class to represent the damage states.
+
+    There are some attributes that are not specific for
+    damage states as the intensity_field, the intensity_unit,
+    the kind of fragility function (lognormcdf for example) or
+    the min and max intensities. However in order to work with
+    those values more easily, they are included here.
     '''
+
+    __slots__ = [
+        'taxonomy',
+        'from_state',
+        'to_state',
+        'intensity_field',
+        'intensity_unit',
+        'fragility_function'
+    ]
+
     def __init__(self,
                  taxonomy,
                  from_state,
@@ -109,6 +157,7 @@ class Fragility:
             taxonomy = dataset['taxonomy']
             intensity_field = dataset['imt']
             intensity_unit = dataset['imu']
+
             for damage_state_mean_key in [
                     k for k in dataset.keys()
                     if k.startswith('D')
@@ -148,7 +197,7 @@ class Fragility:
                     to_state=to_state,
                     intensity_field=intensity_field,
                     intensity_unit=intensity_unit,
-                    fragility_function=fragility_function(mean, stddev)
+                    fragility_function=fragility_function(mean, stddev),
                 )
 
                 damage_states_by_taxonomy[taxonomy].append(damage_state)

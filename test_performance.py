@@ -8,8 +8,6 @@ import datetime
 import subprocess
 import unittest
 
-import exposure
-
 
 class TestPerformance(unittest.TestCase):
     '''
@@ -95,7 +93,7 @@ class TestPerformance(unittest.TestCase):
 
         total_seconds = delta.total_seconds()
 
-        time_ok_seconds = 60 * 3
+        time_ok_seconds = 60
 
         self.assertLess(total_seconds, time_ok_seconds)
 

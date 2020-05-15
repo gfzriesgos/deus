@@ -5,20 +5,13 @@ Module for all the common elements for deus and volcanus.
 Name comes from https://de.wikipedia.org/wiki/Tellus
 """
 
-import collections
 import glob
 import json
 import multiprocessing
 import os
 
 import gpdexposure
-import exposure
-import fragility
-import intensityprovider
-import loss
 import schemamapping
-import shakemap
-import transition
 
 
 class Child():
