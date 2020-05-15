@@ -18,7 +18,6 @@ import intensitydatawrapper
 import intensityprovider
 import loss
 import schemamapping
-import transition
 
 
 def main():

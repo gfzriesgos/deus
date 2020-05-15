@@ -9,12 +9,12 @@ python3 deus.py \
     --updated_exposure_output_file updated_exposure_output_file.json \
     --transition_output_file transition_output.json \
     --damage_output_file damage_output.json \
+    --merged_output_file merged_output.json \
     testinputs/shakemap.xml \
     testinputs/exposure_sara.json \
     'SARA_v1.0' \
-    testinputs/fragility_sara.json \
-    testinputs/loss_sara.json
-```
+    testinputs/fragility_sara.json
+  ```
 
 This script runs deus. It uses:
 - The testinputs `shakemap.xml` as intensity input.
@@ -27,8 +27,6 @@ This script runs deus. It uses:
   as there is no schema explicitly named in the exposure model.
   It is used to [map the given taxonomy to another schema](SchemaMapping.md).
 - The testinputs `fragility_sara.json` to provide the [fragility functions](FragilityFunctions.md).
-- testinputs `loss_sara.json` as provider for the [loss data](LossData.md) for each
-  damage state transition.
 
 And it gives specific names for the outputs:
 - The first one is the updated exposure model. It follows the same
@@ -39,3 +37,6 @@ And it gives specific names for the outputs:
   to compute the loss later with other tools.
 - A json file with the loss computed out of the `loss_sara.json` file.
   This is a kind of default loss computation that may be replaced later.
+- A json file that contains all the data from the upper three output files.
+  We introduced this output for the RIESGOS demonstrator in order to have all the
+  data transferred in one run.
