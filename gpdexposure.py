@@ -210,7 +210,7 @@ def get_updated_exposure_and_transitions(
     # Again, we can't be sure that those columns are there.
     # We use just zeros if they are not.
     result_transitions = collections.defaultdict(empty_transition_values)
-    if not any([expo_value.buildings for expo_value in expo.values()]) > 0:
+    if not any(expo_value.buildings > 0 for expo_value in expo.values()):
         # If we don't have any buildings we can't update
         # them and so we even don't need to read the intensity
         # for this cell.
