@@ -441,29 +441,17 @@ class Updater:
         })
 
 
-class MakeNNones:
-    """Helper class to create a list of n Nones for a default dict."""
-
-    def __init__(self, number):
-        """Init the instance."""
-        self.number = number
-
-    def __call__(self):
-        """Return n [None]."""
-        return [None] * self.number
-
-
 def updated_exposure_output_to_dict(updated_exposure):
     """Convert to data to a dict for output."""
-    # The output format is something like this:
-    # {
-    #    'Buildings': [100, 200],
-    #    'Damage': ['D0', 'D1'],
-    #    'Population': [2000, 3000],
-    #    'Taxonomy': ['TAX1', 'TAX2']
-    # }
-    make_n_nones = MakeNNones(len(updated_exposure))
-    result = collections.defaultdict(make_n_nones)
+    result = {}
+    for key in [
+        'Taxonomy',
+        'Damage',
+        'Buildings',
+        'Population',
+        'Repl-cost-USD-bdg'
+    ]:
+        result[key] = {}
 
     idx = 0
     for expo_key, expo_value in updated_exposure.items():
@@ -479,16 +467,16 @@ def updated_exposure_output_to_dict(updated_exposure):
 
 def transitions_output_to_dict(transitions):
     """Convert the transitions to a dict for output."""
-    # The output format is something like this
-    # {
-    #    'taxonomy': ['TAX1', 'TAX2'],
-    #    'from_damage_state': [1, 2],
-    #    'to_damage_state': [3, 4],
-    #    'n_buildings': [10.2, 23.5],
-    #    'replacement_costs_usd_bdg': [6000, 5000],
-    # }
-    make_n_nones = MakeNNones(len(transitions))
-    result = collections.defaultdict(make_n_nones)
+    result = {}
+
+    for key in [
+        'taxonomy',
+        'from_damage_state',
+        'to_damage_state',
+        'n_buildings',
+        'replacement_costs_usd_bdg'
+    ]:
+        result[key] = {}
 
     idx = 0
     for transition_key, transition_value in transitions.items():
