@@ -451,16 +451,16 @@ def updated_exposure_output_to_dict(updated_exposure):
         'Population',
         'Repl-cost-USD-bdg'
     ]:
-        result[key] = {}
+        result[key] = [None] * len(updated_exposure)
 
-    idx = 0
-    for expo_key, expo_value in updated_exposure.items():
+    for idx, (expo_key, expo_value) in enumerate(
+            updated_exposure.items()
+    ):
         result['Taxonomy'][idx] = expo_key.taxonomy
         result['Damage'][idx] = int_x_to_str_Dx(expo_key.damage_state)
         result['Buildings'][idx] = expo_value.buildings
         result['Population'][idx] = expo_value.population
         result['Repl-cost-USD-bdg'][idx] = expo_value.replcostbdg
-        idx += 1
 
     return result
 
@@ -476,16 +476,16 @@ def transitions_output_to_dict(transitions):
         'n_buildings',
         'replacement_costs_usd_bdg'
     ]:
-        result[key] = {}
+        result[key] = [None] * len(transitions)
 
-    idx = 0
-    for transition_key, transition_value in transitions.items():
+    for idx, (transition_key, transition_value) in enumerate(
+            transitions.items()
+    ):
         result['taxonomy'][idx] = transition_key.taxonomy
         result['from_damage_state'][idx] = transition_key.from_damage_state
         result['to_damage_state'][idx] = transition_key.to_damage_state
         result['n_buildings'][idx] = transition_value.buildings
         result['replacement_costs_usd_bdg'][idx] = transition_value.replcostbdg
-        idx += 1
 
     return result
 
