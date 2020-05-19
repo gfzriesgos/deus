@@ -176,6 +176,15 @@ class TestDeusCmdExecution(unittest.TestCase):
 
         self.assertEqual(input_n_buildings, output_n_buildings)
 
+        merged_output_data = geopandas.read_file(merged_output_filename)
+        for _, row in merged_output_data.iterrows():
+            transitions = row.transitions
+            for key in ['n_buildings', 'to_damage_state', 'from_damage_state']:
+                self.assertEqual(type(transitions[key]), list)
+            expo = row.expo
+            for key in ['Damage', 'Taxonomy', 'Buildings']:
+                self.assertEqual(type(expo[key]), list)
+
     def test_execute_deus_with_ts_shakemap(self):
         '''
         Runs deus with a tsunami shakemap.
