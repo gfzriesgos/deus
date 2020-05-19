@@ -210,7 +210,7 @@ def get_updated_exposure_and_transitions(
     # Again, we can't be sure that those columns are there.
     # We use just zeros if they are not.
     result_transitions = collections.defaultdict(empty_transition_values)
-    if not any([expo_value.buildings for expo_value in expo.values()]) > 0:
+    if not any(expo_value.buildings > 0 for expo_value in expo.values()):
         # If we don't have any buildings we can't update
         # them and so we even don't need to read the intensity
         # for this cell.
@@ -441,63 +441,51 @@ class Updater:
         })
 
 
-class MakeNNones:
-    """Helper class to create a list of n Nones for a default dict."""
-
-    def __init__(self, number):
-        """Init the instance."""
-        self.number = number
-
-    def __call__(self):
-        """Return n [None]."""
-        return [None] * self.number
-
-
 def updated_exposure_output_to_dict(updated_exposure):
     """Convert to data to a dict for output."""
-    # The output format is something like this:
-    # {
-    #    'Buildings': [100, 200],
-    #    'Damage': ['D0', 'D1'],
-    #    'Population': [2000, 3000],
-    #    'Taxonomy': ['TAX1', 'TAX2']
-    # }
-    make_n_nones = MakeNNones(len(updated_exposure))
-    result = collections.defaultdict(make_n_nones)
+    result = {}
+    for key in [
+        'Taxonomy',
+        'Damage',
+        'Buildings',
+        'Population',
+        'Repl-cost-USD-bdg'
+    ]:
+        result[key] = [None] * len(updated_exposure)
 
-    idx = 0
-    for expo_key, expo_value in updated_exposure.items():
+    for idx, (expo_key, expo_value) in enumerate(
+            updated_exposure.items()
+    ):
         result['Taxonomy'][idx] = expo_key.taxonomy
         result['Damage'][idx] = int_x_to_str_Dx(expo_key.damage_state)
         result['Buildings'][idx] = expo_value.buildings
         result['Population'][idx] = expo_value.population
         result['Repl-cost-USD-bdg'][idx] = expo_value.replcostbdg
-        idx += 1
 
     return result
 
 
 def transitions_output_to_dict(transitions):
     """Convert the transitions to a dict for output."""
-    # The output format is something like this
-    # {
-    #    'taxonomy': ['TAX1', 'TAX2'],
-    #    'from_damage_state': [1, 2],
-    #    'to_damage_state': [3, 4],
-    #    'n_buildings': [10.2, 23.5],
-    #    'replacement_costs_usd_bdg': [6000, 5000],
-    # }
-    make_n_nones = MakeNNones(len(transitions))
-    result = collections.defaultdict(make_n_nones)
+    result = {}
 
-    idx = 0
-    for transition_key, transition_value in transitions.items():
+    for key in [
+        'taxonomy',
+        'from_damage_state',
+        'to_damage_state',
+        'n_buildings',
+        'replacement_costs_usd_bdg'
+    ]:
+        result[key] = [None] * len(transitions)
+
+    for idx, (transition_key, transition_value) in enumerate(
+            transitions.items()
+    ):
         result['taxonomy'][idx] = transition_key.taxonomy
         result['from_damage_state'][idx] = transition_key.from_damage_state
         result['to_damage_state'][idx] = transition_key.to_damage_state
         result['n_buildings'][idx] = transition_value.buildings
         result['replacement_costs_usd_bdg'][idx] = transition_value.replcostbdg
-        idx += 1
 
     return result
 
