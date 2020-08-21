@@ -18,7 +18,6 @@ import gpdexposure
 import intensityprovider
 import loss
 import rasterintensityprovider
-import shakemap
 
 
 def main():
@@ -67,7 +66,7 @@ def main():
     args = argparser.parse_args()
 
     intensity_provider = \
-        rasterintensityprovider.RasterIntensityProvider.Shakemaps.from_file(
+        rasterintensityprovider.RasterIntensityProvider.from_file(
             args.intensity_file, intensity='MWH', unit='m'
         )
     # ID for inundation (out of the maximum wave height)
