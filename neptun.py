@@ -66,8 +66,10 @@ def main():
 
     args = argparser.parse_args()
 
-    intensity_provider = rasterintensityprovider.RasterIntensityProvider.Shakemaps.from_file(
-        args.intensity_file, intensity='MWH', unit='m')
+    intensity_provider = \
+        rasterintensityprovider.RasterIntensityProvider.Shakemaps.from_file(
+            args.intensity_file, intensity='MWH', unit='m'
+        )
     # ID for inundation (out of the maximum wave height)
     intensity_provider = intensityprovider.AliasIntensityProvider(
         intensity_provider,
