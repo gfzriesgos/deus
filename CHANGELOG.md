@@ -1,6 +1,6 @@
 # 2020-08-21:
 
-- added executable (neptun.py) to run deus with AWI tsunami grid files
+- added executable (neptunus.py) to run deus with AWI tsunami grid files
   that contain max wave height information in meter
 
 # 2020-05-13:
