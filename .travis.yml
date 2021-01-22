@@ -10,7 +10,7 @@ env:
     - C_INCLUDE_PATH=/usr/include/gdal
 
 before_install:
-  - sed -i -e '/GDAL==2.3.2/d' requirements.txt
+  - sed -i -e '/GDAL==2.4.0/d' requirements.txt
   - sudo apt-get install libgdal-dev python3-rtree
   - echo "GDAL==$(gdal-config --version)" >> requirements.txt
 
