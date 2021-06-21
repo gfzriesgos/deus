@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-#!/usr/bin/env python3
-
 # Damage-Exposure-Update-Service
 # 
 # Command line program for the damage computation in a multi risk scenario
