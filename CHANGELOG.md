@@ -1,3 +1,8 @@
+# 2020-08-21:
+
+- added executable (neptunus.py) to run deus with AWI tsunami grid files
+  that contain max wave height information in meter
+
 # 2020-05-13:
 
 - removed `im_min` and `im_max` handling as those have a bad performance characteristic

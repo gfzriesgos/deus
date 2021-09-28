@@ -6,6 +6,7 @@ the intensity provider for rasters.
 """
 
 import georasters as gr
+import numpy.ma
 
 
 class RasterIntensityProvider:
@@ -27,6 +28,9 @@ class RasterIntensityProvider:
             value = self.raster.map_pixel(point_x=lon, point_y=lat)
         except gr.RasterGeoError:
             # it is outside of the raster
+            value = self.na_value
+
+        if numpy.ma.is_masked(value):
             value = self.na_value
 
         intensities = {
