@@ -4,13 +4,34 @@
 [![Build Status](https://travis-ci.com/gfzriesgos/deus.svg?branch=master)](https://travis-ci.com/gfzriesgos/deus)
 [![codecov](https://codecov.io/gh/gfzriesgos/deus/branch/master/graph/badge.svg)](https://codecov.io/gh/gfzriesgos/deus)
 
-*D*amage-*E*xposure-*U*pdate-*S*ervice
+**D**amage-**E**xposure-**U**pdate-**S**ervice
+
+Command line program for the damage computation in a multi risk scenario
+pipeline for earthquakes, tsnuamis, ashfall & lahars.
+
+## Citation
+Brinckmann, Nils; Gomez-Zapata, Juan Camilo; Pittore, Massimiliano; Rüster, Matthias (2021): DEUS: Damage-Exposure-Update-Service. V. 1.0. GFZ Data Services. https://doi.org/10.5880/riesgos.2021.011
 
 ## What is it?
 
 This is the service to update a given exposure file (as it is the output
 of the assetmaster script) and update the building and damage classes
 with given fragility functions and intensity values.
+
+## Copyright & License
+Copyright © 2021 Helmholtz Centre Potsdam GFZ German Research Centre for Geosciences, Potsdam, Germany
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+
+https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+## Project
+
+Deus was developed in the scope of the RIESGOS project:
+Multi-Risk Analysis and Information System Components for the Andes Region (https://www.riesgos.de/en)
+
 
 ## Documentation
 
