@@ -1,3 +1,7 @@
+# 3021-10-13:
+
+- added support for the Medina 2019 scheme
+
 # 2020-05-13:
 
 - removed `im_min` and `im_max` handling as those have a bad performance characteristic
