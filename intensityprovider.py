@@ -3,26 +3,26 @@
 # Copyright © 2021 Helmholtz Centre Potsdam GFZ German Research Centre for Geosciences, Potsdam, Germany
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
-# 
+#
 # https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
-'''
+"""
 This is the module to
 1. provide the access mechanism for all intensity files and
 2. provide methods to convert all intensity files into a
    geojson intensity file format.
-'''
+"""
 
 import numpy as np
 from scipy.spatial import cKDTree
 
 
 class RasterIntensityProvider:
-    '''
+    """
     Class to provide the intensities on
     an location by reading from a raster.
-    '''
+    """
 
     def __init__(self, raster_wrapper, kind, unit, na_value=0.0):
         self._raster_wrapper = raster_wrapper
@@ -31,7 +31,7 @@ class RasterIntensityProvider:
         self._na_value = na_value
 
     def get_nearest(self, lon, lat):
-        '''
+        """
         Returns a dict with the values and a dict with the
         units of the intensities that the provider has
         on a given location (longitude, latitude).
@@ -39,7 +39,7 @@ class RasterIntensityProvider:
         It is possible that the point is outside of
         the raster coverage, so
         the value may be zero in that cases.
-        '''
+        """
         try:
             if self._raster_wrapper.is_loaction_in_bbox(lon, lat):
                 value = self._raster_wrapper.get_sample(lon, lat)
@@ -55,10 +55,11 @@ class RasterIntensityProvider:
 
 
 class IntensityProvider:
-    '''
+    """
     Class for providing the intensities on
     a location.
-    '''
+    """
+
     def __init__(self, intensity_data, na_value=0.0):
         self._intensity_data = intensity_data
         self._na_value = na_value
@@ -83,7 +84,7 @@ class IntensityProvider:
         return np.max(dists_without_nearests)
 
     def get_nearest(self, lon, lat):
-        '''
+        """
         Returns a dict with the values and a dict with the
         units of the intensities that the provider has
         on a given location (longitude, latitude).
@@ -91,7 +92,7 @@ class IntensityProvider:
         It is possible that the point is to far away
         from all of the intensity measurements, so
         the value may be zero in that cases.
-        '''
+        """
         coord = np.array([lon, lat])
         dist, idx = self._spatial_index.query(coord, k=1)
 
@@ -101,14 +102,12 @@ class IntensityProvider:
         for column in self._intensity_data.get_data_columns():
             if dist <= self._max_dist:
                 value = self._intensity_data.get_value_for_column_and_index(
-                    column=column,
-                    index=idx
+                    column=column, index=idx
                 )
             else:
                 value = self._na_value
             unit = self._intensity_data.get_unit_for_column_and_index(
-                column=column,
-                index=idx
+                column=column, index=idx
             )
             intensities[column] = value
             units[column] = unit
@@ -116,30 +115,29 @@ class IntensityProvider:
 
 
 class StackedIntensityProvider:
-    '''
+    """
     Class for combining several intensity providers
     into one single instance.
-    '''
+    """
 
     def __init__(self, *sub_intensity_providers):
         self._sub_intensity_providers = sub_intensity_providers
 
     def get_nearest(self, lon, lat):
-        '''
+        """
         Returns a dict with the values and a dict with the
         units of the intensities that the provider has
         on a given location (longitude, latitude).
 
         This stacked intensity provider uses a list of
         sub intensity providers to read all the datasets.
-        '''
+        """
         intensities = {}
         units = {}
 
         for single_sub_intensity_provider in self._sub_intensity_providers:
             sub_intens, sub_units = single_sub_intensity_provider.get_nearest(
-                lon=lon,
-                lat=lat
+                lon=lon, lat=lat
             )
             intensities.update(sub_intens)
             units.update(sub_units)
@@ -147,13 +145,14 @@ class StackedIntensityProvider:
 
 
 class AliasIntensityProvider:
-    '''
+    """
     Intensity provider that adds intensities as aliases
     for exisiting intensities.
 
     This is done if one intensity can have several names for
     fragility functions,
-    '''
+    """
+
     def __init__(self, inner_intensity_provider, aliases=None):
         if aliases is None:
             aliases = {}
@@ -161,13 +160,11 @@ class AliasIntensityProvider:
         self._aliases = aliases
 
     def get_nearest(self, lon, lat):
-        '''
+        """
         Returns the base intensities.
         It also adds intensities under other names.
-        '''
-        intensities, units = (
-            self._inner_intensity_provider.get_nearest(lon, lat)
-        )
+        """
+        intensities, units = self._inner_intensity_provider.get_nearest(lon, lat)
 
         for new_intensity_measure in self._aliases:
             possible_intensity_measures = self._aliases[new_intensity_measure]
@@ -178,16 +175,16 @@ class AliasIntensityProvider:
             for given_intensity_measure in possible_intensity_measures:
                 if given_intensity_measure in intensities.keys():
                     if new_intensity_measure not in intensities.keys():
-                        intensities[new_intensity_measure] = \
-                            intensities[given_intensity_measure]
-                        units[new_intensity_measure] = \
-                            units[given_intensity_measure]
+                        intensities[new_intensity_measure] = intensities[
+                            given_intensity_measure
+                        ]
+                        units[new_intensity_measure] = units[given_intensity_measure]
 
         return intensities, units
 
 
 class ConversionIntensityProvider:
-    '''
+    """
     Intensity provider that can convert intensities
     to new intensity measures.
 
@@ -199,32 +196,24 @@ class ConversionIntensityProvider:
     be converted into one new, so there is no option
     to compute one new intensity from two or more existing ones
     (so kind a merge).
-    '''
-    def __init__(
-            self,
-            inner_intensity_provider,
-            from_intensity,
-            as_intensity,
-            fun):
+    """
+
+    def __init__(self, inner_intensity_provider, from_intensity, as_intensity, fun):
         self._inner_intensity_provider = inner_intensity_provider
         self._from_intensity = from_intensity
         self._as_intensity = as_intensity
         self._fun = fun
 
     def get_nearest(self, lon, lat):
-        '''
+        """
         Adds one intensity measurement with the given conversion function.
-        '''
-        intensities, units = self._inner_intensity_provider.get_nearest(
-            lon,
-            lat
-        )
+        """
+        intensities, units = self._inner_intensity_provider.get_nearest(lon, lat)
 
         if self._from_intensity in intensities.keys():
             if self._as_intensity not in intensities.keys():
                 new_intensity, new_unit = self._fun(
-                    intensities[self._from_intensity],
-                    units[self._from_intensity]
+                    intensities[self._from_intensity], units[self._from_intensity]
                 )
                 intensities[self._as_intensity] = new_intensity
                 units[self._as_intensity] = new_unit

@@ -3,9 +3,9 @@
 # Copyright © 2021 Helmholtz Centre Potsdam GFZ German Research Centre for Geosciences, Potsdam, Germany
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
-# 
+#
 # https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
 """
@@ -45,31 +45,28 @@ class TestGpdExposureDamageStateUpdate(unittest.TestCase):
         # TAX2 D1 with 100
 
         expo = {
-            'Taxonomy': ['TAX1', 'TAX1', 'TAX2', 'TAX2'],
-            'Damage': ['D0', 'D1', 'D0', 'D1'],
-            'Buildings': [100.0, 100.0, 100.0, 100.0],
-            'Population': [20.0, 10.0, 20.0, 10.0],
-            'Repl-cost-USD-bdg': [50000, 45000, 60000, 59000]
+            "Taxonomy": ["TAX1", "TAX1", "TAX2", "TAX2"],
+            "Damage": ["D0", "D1", "D0", "D1"],
+            "Buildings": [100.0, 100.0, 100.0, 100.0],
+            "Population": [20.0, 10.0, 20.0, 10.0],
+            "Repl-cost-USD-bdg": [50000, 45000, 60000, 59000],
         }
 
-        series = pandas.Series({
-            'gid': '001',
-            'geometry': shapely.wkt.loads('POINT(52 15)'),
-            'expo': expo
-        })
+        series = pandas.Series(
+            {"gid": "001", "geometry": shapely.wkt.loads("POINT(52 15)"), "expo": expo}
+        )
 
         self.old_exposure = pandas.DataFrame([series])
 
         self.fake_intensity_provider = (
-            testimplementations
-            .AlwaysTheSameIntensityProvider(
-                'INTENSITY', 1, 'unitless'
+            testimplementations.AlwaysTheSameIntensityProvider(
+                "INTENSITY", 1, "unitless"
             )
         )
 
         fragility_data = {
-            'meta': {
-                'id': 'SCHEMA1',
+            "meta": {
+                "id": "SCHEMA1",
                 # we will make the implementation
                 # think that we do the normal way
                 # but we will mock it later
@@ -81,40 +78,39 @@ class TestGpdExposureDamageStateUpdate(unittest.TestCase):
                 # value as probability
                 # so no matter
                 # what intensity is given
-                'shape': 'different!!!',
+                "shape": "different!!!",
             },
-            'data': [
+            "data": [
                 {
-                    'imt': 'intensity',
-                    'imu': 'unitless',
+                    "imt": "intensity",
+                    "imu": "unitless",
                     # half of the buildings go into D1
-                    'D1_mean': 0.5,
-                    'D1_stddev': 0,
+                    "D1_mean": 0.5,
+                    "D1_stddev": 0,
                     # 25% go into D2
-                    'D2_mean': 0.25,
-                    'D2_stddev': 0,
+                    "D2_mean": 0.25,
+                    "D2_stddev": 0,
                     # there are no other values for
                     # D1 to D2
-                    'taxonomy': 'TAX1',
+                    "taxonomy": "TAX1",
                 },
                 {
-                    'imt': 'intensity',
-                    'imu': 'unitless',
+                    "imt": "intensity",
+                    "imu": "unitless",
                     # 75% go into D1
-                    'D1_mean': 0.75,
-                    'D1_stddev': 0,
+                    "D1_mean": 0.75,
+                    "D1_stddev": 0,
                     # 40% go into D2
-                    'D2_mean': 0.4,
-                    'D2_stddev': 0,
-                    'taxonomy': 'TAX2',
+                    "D2_mean": 0.4,
+                    "D2_stddev": 0,
+                    "taxonomy": "TAX2",
                 },
-
-            ]
+            ],
         }
 
         fragility_data2 = {
-            'meta': {
-                'id': 'SCHEMA2',
+            "meta": {
+                "id": "SCHEMA2",
                 # we will make the implementation
                 # think that we do the normal way
                 # but we will mock it later
@@ -126,127 +122,119 @@ class TestGpdExposureDamageStateUpdate(unittest.TestCase):
                 # value as probability
                 # so no matter
                 # what intensity is given
-                'shape': 'different!!!',
+                "shape": "different!!!",
             },
-            'data': [
+            "data": [
                 {
-                    'imt': 'intensity',
-                    'imu': 'unitless',
+                    "imt": "intensity",
+                    "imu": "unitless",
                     # half of the buildings go into D1
-                    'D1_mean': 0.75,
-                    'D1_stddev': 0,
+                    "D1_mean": 0.75,
+                    "D1_stddev": 0,
                     # 25% go into D2
-                    'D2_mean': 0.4,
-                    'D2_stddev': 0,
-                    'D3_mean': 0.2,
-                    'D3_stddev': 0,
+                    "D2_mean": 0.4,
+                    "D2_stddev": 0,
+                    "D3_mean": 0.2,
+                    "D3_stddev": 0,
                     # there are no other values for
                     # D1 to D2
-                    'taxonomy': 'TAX',
+                    "taxonomy": "TAX",
                 },
-
-            ]
+            ],
         }
 
         self.fake_fragility_provider = fragility.Fragility(
             fragility_data
-        ).to_fragility_provider_with_specified_fragility_function(
-            MakeFakeFunction
-        )
+        ).to_fragility_provider_with_specified_fragility_function(MakeFakeFunction)
         # and another one for the schema mapping too
         self.fake_fragility_provider2 = fragility.Fragility(
             fragility_data2
-        ).to_fragility_provider_with_specified_fragility_function(
-            MakeFakeFunction
-        )
+        ).to_fragility_provider_with_specified_fragility_function(MakeFakeFunction)
 
         tax_schema_mapping_data = [
             {
-                'source_schema': 'SCHEMA1',
-                'target_schema': 'SCHEMA2',
-                'conv_matrix': {
-                    'TAX1': {
-                        'TAX': 1.0,
+                "source_schema": "SCHEMA1",
+                "target_schema": "SCHEMA2",
+                "conv_matrix": {
+                    "TAX1": {
+                        "TAX": 1.0,
                     },
-                    'TAX2': {
-                        'TAX': 1.0,
-                    }
-                }
+                    "TAX2": {
+                        "TAX": 1.0,
+                    },
+                },
             }
         ]
 
         ds_schema_mapping_data = [
             {
-                'source_schema': 'SCHEMA1',
-                'target_schema': 'SCHEMA2',
-                'source_taxonomy': 'TAX1',
-                'target_taxonomy': 'TAX',
-                'conv_matrix': {
-                    '0': {
+                "source_schema": "SCHEMA1",
+                "target_schema": "SCHEMA2",
+                "source_taxonomy": "TAX1",
+                "target_taxonomy": "TAX",
+                "conv_matrix": {
+                    "0": {
                         # TAX1 D0 goes to 100% into TAX D0
-                        '0': 1.0,
-                        '1': 0.0,
-                        '2': 0.0,
+                        "0": 1.0,
+                        "1": 0.0,
+                        "2": 0.0,
                     },
-                    '1': {
-                        '0': 0.0,
+                    "1": {
+                        "0": 0.0,
                         # TAX1 D1 goes to 50% into TAX D1
-                        '1': 0.5,
-                        '2': 0.2,
+                        "1": 0.5,
+                        "2": 0.2,
                     },
-                    '2': {
-                        '0': 0.0,
+                    "2": {
+                        "0": 0.0,
                         # TAX1 D1 goes to 30% into TAX D2
-                        '1': 0.3,
-                        '2': 0.3,
+                        "1": 0.3,
+                        "2": 0.3,
                     },
-                    '3': {
-                        '0': 0.0,
+                    "3": {
+                        "0": 0.0,
                         # TAX1 D1 goes to 20% into TAX D3
-                        '1': 0.2,
-                        '2': 0.5,
-                    }
-                }
+                        "1": 0.2,
+                        "2": 0.5,
+                    },
+                },
             },
             {
-                'source_schema': 'SCHEMA1',
-                'target_schema': 'SCHEMA2',
-                'source_taxonomy': 'TAX2',
-                'target_taxonomy': 'TAX',
-                'conv_matrix': {
-                    '0': {
-                        '0': 1.0,
-                        '1': 0.0,
-                        '2': 0.0,
+                "source_schema": "SCHEMA1",
+                "target_schema": "SCHEMA2",
+                "source_taxonomy": "TAX2",
+                "target_taxonomy": "TAX",
+                "conv_matrix": {
+                    "0": {
+                        "0": 1.0,
+                        "1": 0.0,
+                        "2": 0.0,
                     },
-                    '1': {
-                        '0': 0.0,
-                        '1': 0.9,
-                        '2': 0.1,
+                    "1": {
+                        "0": 0.0,
+                        "1": 0.9,
+                        "2": 0.1,
                     },
-                    '2': {
-                        '0': 0.0,
-                        '1': 0.1,
-                        '2': 0.1,
+                    "2": {
+                        "0": 0.0,
+                        "1": 0.1,
+                        "2": 0.1,
                     },
-                    '3': {
-                        '0': 0.0,
-                        '1': 0.0,
-                        '2': 0.8,
-                    }
-                }
+                    "3": {
+                        "0": 0.0,
+                        "1": 0.0,
+                        "2": 0.8,
+                    },
+                },
             },
         ]
         self.fake_schema_mapper = (
-            schemamapping
-            .SchemaMapper
-            .from_taxonomy_and_damage_state_conversion_data(
+            schemamapping.SchemaMapper.from_taxonomy_and_damage_state_conversion_data(
                 tax_schema_mapping_data, ds_schema_mapping_data
             )
         )
         self.fake_loss_provider = (
-            testimplementations
-            .AlwaysOneDollarPerTransitionLossProvider()
+            testimplementations.AlwaysOneDollarPerTransitionLossProvider()
         )
 
     def test_with_schema_mapping(self):
@@ -255,11 +243,11 @@ class TestGpdExposureDamageStateUpdate(unittest.TestCase):
         """
         result_exposure = gpdexposure.update_exposure_transitions_and_losses(
             exposure=self.old_exposure,
-            source_schema='SCHEMA1',
+            source_schema="SCHEMA1",
             schema_mapper=self.fake_schema_mapper,
             intensity_provider=self.fake_intensity_provider,
             fragility_provider=self.fake_fragility_provider2,
-            loss_provider=self.fake_loss_provider
+            loss_provider=self.fake_loss_provider,
         )
         self.assertEqual(1, len(result_exposure))
         expo = pandas.DataFrame(result_exposure.iloc[0].expo)
@@ -268,16 +256,16 @@ class TestGpdExposureDamageStateUpdate(unittest.TestCase):
 
         # This here was the mapping only
         # (but with applying the damage computation)
-        self.assertEqual(24, get_buildings(expo, 'TAX', 'D0'))
-        self.assertBetween(139.19, get_buildings(expo, 'TAX', 'D1'), 140.01)
-        self.assertBetween(140.79, get_buildings(expo, 'TAX', 'D2'), 140.81)
-        self.assertEqual(96, get_buildings(expo, 'TAX', 'D3'))
+        self.assertEqual(24, get_buildings(expo, "TAX", "D0"))
+        self.assertBetween(139.19, get_buildings(expo, "TAX", "D1"), 140.01)
+        self.assertBetween(140.79, get_buildings(expo, "TAX", "D2"), 140.81)
+        self.assertEqual(96, get_buildings(expo, "TAX", "D3"))
 
         # Population follows the same algorithm as the number of buildings
-        self.assertBetween(4.79, get_population(expo, 'TAX', 'D0'), 4.81)
-        self.assertBetween(21.11, get_population(expo, 'TAX', 'D1'), 21.13)
-        self.assertBetween(20.47, get_population(expo, 'TAX', 'D2'), 20.49)
-        self.assertBetween(13.5, get_population(expo, 'TAX', 'D3'), 13.7)
+        self.assertBetween(4.79, get_population(expo, "TAX", "D0"), 4.81)
+        self.assertBetween(21.11, get_population(expo, "TAX", "D1"), 21.13)
+        self.assertBetween(20.47, get_population(expo, "TAX", "D2"), 20.49)
+        self.assertBetween(13.5, get_population(expo, "TAX", "D3"), 13.7)
 
         # The replacement costs don't follow the route of building handling.
         #
@@ -341,58 +329,26 @@ class TestGpdExposureDamageStateUpdate(unittest.TestCase):
         # the damage, we stay with those values.
         #
         self.assertBetween(
-            53_499,
-            get_replacement_costs_usd_bdg(expo, 'TAX', 'D0'),
-            53_501
+            53_499, get_replacement_costs_usd_bdg(expo, "TAX", "D0"), 53_501
         )
         self.assertBetween(
-            53_499,
-            get_replacement_costs_usd_bdg(expo, 'TAX', 'D1'),
-            53_501
+            53_499, get_replacement_costs_usd_bdg(expo, "TAX", "D1"), 53_501
         )
         self.assertBetween(
-            53_499,
-            get_replacement_costs_usd_bdg(expo, 'TAX', 'D2'),
-            53_501
+            53_499, get_replacement_costs_usd_bdg(expo, "TAX", "D2"), 53_501
         )
         self.assertBetween(
-            53_499,
-            get_replacement_costs_usd_bdg(expo, 'TAX', 'D3'),
-            53_501
+            53_499, get_replacement_costs_usd_bdg(expo, "TAX", "D3"), 53_501
         )
 
         transitions = pandas.DataFrame(result_exposure.iloc[0].transitions)
 
-        self.assertBetween(
-            71,
-            get_transition_n_bdg(transitions, 'TAX', 0, 1),
-            73
-        )
-        self.assertBetween(
-            63,
-            get_transition_n_bdg(transitions, 'TAX', 0, 2),
-            65
-        )
-        self.assertBetween(
-            39,
-            get_transition_n_bdg(transitions, 'TAX', 0, 3),
-            41
-        )
-        self.assertBetween(
-            44.7,
-            get_transition_n_bdg(transitions, 'TAX', 1, 2),
-            44.9
-        )
-        self.assertBetween(
-            27.9,
-            get_transition_n_bdg(transitions, 'TAX', 1, 3),
-            28.1
-        )
-        self.assertBetween(
-            7.9,
-            get_transition_n_bdg(transitions, 'TAX', 2, 3),
-            8.1
-        )
+        self.assertBetween(71, get_transition_n_bdg(transitions, "TAX", 0, 1), 73)
+        self.assertBetween(63, get_transition_n_bdg(transitions, "TAX", 0, 2), 65)
+        self.assertBetween(39, get_transition_n_bdg(transitions, "TAX", 0, 3), 41)
+        self.assertBetween(44.7, get_transition_n_bdg(transitions, "TAX", 1, 2), 44.9)
+        self.assertBetween(27.9, get_transition_n_bdg(transitions, "TAX", 1, 3), 28.1)
+        self.assertBetween(7.9, get_transition_n_bdg(transitions, "TAX", 2, 3), 8.1)
 
     def test_without_schema_mapping(self):
         """
@@ -400,24 +356,24 @@ class TestGpdExposureDamageStateUpdate(unittest.TestCase):
         """
         result_exposure = gpdexposure.update_exposure_transitions_and_losses(
             exposure=self.old_exposure,
-            source_schema='SCHEMA1',
+            source_schema="SCHEMA1",
             schema_mapper=self.fake_schema_mapper,
             intensity_provider=self.fake_intensity_provider,
             fragility_provider=self.fake_fragility_provider,
-            loss_provider=self.fake_loss_provider
+            loss_provider=self.fake_loss_provider,
         )
         self.assertEqual(1, len(result_exposure))
         expo = pandas.DataFrame(result_exposure.iloc[0].expo)
 
         self.assertEqual(6, len(expo))
 
-        self.assertBetween(37.49, get_buildings(expo, 'TAX1', 'D0'), 37.51)
-        self.assertBetween(112.49, get_buildings(expo, 'TAX1', 'D1'), 112.51)
-        self.assertBetween(49.99, get_buildings(expo, 'TAX1', 'D2'), 50.01)
+        self.assertBetween(37.49, get_buildings(expo, "TAX1", "D0"), 37.51)
+        self.assertBetween(112.49, get_buildings(expo, "TAX1", "D1"), 112.51)
+        self.assertBetween(49.99, get_buildings(expo, "TAX1", "D2"), 50.01)
 
-        self.assertBetween(14.99, get_buildings(expo, 'TAX2', 'D0'), 15.01)
-        self.assertBetween(104.99, get_buildings(expo, 'TAX2', 'D1'), 105.01)
-        self.assertBetween(79.99, get_buildings(expo, 'TAX2', 'D2'), 80.01)
+        self.assertBetween(14.99, get_buildings(expo, "TAX2", "D0"), 15.01)
+        self.assertBetween(104.99, get_buildings(expo, "TAX2", "D1"), 105.01)
+        self.assertBetween(79.99, get_buildings(expo, "TAX2", "D2"), 80.01)
 
         # Normally the replacement costs per building would stay the very same
         # as the input values (as all of those are only taxonomy specific and
@@ -438,69 +394,35 @@ class TestGpdExposureDamageStateUpdate(unittest.TestCase):
         # And those are the very same regardless of the damage state
 
         self.assertBetween(
-            47_499,
-            get_replacement_costs_usd_bdg(expo, 'TAX1', 'D0'),
-            47_501
+            47_499, get_replacement_costs_usd_bdg(expo, "TAX1", "D0"), 47_501
         )
         self.assertBetween(
-            47_499,
-            get_replacement_costs_usd_bdg(expo, 'TAX1', 'D1'),
-            47_501
+            47_499, get_replacement_costs_usd_bdg(expo, "TAX1", "D1"), 47_501
         )
         self.assertBetween(
-            47_499,
-            get_replacement_costs_usd_bdg(expo, 'TAX1', 'D2'),
-            47_501
+            47_499, get_replacement_costs_usd_bdg(expo, "TAX1", "D2"), 47_501
         )
 
         self.assertBetween(
-            59_499,
-            get_replacement_costs_usd_bdg(expo, 'TAX2', 'D0'),
-            59_501
+            59_499, get_replacement_costs_usd_bdg(expo, "TAX2", "D0"), 59_501
         )
         self.assertBetween(
-            59_499,
-            get_replacement_costs_usd_bdg(expo, 'TAX2', 'D1'),
-            59_501
+            59_499, get_replacement_costs_usd_bdg(expo, "TAX2", "D1"), 59_501
         )
         self.assertBetween(
-            59_499,
-            get_replacement_costs_usd_bdg(expo, 'TAX2', 'D2'),
-            59_501
+            59_499, get_replacement_costs_usd_bdg(expo, "TAX2", "D2"), 59_501
         )
 
         transitions = pandas.DataFrame(result_exposure.iloc[0].transitions)
 
         self.assertBetween(
-            37.49,
-            get_transition_n_bdg(transitions, 'TAX1', 0, 1),
-            37.51
+            37.49, get_transition_n_bdg(transitions, "TAX1", 0, 1), 37.51
         )
-        self.assertBetween(
-            24,
-            get_transition_n_bdg(transitions, 'TAX1', 0, 2),
-            26
-        )
-        self.assertBetween(
-            24,
-            get_transition_n_bdg(transitions, 'TAX1', 1, 2),
-            26
-        )
-        self.assertBetween(
-            44.9,
-            get_transition_n_bdg(transitions, 'TAX2', 0, 1),
-            45.1
-        )
-        self.assertBetween(
-            39.9,
-            get_transition_n_bdg(transitions, 'TAX2', 0, 2),
-            40.1
-        )
-        self.assertBetween(
-            39.9,
-            get_transition_n_bdg(transitions, 'TAX2', 1, 2),
-            40.1
-        )
+        self.assertBetween(24, get_transition_n_bdg(transitions, "TAX1", 0, 2), 26)
+        self.assertBetween(24, get_transition_n_bdg(transitions, "TAX1", 1, 2), 26)
+        self.assertBetween(44.9, get_transition_n_bdg(transitions, "TAX2", 0, 1), 45.1)
+        self.assertBetween(39.9, get_transition_n_bdg(transitions, "TAX2", 0, 2), 40.1)
+        self.assertBetween(39.9, get_transition_n_bdg(transitions, "TAX2", 1, 2), 40.1)
 
     def assertBetween(self, lower, x, upper):
         """
@@ -530,7 +452,7 @@ def get_replacement_costs_usd_bdg(expo, tax, ds):
     """Get the replacement costs in usd per bdg."""
     expo_tax = expo[expo.Taxonomy == tax]
     expo_ds = expo_tax[expo_tax.Damage == ds]
-    return expo_ds['Repl-cost-USD-bdg'].iloc[0]
+    return expo_ds["Repl-cost-USD-bdg"].iloc[0]
 
 
 def get_transition_n_bdg(transitions, tax, from_ds, to_ds):
@@ -550,6 +472,7 @@ class MakeFakeFunction:
     we need to serialize the functions used there,
     so we use a class instead of a nested function.
     """
+
     def __init__(self, mean, stddev):
         self.mean = mean
         self.stddev = stddev
@@ -558,5 +481,5 @@ class MakeFakeFunction:
         return self.mean
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
