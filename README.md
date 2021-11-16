@@ -1,7 +1,5 @@
 # deus
 
-[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/gfzriesgos/deus)](https://hub.docker.com/r/gfzriesgos/deus)
-[![Build Status](https://travis-ci.com/gfzriesgos/deus.svg?branch=master)](https://travis-ci.com/gfzriesgos/deus)
 [![codecov](https://codecov.io/gh/gfzriesgos/deus/branch/master/graph/badge.svg)](https://codecov.io/gh/gfzriesgos/deus)
 
 **D**amage-**E**xposure-**U**pdate-**S**ervice
