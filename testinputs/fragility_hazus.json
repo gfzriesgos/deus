@@ -43,14 +43,14 @@
 "hazus-c2h-low-code",
 "hazus-c1m-low-code",
 "hazus-c1l-low-code",
-"hazus-c1h-low-code",
+"hazus-c1h-low-code"
 ],
 "limit states":[
 "D1",
 "D2",
 "D3",
-"D4",
-],
+"D4"
+]
 },
 "data":[
 {"taxonomy" : "hazus-w2-low-code",
@@ -66,7 +66,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-w1-low-code",
 "D1_mean" : 0.2455,
 "D1_stddev" : 0.1746,
@@ -80,7 +80,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-urmm-low-code",
 "D1_mean" : 0.1227,
 "D1_stddev" : 0.0873,
@@ -94,7 +94,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-urml-low-code",
 "D1_mean" : 0.1718,
 "D1_stddev" : 0.1222,
@@ -108,7 +108,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-s5m-low-code",
 "D1_mean" : 0.1350,
 "D1_stddev" : 0.0961,
@@ -122,7 +122,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-s5l-low-code",
 "D1_mean" : 0.1595,
 "D1_stddev" : 0.1135,
@@ -136,7 +136,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-s5h-low-code",
 "D1_mean" : 0.1227,
 "D1_stddev" : 0.0873,
@@ -150,7 +150,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-s4m-low-code",
 "D1_mean" : 0.1473,
 "D1_stddev" : 0.1048,
@@ -164,7 +164,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-s4l-low-code",
 "D1_mean" : 0.1595,
 "D1_stddev" : 0.1135,
@@ -178,7 +178,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-s4h-low-code",
 "D1_mean" : 0.1473,
 "D1_stddev" : 0.1048,
@@ -192,7 +192,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-s3-low-code",
 "D1_mean" : 0.1227,
 "D1_stddev" : 0.0873,
@@ -206,7 +206,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-s2m-low-code",
 "D1_mean" : 0.1473,
 "D1_stddev" : 0.1048,
@@ -220,7 +220,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-s2l-low-code",
 "D1_mean" : 0.1595,
 "D1_stddev" : 0.1135,
@@ -234,7 +234,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-s2h-low-code",
 "D1_mean" : 0.1350,
 "D1_stddev" : 0.0961,
@@ -248,7 +248,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-s1m-low-code",
 "D1_mean" : 0.1473,
 "D1_stddev" : 0.1048,
@@ -262,7 +262,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-s1l-low-code",
 "D1_mean" : 0.1473,
 "D1_stddev" : 0.1048,
@@ -276,7 +276,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-s1h-low-code",
 "D1_mean" : 0.1227,
 "D1_stddev" : 0.0873,
@@ -290,7 +290,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-rm2m-low-code",
 "D1_mean" : 0.1473,
 "D1_stddev" : 0.1048,
@@ -304,7 +304,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-rm2l-low-code",
 "D1_mean" : 0.1718,
 "D1_stddev" : 0.1222,
@@ -318,7 +318,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-rm2h-low-code",
 "D1_mean" : 0.1350,
 "D1_stddev" : 0.0961,
@@ -332,7 +332,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-rm1m-low-code",
 "D1_mean" : 0.1718,
 "D1_stddev" : 0.1222,
@@ -346,7 +346,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-rm1l-low-code",
 "D1_mean" : 0.1964,
 "D1_stddev" : 0.1397,
@@ -360,7 +360,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-pc2m-low-code",
 "D1_mean" : 0.1350,
 "D1_stddev" : 0.0961,
@@ -374,7 +374,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-pc2l-low-code",
 "D1_mean" : 0.1595,
 "D1_stddev" : 0.1135,
@@ -388,7 +388,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-pc2h-low-code",
 "D1_mean" : 0.1350,
 "D1_stddev" : 0.0961,
@@ -402,7 +402,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-pc1-low-code",
 "D1_mean" : 0.1595,
 "D1_stddev" : 0.1135,
@@ -416,7 +416,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-mh-low-code",
 "D1_mean" : 0.1350,
 "D1_stddev" : 0.0961,
@@ -430,7 +430,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-c3m-low-code",
 "D1_mean" : 0.1350,
 "D1_stddev" : 0.0961,
@@ -444,7 +444,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-c3l-low-code",
 "D1_mean" : 0.1473,
 "D1_stddev" : 0.1048,
@@ -458,7 +458,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-c3h-low-code",
 "D1_mean" : 0.1105,
 "D1_stddev" : 0.0786,
@@ -472,7 +472,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-c2m-low-code",
 "D1_mean" : 0.1473,
 "D1_stddev" : 0.1048,
@@ -486,7 +486,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-c2l-low-code",
 "D1_mean" : 0.1718,
 "D1_stddev" : 0.1222,
@@ -500,7 +500,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-c2h-low-code",
 "D1_mean" : 0.1350,
 "D1_stddev" : 0.0961,
@@ -514,7 +514,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-c1m-low-code",
 "D1_mean" : 0.1473,
 "D1_stddev" : 0.1048,
@@ -528,7 +528,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-c1l-low-code",
 "D1_mean" : 0.1473,
 "D1_stddev" : 0.1048,
@@ -542,7 +542,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
+"im_max" : 3
 },{"taxonomy" : "hazus-c1h-low-code",
 "D1_mean" : 0.1227,
 "D1_stddev" : 0.0873,
@@ -556,7 +556,7 @@
 "imt" : "PGA",
 "imu" : "g",
 "im_min" : 0,
-"im_max" : 3,
-},
+"im_max" : 3
+}
 ]
 }

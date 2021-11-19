@@ -3,14 +3,14 @@
 # Copyright © 2021 Helmholtz Centre Potsdam GFZ German Research Centre for Geosciences, Potsdam, Germany
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
-# 
+#
 # https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
-'''
+"""
 Module for the exposure using a geopandas dataframe.
-'''
+"""
 
 import collections
 import ctypes
@@ -48,27 +48,25 @@ def int_x_to_str_Dx(damage_state_without_d_prefix):
     For exmple the input is 2 and the expected
     result is D2.
     """
-    return 'D' + str(damage_state_without_d_prefix)
+    return "D" + str(damage_state_without_d_prefix)
 
 
-ExpoKey = collections.namedtuple('ExpoKey', ['taxonomy', 'damage_state'])
+ExpoKey = collections.namedtuple("ExpoKey", ["taxonomy", "damage_state"])
 
 
 class ExpoValues(ctypes.Structure):
     """Class to store the information for the values of an expo dict."""
+
     _fields_ = [
-        ('buildings', ctypes.c_double),
-        ('population', ctypes.c_double),
-        ('replcostbdg', ctypes.c_double),
+        ("buildings", ctypes.c_double),
+        ("population", ctypes.c_double),
+        ("replcostbdg", ctypes.c_double),
     ]
 
     def __repr__(self):
-        return 'ExpoValues(' + \
-            'buildings={0}, population={1}, replcostbdg={2})'.format(
-                repr(self.buildings),
-                repr(self.population),
-                repr(self.replcostbdg)
-            )
+        return "ExpoValues(" + "buildings={0}, population={1}, replcostbdg={2})".format(
+            repr(self.buildings), repr(self.population), repr(self.replcostbdg)
+        )
 
 
 def empty_expo_values():
@@ -77,20 +75,20 @@ def empty_expo_values():
 
 
 TransitionKey = collections.namedtuple(
-    'TransitionKey',
-    ['taxonomy', 'from_damage_state', 'to_damage_state']
+    "TransitionKey", ["taxonomy", "from_damage_state", "to_damage_state"]
 )
 
 
 class TransitionValues(ctypes.Structure):
     """Class to store the keys in the transition dict."""
+
     _fields_ = [
-        ('buildings', ctypes.c_double),
-        ('replcostbdg', ctypes.c_double),
+        ("buildings", ctypes.c_double),
+        ("replcostbdg", ctypes.c_double),
     ]
 
     def __repr__(self):
-        return 'TransitionValues(buildings={0}, replcostbdg={1})'.format(
+        return "TransitionValues(buildings={0}, replcostbdg={1})".format(
             repr(self.buildings), repr(self.replcostbdg)
         )
 
@@ -106,12 +104,13 @@ def zero():
 
 
 def update_exposure_transitions_and_losses(
-        exposure,
-        source_schema,
-        schema_mapper,
-        intensity_provider,
-        fragility_provider,
-        loss_provider):
+    exposure,
+    source_schema,
+    schema_mapper,
+    intensity_provider,
+    fragility_provider,
+    loss_provider,
+):
     """
     This is the main function to update the
     exposure based on the intensities of the intensity provider.
@@ -130,7 +129,7 @@ def update_exposure_transitions_and_losses(
         fragility_provider,
         schema_mapper,
         intensity_provider,
-        loss_provider
+        loss_provider,
     )
     # So we use the pandas apply to run our function. I'm not sure if we
     # can parallize this, but it is one of the fastest ways in python anyway.
@@ -139,22 +138,16 @@ def update_exposure_transitions_and_losses(
     if PARALLEL_PROCESSING:
         with multiprocessing.Pool(n_cpus) as pool:
             dataframe = pandas.concat(
-                pool.map(updater.update_df, splitted_exposure),
-                sort=False
+                pool.map(updater.update_df, splitted_exposure), sort=False
             )
     else:
         dataframe = pandas.concat(
-            [updater.update_df(x) for x in splitted_exposure],
-            sort=False
+            [updater.update_df(x) for x in splitted_exposure], sort=False
         )
     return dataframe
 
 
-def map_exposure(
-        expo,
-        source_schema,
-        target_schema,
-        schema_mapper):
+def map_exposure(expo, source_schema, target_schema, schema_mapper):
     """
     The function to map the exposure to another schema if necessary.
     """
@@ -177,7 +170,7 @@ def map_exposure(
             target_schema=target_schema,
             # We want to keep it as a number between 0 and 1
             # so that we are able to map the population as well.
-            n_buildings=1.0
+            n_buildings=1.0,
         )
 
         for res in mapping_results:
@@ -207,10 +200,8 @@ def map_exposure(
 
 
 def get_updated_exposure_and_transitions(
-        geometry,
-        expo,
-        intensity_provider,
-        fragility_provider):
+    geometry, expo, intensity_provider, fragility_provider
+):
     """
     This function returns the update exposure and all of
     the transitions that happend in this step.
@@ -246,14 +237,13 @@ def get_updated_exposure_and_transitions(
         # We use the input data for calculating the weighted mean
         # for the replacment costs per building (in case they really
         # differ somehow, but the schemamapping makes this possible).
-        total_repl_per_tax[taxonomy] += \
-            (old_expo_value.replcostbdg * old_expo_value.buildings)
+        total_repl_per_tax[taxonomy] += (
+            old_expo_value.replcostbdg * old_expo_value.buildings
+        )
         n_buildings_per_tax[taxonomy] += old_expo_value.buildings
 
         damage_states_to_care = get_sorted_damage_states(
-            fragility_provider,
-            taxonomy,
-            old_damage_state
+            fragility_provider, taxonomy, old_damage_state
         )
 
         for single_damage_state in damage_states_to_care:
@@ -277,8 +267,9 @@ def get_updated_exposure_and_transitions(
                 transition_key = TransitionKey(
                     taxonomy, old_damage_state, single_damage_state.to_state
                 )
-                result_transitions[transition_key].buildings += \
-                    n_buildings_in_damage_state
+                result_transitions[
+                    transition_key
+                ].buildings += n_buildings_in_damage_state
 
         # If we have buildings left in the given damage state, than we must
         # add them in the n_buildings as well, but we don't need a transition.
@@ -319,8 +310,7 @@ def compute_loss(transitions, loss_provider, schema):
         # If we don't have replacement costs we can ask the loss_provider.
         if replacement_cost == 0:
             replacement_cost = loss_provider.get_fallback_replacement_cost(
-                schema=schema,
-                taxonomy=transition_key.taxonomy
+                schema=schema, taxonomy=transition_key.taxonomy
             )
 
         single_loss_value = loss_provider.get_loss(
@@ -328,7 +318,7 @@ def compute_loss(transitions, loss_provider, schema):
             taxonomy=transition_key.taxonomy,
             from_damage_state=transition_key.from_damage_state,
             to_damage_state=transition_key.to_damage_state,
-            replacement_cost=replacement_cost
+            replacement_cost=replacement_cost,
         )
         n_loss_value = single_loss_value * transition_value.buildings
 
@@ -336,20 +326,15 @@ def compute_loss(transitions, loss_provider, schema):
     return loss_value
 
 
-def get_sorted_damage_states(
-        fragility_provider,
-        taxonomy,
-        old_damage_state):
+def get_sorted_damage_states(fragility_provider, taxonomy, old_damage_state):
     """Return the sorted damage states that are above the the current one."""
 
-    damage_states = fragility_provider.get_damage_states_for_taxonomy(
-        taxonomy
-    )
+    damage_states = fragility_provider.get_damage_states_for_taxonomy(taxonomy)
 
     damage_states_to_care = [
-        ds for ds in damage_states
-        if ds.from_state == old_damage_state
-        and ds.to_state > old_damage_state
+        ds
+        for ds in damage_states
+        if ds.from_state == old_damage_state and ds.to_state > old_damage_state
     ]
 
     damage_states_to_care.sort(key=sort_by_to_damage_state_desc)
@@ -370,13 +355,15 @@ class Updater:
     data sources / providers, as a nested function can't be serialized
     for parallelization.
     """
+
     def __init__(
-            self,
-            source_schema,
-            fragility_provider,
-            schema_mapper,
-            intensity_provider,
-            loss_provider):
+        self,
+        source_schema,
+        fragility_provider,
+        schema_mapper,
+        intensity_provider,
+        loss_provider,
+    ):
         self.source_schema = source_schema
         self.fragility_provider = fragility_provider
         self.schema_mapper = schema_mapper
@@ -410,65 +397,59 @@ class Updater:
             expo=old_exposure,
             source_schema=self.source_schema,
             target_schema=self.fragility_provider.schema,
-            schema_mapper=self.schema_mapper
+            schema_mapper=self.schema_mapper,
         )
         # Then we can collect the updates & transitions.
         updated_exposure, transitions = get_updated_exposure_and_transitions(
             geometry=series.geometry,
             expo=mapped_exposure,
             intensity_provider=self.intensity_provider,
-            fragility_provider=self.fragility_provider
+            fragility_provider=self.fragility_provider,
         )
         # After that we can compute the loss of all the transitions in the cell
         loss_value = compute_loss(
             transitions=transitions,
             loss_provider=self.loss_provider,
-            schema=self.fragility_provider.schema
+            schema=self.fragility_provider.schema,
         )
         # In earlier versions of deus the updated exposure, the transitions
         # and the losses were splitted. In this version we merge them right
         # here. Later on we can split them back up to produce the expected
         # files.
-        return pandas.Series({
-            'gid': series.gid,
-            'geometry': series.geometry,
-            # We use the list orientation here to make the result more compact.
-            # Normally it would use a dict orientiation that would make sense
-            # for sparse output. It is not sparse here.
-            # So we get out something like
-            # {
-            #  'Buildings': [0, 100, 23, ...],
-            #  'Taxonomy': ['RC1', 'RC2', ...],
-            #  ...
-            # }
-            'expo': updated_exposure_output_to_dict(updated_exposure),
-            'schema': self.fragility_provider.schema,
-            'transitions': transitions_output_to_dict(transitions),
-            'loss_value': loss_value,
-            'loss_unit': self.loss_provider.get_unit()
-        })
+        return pandas.Series(
+            {
+                "gid": series.gid,
+                "geometry": series.geometry,
+                # We use the list orientation here to make the result more compact.
+                # Normally it would use a dict orientiation that would make sense
+                # for sparse output. It is not sparse here.
+                # So we get out something like
+                # {
+                #  'Buildings': [0, 100, 23, ...],
+                #  'Taxonomy': ['RC1', 'RC2', ...],
+                #  ...
+                # }
+                "expo": updated_exposure_output_to_dict(updated_exposure),
+                "schema": self.fragility_provider.schema,
+                "transitions": transitions_output_to_dict(transitions),
+                "loss_value": loss_value,
+                "loss_unit": self.loss_provider.get_unit(),
+            }
+        )
 
 
 def updated_exposure_output_to_dict(updated_exposure):
     """Convert to data to a dict for output."""
     result = {}
-    for key in [
-        'Taxonomy',
-        'Damage',
-        'Buildings',
-        'Population',
-        'Repl-cost-USD-bdg'
-    ]:
+    for key in ["Taxonomy", "Damage", "Buildings", "Population", "Repl-cost-USD-bdg"]:
         result[key] = [None] * len(updated_exposure)
 
-    for idx, (expo_key, expo_value) in enumerate(
-            updated_exposure.items()
-    ):
-        result['Taxonomy'][idx] = expo_key.taxonomy
-        result['Damage'][idx] = int_x_to_str_Dx(expo_key.damage_state)
-        result['Buildings'][idx] = expo_value.buildings
-        result['Population'][idx] = expo_value.population
-        result['Repl-cost-USD-bdg'][idx] = expo_value.replcostbdg
+    for idx, (expo_key, expo_value) in enumerate(updated_exposure.items()):
+        result["Taxonomy"][idx] = expo_key.taxonomy
+        result["Damage"][idx] = int_x_to_str_Dx(expo_key.damage_state)
+        result["Buildings"][idx] = expo_value.buildings
+        result["Population"][idx] = expo_value.population
+        result["Repl-cost-USD-bdg"][idx] = expo_value.replcostbdg
 
     return result
 
@@ -478,22 +459,20 @@ def transitions_output_to_dict(transitions):
     result = {}
 
     for key in [
-        'taxonomy',
-        'from_damage_state',
-        'to_damage_state',
-        'n_buildings',
-        'replacement_costs_usd_bdg'
+        "taxonomy",
+        "from_damage_state",
+        "to_damage_state",
+        "n_buildings",
+        "replacement_costs_usd_bdg",
     ]:
         result[key] = [None] * len(transitions)
 
-    for idx, (transition_key, transition_value) in enumerate(
-            transitions.items()
-    ):
-        result['taxonomy'][idx] = transition_key.taxonomy
-        result['from_damage_state'][idx] = transition_key.from_damage_state
-        result['to_damage_state'][idx] = transition_key.to_damage_state
-        result['n_buildings'][idx] = transition_value.buildings
-        result['replacement_costs_usd_bdg'][idx] = transition_value.replcostbdg
+    for idx, (transition_key, transition_value) in enumerate(transitions.items()):
+        result["taxonomy"][idx] = transition_key.taxonomy
+        result["from_damage_state"][idx] = transition_key.from_damage_state
+        result["to_damage_state"][idx] = transition_key.to_damage_state
+        result["n_buildings"][idx] = transition_value.buildings
+        result["replacement_costs_usd_bdg"][idx] = transition_value.replcostbdg
 
     return result
 
@@ -507,23 +486,19 @@ def expo_from_series_to_dict(expo):
     """
     as_dict = collections.defaultdict(empty_expo_values)
 
-    if isinstance(expo['Taxonomy'], list):
-        idx_generator = range(len(expo['Taxonomy']))
+    if isinstance(expo["Taxonomy"], list):
+        idx_generator = range(len(expo["Taxonomy"]))
     else:
-        idx_generator = expo['Taxonomy'].keys()
+        idx_generator = expo["Taxonomy"].keys()
 
     for idx in idx_generator:
         expo_key = ExpoKey(
-            get_from_series_expo(expo['Taxonomy'], idx, None),
-            str_Dx_to_int(get_from_series_expo(expo['Damage'], idx, None))
+            get_from_series_expo(expo["Taxonomy"], idx, None),
+            str_Dx_to_int(get_from_series_expo(expo["Damage"], idx, None)),
         )
-        buildings = get_from_series_expo(expo.get('Buildings', []), idx, 0)
-        population = get_from_series_expo(expo.get('Population', []), idx, 0)
-        replcostbdg = get_from_series_expo(
-            expo.get('Repl-cost-USD-bdg', []),
-            idx,
-            0
-        )
+        buildings = get_from_series_expo(expo.get("Buildings", []), idx, 0)
+        population = get_from_series_expo(expo.get("Population", []), idx, 0)
+        replcostbdg = get_from_series_expo(expo.get("Repl-cost-USD-bdg", []), idx, 0)
         expo_value = ExpoValues(buildings, population, replcostbdg)
         as_dict[expo_key] = expo_value
 

@@ -3,9 +3,9 @@
 # Copyright © 2021 Helmholtz Centre Potsdam GFZ German Research Centre for Geosciences, Potsdam, Germany
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
-# 
+#
 # https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
 """
@@ -59,27 +59,27 @@ class TestSchemaMapping(unittest.TestCase):
         Set up a setting with some base schema
         mapping data.
         """
-        self.source_schema = 'SCHEMA1'
-        self.target_schema = 'SCHEMA2'
+        self.source_schema = "SCHEMA1"
+        self.target_schema = "SCHEMA2"
 
-        self.s1_b1 = 'S1_B1'
-        self.s1_b2 = 'S2_B2'
-        self.s2_b1 = 'S2_B1'
-        self.s2_b2_1 = 'S2_B2_1'
-        self.s2_b2_2 = 'S2_B2_2'
+        self.s1_b1 = "S1_B1"
+        self.s1_b2 = "S2_B2"
+        self.s2_b1 = "S2_B1"
+        self.s2_b2_1 = "S2_B2_1"
+        self.s2_b2_2 = "S2_B2_2"
 
         tax_mapping_data = [
             {
-                'source_schema': self.source_schema,
-                'target_schema': self.target_schema,
-                'source_taxonomies': [self.s1_b1, self.s1_b2],
-                'target_taxonomioes': [self.s2_b1, self.s2_b2_1, self.s2_b2_2],
+                "source_schema": self.source_schema,
+                "target_schema": self.target_schema,
+                "source_taxonomies": [self.s1_b1, self.s1_b2],
+                "target_taxonomioes": [self.s2_b1, self.s2_b2_1, self.s2_b2_2],
                 # the structure is a bit counter intuitive
                 # as the first level keys are target_taxonomies
                 # but they come from matrixes and this is the
                 # default way there
                 # same is true for the conversion for damage states
-                'conv_matrix': {
+                "conv_matrix": {
                     # all of our S1_B1 go to s2_b2_1
                     self.s1_b1: {
                         self.s2_b1: 1.0,
@@ -92,8 +92,8 @@ class TestSchemaMapping(unittest.TestCase):
                         self.s2_b1: 0.0,
                         self.s2_b2_1: 0.25,
                         self.s2_b2_2: 0.75,
-                    }
-                }
+                    },
+                },
             }
         ]
 
@@ -102,167 +102,164 @@ class TestSchemaMapping(unittest.TestCase):
             # on the source taxonomy and the target taxonomy
             # so we have to give 2x3 Datasets here
             {
-                'source_schema': self.source_schema,
-                'source_taxonomy': self.s1_b1,
-                'target_schema': self.target_schema,
-                'target_taxonomy': self.s2_b1,
-                'source_damage_states': [0, 1],
-                'target_damage_states': [0, 1, 2],
+                "source_schema": self.source_schema,
+                "source_taxonomy": self.s1_b1,
+                "target_schema": self.target_schema,
+                "target_taxonomy": self.s2_b1,
+                "source_damage_states": [0, 1],
+                "target_damage_states": [0, 1, 2],
                 # for S1_B1 to S2_B1
                 # we just set half of the
                 # old D1 to new D1 and the other half to D2
-                'conv_matrix': {
-                    '0': {
-                        '0': 1.0,
-                        '1': 0.0,
+                "conv_matrix": {
+                    "0": {
+                        "0": 1.0,
+                        "1": 0.0,
                     },
-                    '1': {
-                        '0': 0.0,
-                        '1': 0.5,
+                    "1": {
+                        "0": 0.0,
+                        "1": 0.5,
                     },
-                    '2': {
-                        '0': 0.0,
-                        '1': 0.5,
+                    "2": {
+                        "0": 0.0,
+                        "1": 0.5,
                     },
                 },
             },
             {
-                'source_schema': self.source_schema,
-                'source_taxonomy': self.s1_b1,
-                'target_schema': self.target_schema,
-                'target_taxonomy': self.s2_b2_1,
-                'source_damage_states': [0, 1],
-                'target_damage_states': [0, 1, 2],
+                "source_schema": self.source_schema,
+                "source_taxonomy": self.s1_b1,
+                "target_schema": self.target_schema,
+                "target_taxonomy": self.s2_b2_1,
+                "source_damage_states": [0, 1],
+                "target_damage_states": [0, 1, 2],
                 # this will not happen, because of the
                 # taxonomy conversion
                 # so values don't care
                 # and we stay with the ones for conversion
                 # to S2_B1
-                'conv_matrix': {
-                    '0': {
-                        '0': 1.0,
-                        '1': 0.0,
+                "conv_matrix": {
+                    "0": {
+                        "0": 1.0,
+                        "1": 0.0,
                     },
-                    '1': {
-                        '0': 0.0,
-                        '1': 0.5,
+                    "1": {
+                        "0": 0.0,
+                        "1": 0.5,
                     },
-                    '2': {
-                        '0': 0.0,
-                        '1': 0.5,
+                    "2": {
+                        "0": 0.0,
+                        "1": 0.5,
                     },
                 },
             },
             {
-                'source_schema': self.source_schema,
-                'source_taxonomy': self.s1_b1,
-                'target_schema': self.target_schema,
-                'target_taxonomy': self.s2_b2_2,
-                'source_damage_states': [0, 1],
-                'target_damage_states': [0, 1, 2],
+                "source_schema": self.source_schema,
+                "source_taxonomy": self.s1_b1,
+                "target_schema": self.target_schema,
+                "target_taxonomy": self.s2_b2_2,
+                "source_damage_states": [0, 1],
+                "target_damage_states": [0, 1, 2],
                 # this will not happen, because of the
                 # taxonomy conversion
                 # so values don't care
                 # and we stay with the ones for conversion
                 # to S2_B1
-                'conv_matrix': {
-                    '0': {
-                        '0': 1.0,
-                        '1': 0.0,
+                "conv_matrix": {
+                    "0": {
+                        "0": 1.0,
+                        "1": 0.0,
                     },
-                    '1': {
-                        '0': 0.0,
-                        '1': 0.5,
+                    "1": {
+                        "0": 0.0,
+                        "1": 0.5,
                     },
-                    '2': {
-                        '0': 0.0,
-                        '1': 0.5,
+                    "2": {
+                        "0": 0.0,
+                        "1": 0.5,
                     },
                 },
             },
             {
-                'source_schema': self.source_schema,
-                'source_taxonomy': self.s1_b2,
-                'target_schema': self.target_schema,
-                'target_taxonomy': self.s2_b1,
-                'source_damage_states': [0, 1],
-                'target_damage_states': [0, 1, 2],
+                "source_schema": self.source_schema,
+                "source_taxonomy": self.s1_b2,
+                "target_schema": self.target_schema,
+                "target_taxonomy": self.s2_b1,
+                "source_damage_states": [0, 1],
+                "target_damage_states": [0, 1, 2],
                 # this will not happen, because of the
                 # taxonomy conversion
                 # so values don't care
                 # and we stay with the ones for conversion
                 # for S1_B1 to S2_B1
-                'conv_matrix': {
-                    '0': {
-                        '0': 1.0,
-                        '1': 0.0,
+                "conv_matrix": {
+                    "0": {
+                        "0": 1.0,
+                        "1": 0.0,
                     },
-                    '1': {
-                        '0': 0.0,
-                        '1': 0.5,
+                    "1": {
+                        "0": 0.0,
+                        "1": 0.5,
                     },
-                    '2': {
-                        '0': 0.0,
-                        '1': 0.5,
+                    "2": {
+                        "0": 0.0,
+                        "1": 0.5,
                     },
                 },
             },
             {
-                'source_schema': self.source_schema,
-                'source_taxonomy': self.s1_b2,
-                'target_schema': self.target_schema,
-                'target_taxonomy': self.s2_b2_1,
-                'source_damage_states': [0, 1],
-                'target_damage_states': [0, 1, 2],
+                "source_schema": self.source_schema,
+                "source_taxonomy": self.s1_b2,
+                "target_schema": self.target_schema,
+                "target_taxonomy": self.s2_b2_1,
+                "source_damage_states": [0, 1],
+                "target_damage_states": [0, 1, 2],
                 # here the conversion will happen again
                 # and here we put 75 % in D1, and only 25% in D2
-                'conv_matrix': {
-                    '0': {
-                        '0': 1.0,
-                        '1': 0.0,
+                "conv_matrix": {
+                    "0": {
+                        "0": 1.0,
+                        "1": 0.0,
                     },
-                    '1': {
-                        '0': 0.0,
-                        '1': 0.75,
+                    "1": {
+                        "0": 0.0,
+                        "1": 0.75,
                     },
-                    '2': {
-                        '0': 0.0,
-                        '1': 0.25,
+                    "2": {
+                        "0": 0.0,
+                        "1": 0.25,
                     },
                 },
             },
             {
-                'source_schema': self.source_schema,
-                'source_taxonomy': self.s1_b2,
-                'target_schema': self.target_schema,
-                'target_taxonomy': self.s2_b2_2,
-                'source_damage_states': [0, 1],
-                'target_damage_states': [0, 1, 2],
+                "source_schema": self.source_schema,
+                "source_taxonomy": self.s1_b2,
+                "target_schema": self.target_schema,
+                "target_taxonomy": self.s2_b2_2,
+                "source_damage_states": [0, 1],
+                "target_damage_states": [0, 1, 2],
                 # here the conversion will happen again
                 # and here we put 25 % in D1, and 75% in D2
-                'conv_matrix': {
-                    '0': {
-                        '0': 1.0,
-                        '1': 0.0,
+                "conv_matrix": {
+                    "0": {
+                        "0": 1.0,
+                        "1": 0.0,
                     },
-                    '1': {
-                        '0': 0.0,
-                        '1': 0.25,
+                    "1": {
+                        "0": 0.0,
+                        "1": 0.25,
                     },
-                    '2': {
-                        '0': 0.0,
-                        '1': 0.75,
+                    "2": {
+                        "0": 0.0,
+                        "1": 0.75,
                     },
                 },
             },
         ]
 
         self.schema_mapper = (
-            schemamapping
-            .SchemaMapper
-            .from_taxonomy_and_damage_state_conversion_data(
-                tax_mapping_data,
-                ds_mapping_data
+            schemamapping.SchemaMapper.from_taxonomy_and_damage_state_conversion_data(
+                tax_mapping_data, ds_mapping_data
             )
         )
 
@@ -284,10 +281,7 @@ class TestSchemaMapping(unittest.TestCase):
 
         single_mapping_result = mapping_results[0]
 
-        self.assertEqual(
-            single_mapping_result.schema,
-            self.source_schema
-        )
+        self.assertEqual(single_mapping_result.schema, self.source_schema)
         self.assertEqual(single_mapping_result.taxonomy, self.s1_b1)
         self.assertEqual(single_mapping_result.damage_state, 0)
         self.assertLess(99.999, single_mapping_result.n_buildings)
@@ -315,10 +309,7 @@ class TestSchemaMapping(unittest.TestCase):
 
         single_mapping_result = mapping_results[0]
 
-        self.assertEqual(
-            single_mapping_result.schema,
-            self.target_schema
-        )
+        self.assertEqual(single_mapping_result.schema, self.target_schema)
         self.assertEqual(single_mapping_result.taxonomy, self.s2_b1)
         self.assertEqual(single_mapping_result.damage_state, 0)
         self.assertLess(99.999, single_mapping_result.n_buildings)
@@ -344,15 +335,9 @@ class TestSchemaMapping(unittest.TestCase):
 
         self.assertEqual(len(mapping_results), 2)
 
-        d1_mapping_result = [
-            x for x in mapping_results
-            if x.damage_state == 1
-        ][0]
+        d1_mapping_result = [x for x in mapping_results if x.damage_state == 1][0]
 
-        d2_mapping_result = [
-            x for x in mapping_results
-            if x.damage_state == 2
-        ][0]
+        d2_mapping_result = [x for x in mapping_results if x.damage_state == 2][0]
 
         self.assertEqual(d1_mapping_result.schema, self.target_schema)
         self.assertEqual(d1_mapping_result.taxonomy, self.s2_b1)
@@ -385,65 +370,53 @@ class TestSchemaMapping(unittest.TestCase):
         self.assertEqual(len(mapping_results), 4)
 
         b2_1_d1_mapping_result = [
-            x for x in mapping_results
-            if x.damage_state == 1
-            and x.taxonomy == self.s2_b2_1
+            x
+            for x in mapping_results
+            if x.damage_state == 1 and x.taxonomy == self.s2_b2_1
         ][0]
 
         b2_1_d2_mapping_result = [
-            x for x in mapping_results
-            if x.damage_state == 2
-            and x.taxonomy == self.s2_b2_1
+            x
+            for x in mapping_results
+            if x.damage_state == 2 and x.taxonomy == self.s2_b2_1
         ][0]
 
         b2_2_d1_mapping_result = [
-            x for x in mapping_results
-            if x.damage_state == 1
-            and x.taxonomy == self.s2_b2_2
+            x
+            for x in mapping_results
+            if x.damage_state == 1 and x.taxonomy == self.s2_b2_2
         ][0]
 
         b2_2_d2_mapping_result = [
-            x for x in mapping_results
-            if x.damage_state == 2
-            and x.taxonomy == self.s2_b2_2
+            x
+            for x in mapping_results
+            if x.damage_state == 2 and x.taxonomy == self.s2_b2_2
         ][0]
 
-        self.assertEqual(
-            b2_1_d1_mapping_result.schema,
-            self.target_schema
-        )
+        self.assertEqual(b2_1_d1_mapping_result.schema, self.target_schema)
         self.assertEqual(b2_1_d1_mapping_result.taxonomy, self.s2_b2_1)
         self.assertEqual(b2_1_d1_mapping_result.damage_state, 1)
         self.assertLess(18.749, b2_1_d1_mapping_result.n_buildings)
         self.assertLess(b2_1_d1_mapping_result.n_buildings, 18.751)
 
-        self.assertEqual(
-            b2_1_d2_mapping_result.schema,
-            self.target_schema
-        )
+        self.assertEqual(b2_1_d2_mapping_result.schema, self.target_schema)
         self.assertEqual(b2_1_d2_mapping_result.taxonomy, self.s2_b2_1)
         self.assertEqual(b2_1_d2_mapping_result.damage_state, 2)
         self.assertLess(6.249, b2_1_d2_mapping_result.n_buildings)
         self.assertLess(b2_1_d2_mapping_result.n_buildings, 6.251)
 
-        self.assertEqual(
-            b2_2_d1_mapping_result.schema,
-            self.target_schema
-        )
+        self.assertEqual(b2_2_d1_mapping_result.schema, self.target_schema)
         self.assertEqual(b2_2_d1_mapping_result.taxonomy, self.s2_b2_2)
         self.assertEqual(b2_2_d1_mapping_result.damage_state, 1)
         self.assertLess(18.749, b2_2_d1_mapping_result.n_buildings)
         self.assertLess(b2_2_d1_mapping_result.n_buildings, 18.751)
 
-        self.assertEqual(
-            b2_2_d2_mapping_result.schema,
-            self.target_schema
-        )
+        self.assertEqual(b2_2_d2_mapping_result.schema, self.target_schema)
         self.assertEqual(b2_2_d2_mapping_result.taxonomy, self.s2_b2_2)
         self.assertEqual(b2_2_d2_mapping_result.damage_state, 2)
         self.assertLess(56.249, b2_2_d2_mapping_result.n_buildings)
         self.assertLess(b2_2_d2_mapping_result.n_buildings, 56.251)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
