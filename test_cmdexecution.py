@@ -28,7 +28,9 @@ class TestLowChange(unittest.TestCase):
         current_dir = os.path.dirname(os.path.abspath(__file__))
 
         testinput_dir = os.path.join(current_dir, "testinputs")
-        test_shakemap = os.path.join(testinput_dir, "shakemap_low_changes_testcase.xml")
+        test_shakemap = os.path.join(
+            testinput_dir, "shakemap_low_changes_testcase.xml"
+        )
         test_exposure_file = os.path.join(
             testinput_dir, "exposure_low_changes_testcase.json"
         )
@@ -99,11 +101,15 @@ class TestDeusCmdExecution(unittest.TestCase):
         current_dir = os.path.dirname(os.path.abspath(__file__))
 
         testinput_dir = os.path.join(current_dir, "testinputs")
-        test_shakemap = os.path.join(testinput_dir, "shakemap_with_multiple_imts.xml")
+        test_shakemap = os.path.join(
+            testinput_dir, "shakemap_with_multiple_imts.xml"
+        )
         test_exposure_file = os.path.join(
             testinput_dir, "exposure_from_assetmaster.json"
         )
-        test_fragility_file = os.path.join(testinput_dir, "fragility_sara.json")
+        test_fragility_file = os.path.join(
+            testinput_dir, "fragility_sara.json"
+        )
 
         output_dir = os.path.join(current_dir, "testoutputs")
 
@@ -113,8 +119,12 @@ class TestDeusCmdExecution(unittest.TestCase):
         transition_output_filename = os.path.join(
             output_dir, "transitions_multiple_imts.json"
         )
-        loss_output_filename = os.path.join(output_dir, "losses_multiple_imts.json")
-        merged_output_filename = os.path.join(output_dir, "merged_multiple_imts.json")
+        loss_output_filename = os.path.join(
+            output_dir, "losses_multiple_imts.json"
+        )
+        merged_output_filename = os.path.join(
+            output_dir, "merged_multiple_imts.json"
+        )
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
@@ -148,7 +158,9 @@ class TestDeusCmdExecution(unittest.TestCase):
             check=True,
         )
 
-        input_n_buildings = get_n_buildings_by_cell_gid(schema, test_exposure_file)
+        input_n_buildings = get_n_buildings_by_cell_gid(
+            schema, test_exposure_file
+        )
         output_n_buildings = get_n_buildings_by_cell_gid(
             schema, updated_exposure_output_filename
         )
@@ -177,14 +189,18 @@ class TestDeusCmdExecution(unittest.TestCase):
         test_exposure_file = os.path.join(
             testinput_dir, "exposure_from_assetmaster.json"
         )
-        test_fragility_file = os.path.join(testinput_dir, "fragility_suppasri.json")
+        test_fragility_file = os.path.join(
+            testinput_dir, "fragility_suppasri.json"
+        )
 
         output_dir = os.path.join(current_dir, "testoutputs")
 
         updated_exposure_output_filename = os.path.join(
             output_dir, "updated_exposure_ts.json"
         )
-        transition_output_filename = os.path.join(output_dir, "transitions_ts.json")
+        transition_output_filename = os.path.join(
+            output_dir, "transitions_ts.json"
+        )
         loss_output_filename = os.path.join(output_dir, "losses_ts.json")
         merged_output_filename = os.path.join(output_dir, "merged_ts.json")
 
@@ -243,21 +259,27 @@ class TestDeusCmdExecution(unittest.TestCase):
         test_exposure_file = os.path.join(
             testinput_dir, "exposure_from_assetmaster.json"
         )
-        test_fragility_file = os.path.join(testinput_dir, "fragility_sara.json")
+        test_fragility_file = os.path.join(
+            testinput_dir, "fragility_sara.json"
+        )
 
         output_dir = os.path.join(current_dir, "testoutputs")
 
         updated_exposure_output_filename = os.path.join(
             output_dir, "updated_exposure.json"
         )
-        transition_output_filename = os.path.join(output_dir, "transitions.json")
+        transition_output_filename = os.path.join(
+            output_dir, "transitions.json"
+        )
         loss_output_filename = os.path.join(output_dir, "losses.json")
         merged_output_filename = os.path.join(output_dir, "merged.json")
 
         updated_exposure_output_filename2 = os.path.join(
             output_dir, "updated_exposure2.json"
         )
-        transition_output_filename2 = os.path.join(output_dir, "transitions2.json")
+        transition_output_filename2 = os.path.join(
+            output_dir, "transitions2.json"
+        )
         loss_output_filename2 = os.path.join(output_dir, "losses2.json")
         merged_output_filename2 = os.path.join(output_dir, "merged2.json")
 
@@ -334,7 +356,9 @@ class TestDeusCmdExecution(unittest.TestCase):
         testinput_dir = os.path.join(current_dir, "testinputs")
         test_shakemap = os.path.join(testinput_dir, "shakemap_tsunami.xml")
         test_exposure_file = os.path.join(testinput_dir, "exposure_peru.json")
-        test_fragility_file = os.path.join(testinput_dir, "fragility_suppasri.json")
+        test_fragility_file = os.path.join(
+            testinput_dir, "fragility_suppasri.json"
+        )
 
         output_dir = os.path.join(current_dir, "testoutputs")
 
@@ -344,8 +368,12 @@ class TestDeusCmdExecution(unittest.TestCase):
         transition_output_filename = os.path.join(
             output_dir, "transitions_peru_suppasri.json"
         )
-        loss_output_filename = os.path.join(output_dir, "losses_peru_suppasri.json")
-        merged_output_filename = os.path.join(output_dir, "merged_peru_suppasri.json")
+        loss_output_filename = os.path.join(
+            output_dir, "losses_peru_suppasri.json"
+        )
+        merged_output_filename = os.path.join(
+            output_dir, "merged_peru_suppasri.json"
+        )
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
@@ -379,7 +407,9 @@ class TestDeusCmdExecution(unittest.TestCase):
             check=True,
         )
 
-        input_n_buildings = get_n_buildings_by_cell_gid(schema, test_exposure_file)
+        input_n_buildings = get_n_buildings_by_cell_gid(
+            schema, test_exposure_file
+        )
         output_n_buildings = get_n_buildings_by_cell_gid(
             schema, updated_exposure_output_filename
         )
@@ -399,15 +429,21 @@ class TestDeusCmdExecutionInEcuador(unittest.TestCase):
 
         testinput_dir = os.path.join(current_dir, "testinputs")
         test_shakemap = os.path.join(testinput_dir, "shakemap_lahar.xml")
-        test_exposure_file = os.path.join(testinput_dir, "exposure_model_lahar.json")
-        test_fragility_file = os.path.join(testinput_dir, "fragility_marvrouli.json")
+        test_exposure_file = os.path.join(
+            testinput_dir, "exposure_model_lahar.json"
+        )
+        test_fragility_file = os.path.join(
+            testinput_dir, "fragility_marvrouli.json"
+        )
 
         output_dir = os.path.join(current_dir, "testoutputs")
 
         updated_exposure_output_filename = os.path.join(
             output_dir, "updated_exposure_lahar.json"
         )
-        transition_output_filename = os.path.join(output_dir, "transitions_lahar.json")
+        transition_output_filename = os.path.join(
+            output_dir, "transitions_lahar.json"
+        )
         loss_output_filename = os.path.join(output_dir, "losses_lahar.json")
         merged_output_filename = os.path.join(output_dir, "merged_lahar.json")
 
@@ -443,7 +479,9 @@ class TestDeusCmdExecutionInEcuador(unittest.TestCase):
             check=True,
         )
 
-        input_n_buildings = get_n_buildings_by_cell_gid(schema, test_exposure_file)
+        input_n_buildings = get_n_buildings_by_cell_gid(
+            schema, test_exposure_file
+        )
         output_n_buildings = get_n_buildings_by_cell_gid(
             schema, updated_exposure_output_filename
         )
@@ -470,8 +508,12 @@ class TestVolcanoCmdExecution(unittest.TestCase):
             testinput_dir, "ashfall_shapefile", "E1_AF_kPa_VEI4.shp"
         )
         test_intensity_column = "FEB2008"
-        test_exposure_file = os.path.join(testinput_dir, "exposure_model_ashfall.json")
-        test_fragility_file = os.path.join(testinput_dir, "fragility_torres.json")
+        test_exposure_file = os.path.join(
+            testinput_dir, "exposure_model_ashfall.json"
+        )
+        test_fragility_file = os.path.join(
+            testinput_dir, "fragility_torres.json"
+        )
 
         output_dir = os.path.join(current_dir, "testoutputs")
 
@@ -481,8 +523,12 @@ class TestVolcanoCmdExecution(unittest.TestCase):
         transition_output_filename = os.path.join(
             output_dir, "transitions_ecuador_torres.json"
         )
-        loss_output_filename = os.path.join(output_dir, "losses_ecuador_torres.json")
-        merged_output_filename = os.path.join(output_dir, "merged_ecuador_torres.json")
+        loss_output_filename = os.path.join(
+            output_dir, "losses_ecuador_torres.json"
+        )
+        merged_output_filename = os.path.join(
+            output_dir, "merged_ecuador_torres.json"
+        )
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
@@ -517,7 +563,9 @@ class TestVolcanoCmdExecution(unittest.TestCase):
             check=True,
         )
 
-        input_n_buildings = get_n_buildings_by_cell_gid(schema, test_exposure_file)
+        input_n_buildings = get_n_buildings_by_cell_gid(
+            schema, test_exposure_file
+        )
         output_n_buildings = get_n_buildings_by_cell_gid(
             schema, updated_exposure_output_filename
         )
@@ -545,10 +593,16 @@ class TestVolcanusAndThenDeus(unittest.TestCase):
         )
         test_intensity_column = "FEB2008"
         test_shakemap = os.path.join(testinput_dir, "shakemap_lahar.xml")
-        test_exposure_file = os.path.join(testinput_dir, "exposure_model_ashfall.json")
-        test_fragility_file = os.path.join(testinput_dir, "fragility_torres.json")
+        test_exposure_file = os.path.join(
+            testinput_dir, "exposure_model_ashfall.json"
+        )
+        test_fragility_file = os.path.join(
+            testinput_dir, "fragility_torres.json"
+        )
 
-        test_fragility_file2 = os.path.join(testinput_dir, "fragility_marvrouli.json")
+        test_fragility_file2 = os.path.join(
+            testinput_dir, "fragility_marvrouli.json"
+        )
 
         output_dir = os.path.join(current_dir, "testoutputs")
 
@@ -558,7 +612,9 @@ class TestVolcanusAndThenDeus(unittest.TestCase):
         transition_output_filename = os.path.join(
             output_dir, "transitions_ecuador_torres_1.json"
         )
-        loss_output_filename = os.path.join(output_dir, "losses_ecuador_torres_1.json")
+        loss_output_filename = os.path.join(
+            output_dir, "losses_ecuador_torres_1.json"
+        )
         merged_output_filename = os.path.join(
             output_dir, "merged_ecuador_torres_1.json"
         )
@@ -568,7 +624,9 @@ class TestVolcanusAndThenDeus(unittest.TestCase):
         transition_output_filename2 = os.path.join(
             output_dir, "transitions_lahar_after_ash.json"
         )
-        loss_output_filename2 = os.path.join(output_dir, "losses_lahar_after_ash.json")
+        loss_output_filename2 = os.path.join(
+            output_dir, "losses_lahar_after_ash.json"
+        )
         merged_output_filename2 = os.path.join(
             output_dir, "merged_lahar_after_ash.json"
         )
@@ -610,7 +668,9 @@ class TestVolcanusAndThenDeus(unittest.TestCase):
             check=True,
         )
 
-        input_n_buildings = get_n_buildings_by_cell_gid(schema, test_exposure_file)
+        input_n_buildings = get_n_buildings_by_cell_gid(
+            schema, test_exposure_file
+        )
         output_n_buildings = get_n_buildings_by_cell_gid(
             schema, updated_exposure_output_filename
         )

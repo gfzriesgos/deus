@@ -40,7 +40,9 @@ def main():
         + "classes of the Buildings"
     )
     argparser.add_argument("intensity_file", help="File ashfalls data")
-    argparser.add_argument("intensity_column", help="Column in the intensity file")
+    argparser.add_argument(
+        "intensity_column", help="Column in the intensity file"
+    )
     argparser.add_argument("exposure_file", help="File with the exposure data")
     argparser.add_argument(
         "exposure_schema", help="The actual schema for the exposure data"

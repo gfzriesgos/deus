@@ -39,7 +39,10 @@ class Ashfall:
         """
         intensity_data_wrapper = (
             intensitydatawrapper.GeopandasDataFrameWrapperWithColumnUnit(
-                self._gdf, column=self._column, name=self._name, unit=self._unit
+                self._gdf,
+                column=self._column,
+                name=self._name,
+                unit=self._unit,
             )
         )
         return intensityprovider.IntensityProvider(

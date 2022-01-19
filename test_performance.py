@@ -34,8 +34,12 @@ class TestPerformance(unittest.TestCase):
 
         testinput_dir = os.path.join(current_dir, "testinputs", "performance")
         test_shakemap = os.path.join(testinput_dir, "shakemap_ts.xml")
-        test_exposure_file = os.path.join(testinput_dir, "exposure_so_far.json")
-        test_fragility_file = os.path.join(testinput_dir, "fragility_suppasri.json")
+        test_exposure_file = os.path.join(
+            testinput_dir, "exposure_so_far.json"
+        )
+        test_fragility_file = os.path.join(
+            testinput_dir, "fragility_suppasri.json"
+        )
 
         output_dir = os.path.join(current_dir, "testoutputs")
 
@@ -46,7 +50,9 @@ class TestPerformance(unittest.TestCase):
             output_dir, "transitions_ts_perf.json"
         )
         loss_output_filename = os.path.join(output_dir, "losses_ts_perf.json")
-        merged_output_filename = os.path.join(output_dir, "merged_ts_perf.json")
+        merged_output_filename = os.path.join(
+            output_dir, "merged_ts_perf.json"
+        )
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)

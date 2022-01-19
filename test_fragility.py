@@ -18,14 +18,18 @@ class TestFragility(unittest.TestCase):
         Reads the schema from the fragility file.
         """
 
-        fr_file = fragility.Fragility.from_file("./testinputs/fragility_sara.json")
+        fr_file = fragility.Fragility.from_file(
+            "./testinputs/fragility_sara.json"
+        )
         fr_provider = fr_file.to_fragility_provider()
 
         schema = fr_provider.schema
 
         self.assertEqual("SARA_v1.0", schema)
 
-        fr_file2 = fragility.Fragility.from_file("./testinputs/fragility_suppasri.json")
+        fr_file2 = fragility.Fragility.from_file(
+            "./testinputs/fragility_suppasri.json"
+        )
         fr_provider2 = fr_file2.to_fragility_provider()
 
         schema2 = fr_provider2.schema

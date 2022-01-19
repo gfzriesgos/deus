@@ -42,7 +42,9 @@ class TestRasterIntensityProvider(unittest.TestCase):
         intensity = "pressure"
         unit = "p"
         na_value = 0.0
-        PointsWithValue = collections.namedtuple("PointsWithValue", "x y value")
+        PointsWithValue = collections.namedtuple(
+            "PointsWithValue", "x y value"
+        )
 
         eps = 0.1
 
@@ -52,8 +54,10 @@ class TestRasterIntensityProvider(unittest.TestCase):
             PointsWithValue(x=773449.1072520, y=9917890.4097193, value=0),
         ]
 
-        intensity_provider = rasterintensityprovider.RasterIntensityProvider.from_file(
-            raster_file, intensity, unit, na_value
+        intensity_provider = (
+            rasterintensityprovider.RasterIntensityProvider.from_file(
+                raster_file, intensity, unit, na_value
+            )
         )
 
         for check in checks:

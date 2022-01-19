@@ -46,7 +46,9 @@ class GeopandasDataFrameWrapper:
     and unit columns.
     """
 
-    def __init__(self, gdf, prefix_value_columns="value_", prefix_unit_columns="unit_"):
+    def __init__(
+        self, gdf, prefix_value_columns="value_", prefix_unit_columns="unit_"
+    ):
         self._gdf = gdf
         self._prefix_value_columns = prefix_value_columns
         self._prefix_unit_columns = prefix_unit_columns
@@ -213,7 +215,9 @@ class RasterDataWrapper:
         """
         Returns the unit for the column and the index.
         """
-        return self._inner_data_wrapper.get_unit_for_column_and_index(column, index)
+        return self._inner_data_wrapper.get_unit_for_column_and_index(
+            column, index
+        )
 
 
 class DictWithListDataWrapper:

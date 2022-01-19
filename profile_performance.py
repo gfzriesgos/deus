@@ -35,7 +35,9 @@ output_dir = os.path.join(current_dir, "testoutputs")
 updated_exposure_output_filename = os.path.join(
     output_dir, "updated_exposure_ts_perf.json"
 )
-transition_output_filename = os.path.join(output_dir, "transitions_ts_perf.json")
+transition_output_filename = os.path.join(
+    output_dir, "transitions_ts_perf.json"
+)
 loss_output_filename = os.path.join(output_dir, "losses_ts_perf.json")
 merged_output_filename = os.path.join(output_dir, "merged_ts_perf.json")
 
@@ -54,7 +56,9 @@ if os.path.exists(loss_output_filename):
 if os.path.exists(merged_output_filename):
     os.unlink(merged_output_filename)
 
-intensity_provider = shakemap.Shakemaps.from_file(test_shakemap).to_intensity_provider()
+intensity_provider = shakemap.Shakemaps.from_file(
+    test_shakemap
+).to_intensity_provider()
 # add aliases
 # ID for inundation (out of the maximum wave height)
 # SA_01 and SA_03 out of the PGA
@@ -84,6 +88,11 @@ args = argparse.Namespace(
 )
 
 worker = tellus.Child(
-    intensity_provider, fragility_provider, old_exposure, schema, loss_provider, args
+    intensity_provider,
+    fragility_provider,
+    old_exposure,
+    schema,
+    loss_provider,
+    args,
 )
 cProfile.run("worker.run()")

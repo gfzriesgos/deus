@@ -84,7 +84,7 @@ python_black:
   script:
     - *install_gdal_and_requirements
     - pip3 install --cache-dir=.pip black==21.4b2
-    - black --check .
+    - black -l 79 --check .
 
 run_tests:
   image: python:3.7-buster

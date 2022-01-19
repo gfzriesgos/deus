@@ -38,12 +38,19 @@ class LossProvider:
             raise Exception("schema is not known for loss computation")
         data_for_schema = self._data[schema]["data"]
         if taxonomy not in data_for_schema["replacementCosts"].keys():
-            raise Exception("no taxonomy candidates found for %s", repr(taxonomy))
+            raise Exception(
+                "no taxonomy candidates found for %s", repr(taxonomy)
+            )
 
         return data_for_schema["replacementCosts"][taxonomy]
 
     def get_loss(
-        self, schema, taxonomy, from_damage_state, to_damage_state, replacement_cost
+        self,
+        schema,
+        taxonomy,
+        from_damage_state,
+        to_damage_state,
+        replacement_cost,
     ):
         """
         Returns the loss for the transition.

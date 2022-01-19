@@ -38,7 +38,8 @@ def main():
         + "classes of the Buildings"
     )
     argparser.add_argument(
-        "intensity_file", help="File with hazard intensities, for example a shakemap"
+        "intensity_file",
+        help="File with hazard intensities, for example a shakemap",
     )
     argparser.add_argument("exposure_file", help="File with the exposure data")
     argparser.add_argument(

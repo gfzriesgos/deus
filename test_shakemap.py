@@ -128,10 +128,14 @@ class TestReadShakemapGridData(unittest.TestCase):
 
 class TestShakemap(unittest.TestCase):
     def test_read_ts_shakemap(self):
-        shake_map_ts = shakemap.Shakemaps.from_file("./testinputs/shakemap_tsunami.xml")
+        shake_map_ts = shakemap.Shakemaps.from_file(
+            "./testinputs/shakemap_tsunami.xml"
+        )
         ts_provider = shake_map_ts.to_intensity_provider()
 
-        ts_intensity, ts_units = ts_provider.get_nearest(lon=-71.547, lat=-32.9857)
+        ts_intensity, ts_units = ts_provider.get_nearest(
+            lon=-71.547, lat=-32.9857
+        )
 
         self.assertEqual("m", ts_units["INUN_MEAN_POLY"])
 
@@ -143,12 +147,16 @@ class TestShakemap(unittest.TestCase):
         Reads a normal shakemap (as it is the output of shakyground.
         :return: None
         """
-        shake_map_eq = shakemap.Shakemaps.from_file("./testinputs/shakemap.xml")
+        shake_map_eq = shakemap.Shakemaps.from_file(
+            "./testinputs/shakemap.xml"
+        )
         eq_provider = shake_map_eq.to_intensity_provider()
 
         self.assertIsNotNone(eq_provider)
 
-        eq_intensity, eq_units = eq_provider.get_nearest(lon=-72.7, lat=-31.6416666667)
+        eq_intensity, eq_units = eq_provider.get_nearest(
+            lon=-72.7, lat=-31.6416666667
+        )
 
         self.assertEqual("g", eq_units["PGA"])
 

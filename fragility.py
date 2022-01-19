@@ -165,7 +165,9 @@ class Fragility:
             intensity_unit = dataset["imu"]
 
             for damage_state_mean_key in [
-                k for k in dataset.keys() if k.startswith("D") and k.endswith("_mean")
+                k
+                for k in dataset.keys()
+                if k.startswith("D") and k.endswith("_mean")
             ]:
                 #
                 # the data is in the format
@@ -175,7 +177,9 @@ class Fragility:
                 # D01, so that it is the damage state from 0 to 1 or
                 # D_0_1 or D0_1
                 #
-                to_state = int(re.search(r"(\d)_mean$", damage_state_mean_key).group(1))
+                to_state = int(
+                    re.search(r"(\d)_mean$", damage_state_mean_key).group(1)
+                )
                 from_state = int(
                     re.search(r"^D_?(\d)_", damage_state_mean_key).group(1)
                 )
@@ -186,7 +190,9 @@ class Fragility:
                     from_state = 0
 
                 mean = dataset[damage_state_mean_key]
-                stddev = dataset[damage_state_mean_key.replace("_mean", "_stddev")]
+                stddev = dataset[
+                    damage_state_mean_key.replace("_mean", "_stddev")
+                ]
 
                 damage_state = DamageState(
                     taxonomy=taxonomy,

@@ -132,15 +132,19 @@ class TestBasics(unittest.TestCase):
 
         damage_states = [ds for ds in taxonomy_data_urm1]
 
-        ds_1 = [ds for ds in damage_states if ds.to_state == 1 and ds.from_state == 0][
-            0
-        ]
+        ds_1 = [
+            ds
+            for ds in damage_states
+            if ds.to_state == 1 and ds.from_state == 0
+        ][0]
 
         self.assertIsNotNone(ds_1)
 
-        ds_2 = [ds for ds in damage_states if ds.to_state == 2 and ds.from_state == 1][
-            0
-        ]
+        ds_2 = [
+            ds
+            for ds in damage_states
+            if ds.to_state == 2 and ds.from_state == 1
+        ][0]
 
         self.assertIsNotNone(ds_2)
 
@@ -148,7 +152,9 @@ class TestBasics(unittest.TestCase):
         damage_states_cm = [ds for ds in taxonomy_data_cm]
 
         ds_1_2 = [
-            ds for ds in damage_states_cm if ds.to_state == 2 and ds.from_state == 1
+            ds
+            for ds in damage_states_cm
+            if ds.to_state == 2 and ds.from_state == 1
         ][0]
 
         self.assertIsNotNone(ds_1_2)
@@ -213,7 +219,9 @@ class TestBasics(unittest.TestCase):
             intensitydatawrapper.GeopandasDataFrameWrapper(geodata)
         )
 
-        intensities, units = intensity_provider.get_nearest(lon=-71.5473, lat=-32.8025)
+        intensities, units = intensity_provider.get_nearest(
+            lon=-71.5473, lat=-32.8025
+        )
         intensity_mwh = intensities["mwh"]
         self.assertLess(6.7134, intensity_mwh)
         self.assertLess(intensity_mwh, 6.7136)
@@ -279,7 +287,9 @@ class TestBasics(unittest.TestCase):
             usage_epsg_code="epsg:4326",
         )
 
-        intensity_provider = intensityprovider.IntensityProvider(intensity_data)
+        intensity_provider = intensityprovider.IntensityProvider(
+            intensity_data
+        )
 
         intensities, units = intensity_provider.get_nearest(
             lon=-78.48187327247078,
@@ -346,8 +356,10 @@ class TestBasics(unittest.TestCase):
             intensitydatawrapper.GeopandasDataFrameWrapper(geodata2)
         )
 
-        stacked_intensity_provider = intensityprovider.StackedIntensityProvider(
-            intensity_provider1, intensity_provider2
+        stacked_intensity_provider = (
+            intensityprovider.StackedIntensityProvider(
+                intensity_provider1, intensity_provider2
+            )
         )
 
         intensities, units = stacked_intensity_provider.get_nearest(

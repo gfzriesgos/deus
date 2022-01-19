@@ -84,7 +84,8 @@ class EqShakemap:
         that is closest to a given location.
         """
         data, units = read_shakemap_data_and_units(
-            grid_fields=self._find_grid_fields(), grid_data=self._find_grid_data()
+            grid_fields=self._find_grid_fields(),
+            grid_data=self._find_grid_data(),
         )
 
         wrapped_data = intensitydatawrapper.DictWithListDataWrapper(
@@ -149,7 +150,9 @@ def read_shakemap_data_from_str(grid_data_text):
     """
     # it must be tokenized (because of xml processing the newlines
     # may not be consistent)
-    tokens = tokenize.tokenize(io.BytesIO(grid_data_text.encode("utf-8")).readline)
+    tokens = tokenize.tokenize(
+        io.BytesIO(grid_data_text.encode("utf-8")).readline
+    )
     token_before = None
     for token in tokens:
         # 2 is number

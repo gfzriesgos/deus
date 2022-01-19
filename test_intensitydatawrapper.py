@@ -29,7 +29,10 @@ class TestReadFromShapefile(unittest.TestCase):
     def test_read_ashfall(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))
         input_file_name = os.path.join(
-            current_dir, "testinputs", "ashfall_shapefile", "E1_AF_kPa_VEI4.shp"
+            current_dir,
+            "testinputs",
+            "ashfall_shapefile",
+            "E1_AF_kPa_VEI4.shp",
         )
         column = "FEB2008"
 

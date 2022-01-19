@@ -53,7 +53,11 @@ class TestGpdExposureDamageStateUpdate(unittest.TestCase):
         }
 
         series = pandas.Series(
-            {"gid": "001", "geometry": shapely.wkt.loads("POINT(52 15)"), "expo": expo}
+            {
+                "gid": "001",
+                "geometry": shapely.wkt.loads("POINT(52 15)"),
+                "expo": expo,
+            }
         )
 
         self.old_exposure = pandas.DataFrame([series])
@@ -145,11 +149,15 @@ class TestGpdExposureDamageStateUpdate(unittest.TestCase):
 
         self.fake_fragility_provider = fragility.Fragility(
             fragility_data
-        ).to_fragility_provider_with_specified_fragility_function(MakeFakeFunction)
+        ).to_fragility_provider_with_specified_fragility_function(
+            MakeFakeFunction
+        )
         # and another one for the schema mapping too
         self.fake_fragility_provider2 = fragility.Fragility(
             fragility_data2
-        ).to_fragility_provider_with_specified_fragility_function(MakeFakeFunction)
+        ).to_fragility_provider_with_specified_fragility_function(
+            MakeFakeFunction
+        )
 
         tax_schema_mapping_data = [
             {
@@ -228,10 +236,8 @@ class TestGpdExposureDamageStateUpdate(unittest.TestCase):
                 },
             },
         ]
-        self.fake_schema_mapper = (
-            schemamapping.SchemaMapper.from_taxonomy_and_damage_state_conversion_data(
-                tax_schema_mapping_data, ds_schema_mapping_data
-            )
+        self.fake_schema_mapper = schemamapping.SchemaMapper.from_taxonomy_and_damage_state_conversion_data(
+            tax_schema_mapping_data, ds_schema_mapping_data
         )
         self.fake_loss_provider = (
             testimplementations.AlwaysOneDollarPerTransitionLossProvider()
@@ -343,12 +349,24 @@ class TestGpdExposureDamageStateUpdate(unittest.TestCase):
 
         transitions = pandas.DataFrame(result_exposure.iloc[0].transitions)
 
-        self.assertBetween(71, get_transition_n_bdg(transitions, "TAX", 0, 1), 73)
-        self.assertBetween(63, get_transition_n_bdg(transitions, "TAX", 0, 2), 65)
-        self.assertBetween(39, get_transition_n_bdg(transitions, "TAX", 0, 3), 41)
-        self.assertBetween(44.7, get_transition_n_bdg(transitions, "TAX", 1, 2), 44.9)
-        self.assertBetween(27.9, get_transition_n_bdg(transitions, "TAX", 1, 3), 28.1)
-        self.assertBetween(7.9, get_transition_n_bdg(transitions, "TAX", 2, 3), 8.1)
+        self.assertBetween(
+            71, get_transition_n_bdg(transitions, "TAX", 0, 1), 73
+        )
+        self.assertBetween(
+            63, get_transition_n_bdg(transitions, "TAX", 0, 2), 65
+        )
+        self.assertBetween(
+            39, get_transition_n_bdg(transitions, "TAX", 0, 3), 41
+        )
+        self.assertBetween(
+            44.7, get_transition_n_bdg(transitions, "TAX", 1, 2), 44.9
+        )
+        self.assertBetween(
+            27.9, get_transition_n_bdg(transitions, "TAX", 1, 3), 28.1
+        )
+        self.assertBetween(
+            7.9, get_transition_n_bdg(transitions, "TAX", 2, 3), 8.1
+        )
 
     def test_without_schema_mapping(self):
         """
@@ -418,11 +436,21 @@ class TestGpdExposureDamageStateUpdate(unittest.TestCase):
         self.assertBetween(
             37.49, get_transition_n_bdg(transitions, "TAX1", 0, 1), 37.51
         )
-        self.assertBetween(24, get_transition_n_bdg(transitions, "TAX1", 0, 2), 26)
-        self.assertBetween(24, get_transition_n_bdg(transitions, "TAX1", 1, 2), 26)
-        self.assertBetween(44.9, get_transition_n_bdg(transitions, "TAX2", 0, 1), 45.1)
-        self.assertBetween(39.9, get_transition_n_bdg(transitions, "TAX2", 0, 2), 40.1)
-        self.assertBetween(39.9, get_transition_n_bdg(transitions, "TAX2", 1, 2), 40.1)
+        self.assertBetween(
+            24, get_transition_n_bdg(transitions, "TAX1", 0, 2), 26
+        )
+        self.assertBetween(
+            24, get_transition_n_bdg(transitions, "TAX1", 1, 2), 26
+        )
+        self.assertBetween(
+            44.9, get_transition_n_bdg(transitions, "TAX2", 0, 1), 45.1
+        )
+        self.assertBetween(
+            39.9, get_transition_n_bdg(transitions, "TAX2", 0, 2), 40.1
+        )
+        self.assertBetween(
+            39.9, get_transition_n_bdg(transitions, "TAX2", 1, 2), 40.1
+        )
 
     def assertBetween(self, lower, x, upper):
         """

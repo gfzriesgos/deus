@@ -64,8 +64,13 @@ class ExpoValues(ctypes.Structure):
     ]
 
     def __repr__(self):
-        return "ExpoValues(" + "buildings={0}, population={1}, replcostbdg={2})".format(
-            repr(self.buildings), repr(self.population), repr(self.replcostbdg)
+        return (
+            "ExpoValues("
+            + "buildings={0}, population={1}, replcostbdg={2})".format(
+                repr(self.buildings),
+                repr(self.population),
+                repr(self.replcostbdg),
+            )
         )
 
 
@@ -441,7 +446,13 @@ class Updater:
 def updated_exposure_output_to_dict(updated_exposure):
     """Convert to data to a dict for output."""
     result = {}
-    for key in ["Taxonomy", "Damage", "Buildings", "Population", "Repl-cost-USD-bdg"]:
+    for key in [
+        "Taxonomy",
+        "Damage",
+        "Buildings",
+        "Population",
+        "Repl-cost-USD-bdg",
+    ]:
         result[key] = [None] * len(updated_exposure)
 
     for idx, (expo_key, expo_value) in enumerate(updated_exposure.items()):
@@ -467,7 +478,9 @@ def transitions_output_to_dict(transitions):
     ]:
         result[key] = [None] * len(transitions)
 
-    for idx, (transition_key, transition_value) in enumerate(transitions.items()):
+    for idx, (transition_key, transition_value) in enumerate(
+        transitions.items()
+    ):
         result["taxonomy"][idx] = transition_key.taxonomy
         result["from_damage_state"][idx] = transition_key.from_damage_state
         result["to_damage_state"][idx] = transition_key.to_damage_state
@@ -498,7 +511,9 @@ def expo_from_series_to_dict(expo):
         )
         buildings = get_from_series_expo(expo.get("Buildings", []), idx, 0)
         population = get_from_series_expo(expo.get("Population", []), idx, 0)
-        replcostbdg = get_from_series_expo(expo.get("Repl-cost-USD-bdg", []), idx, 0)
+        replcostbdg = get_from_series_expo(
+            expo.get("Repl-cost-USD-bdg", []), idx, 0
+        )
         expo_value = ExpoValues(buildings, population, replcostbdg)
         as_dict[expo_key] = expo_value
 

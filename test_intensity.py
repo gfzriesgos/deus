@@ -29,8 +29,10 @@ class TestIntensity(unittest.TestCase):
         returns the same values regardless of
         the coordinates.
         """
-        intensity_provider = testimplementations.AlwaysTheSameIntensityProvider(
-            kind="PGA", value=1.0, unit="g"
+        intensity_provider = (
+            testimplementations.AlwaysTheSameIntensityProvider(
+                kind="PGA", value=1.0, unit="g"
+            )
         )
 
         intensities, units = intensity_provider.get_nearest(1, 1)
@@ -48,8 +50,10 @@ class TestIntensity(unittest.TestCase):
         """
         Test for aliases.
         """
-        inner_intensity_provider = testimplementations.AlwaysTheSameIntensityProvider(
-            kind="PGA", value=1.0, unit="g"
+        inner_intensity_provider = (
+            testimplementations.AlwaysTheSameIntensityProvider(
+                kind="PGA", value=1.0, unit="g"
+            )
         )
 
         intensity_provider = intensityprovider.AliasIntensityProvider(
@@ -76,8 +80,10 @@ class TestIntensity(unittest.TestCase):
         """
         Test for intensity conversion.
         """
-        inner_intensity_provider = testimplementations.AlwaysTheSameIntensityProvider(
-            kind="PGA", value=1.0, unit="g"
+        inner_intensity_provider = (
+            testimplementations.AlwaysTheSameIntensityProvider(
+                kind="PGA", value=1.0, unit="g"
+            )
         )
 
         def pga_to_pga1000(old_intensity, old_unit):

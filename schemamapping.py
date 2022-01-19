@@ -20,7 +20,8 @@ import pandas as pd
 
 
 CacheKey = collections.namedtuple(
-    "CacheKey", "source_schema source_taxonomy source_damage_state target_schema"
+    "CacheKey",
+    "source_schema source_taxonomy source_damage_state target_schema",
 )
 
 CacheKeyTaxonomy = collections.namedtuple(
@@ -60,7 +61,9 @@ class DamageStateMappingMatrix:
 
     def _init_conv_matrix(self):
         self.conv_matrix = (
-            pd.DataFrame(dict(convert_dict_to_use_int_keys(self.pure_dict_conv_matrix)))
+            pd.DataFrame(
+                dict(convert_dict_to_use_int_keys(self.pure_dict_conv_matrix))
+            )
             .transpose()
             .to_dict()
         )
@@ -169,7 +172,9 @@ class SchemaMapper:
                 target_schema=target_schema,
             )
 
-            tax_mapping_data_by_schemas[source_target_schema_tuple] = conv_matrix
+            tax_mapping_data_by_schemas[
+                source_target_schema_tuple
+            ] = conv_matrix
 
         # then to the very same for the damage state
         # schema mapping datasets
@@ -233,7 +238,11 @@ class SchemaMapper:
         return results_for_n_buildings
 
     def _map_schema_1(
-        self, source_schema, source_taxonomy, source_damage_state, target_schema
+        self,
+        source_schema,
+        source_taxonomy,
+        source_damage_state,
+        target_schema,
     ):
 
         cachekey = CacheKey(
@@ -301,7 +310,11 @@ class SchemaMapper:
         return tax_conv_matrix[source_taxonomy]
 
     def _do_map_schema_1(
-        self, source_schema, source_taxonomy, source_damage_state, target_schema
+        self,
+        source_schema,
+        source_taxonomy,
+        source_damage_state,
+        target_schema,
     ):
 
         mapping_results = []
@@ -313,7 +326,9 @@ class SchemaMapper:
         )
 
         for target_taxonomy in tax_conv_row.keys():
-            n_buildings_in_target_taxonomy = 1.0 * tax_conv_row[target_taxonomy]
+            n_buildings_in_target_taxonomy = (
+                1.0 * tax_conv_row[target_taxonomy]
+            )
 
             if tax_conv_row[target_taxonomy] > 0:
                 # now we can do the damage state conversion
@@ -336,7 +351,9 @@ class SchemaMapper:
 
                 ds_conv_matrix = self._ds_mapping_data[schema_taxonomy_setting]
 
-                if not ds_conv_matrix.contains_source_damage_state(source_damage_state):
+                if not ds_conv_matrix.contains_source_damage_state(
+                    source_damage_state
+                ):
                     raise Exception(
                         (
                             "There is no data for the damage state schema"

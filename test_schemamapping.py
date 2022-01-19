@@ -257,10 +257,8 @@ class TestSchemaMapping(unittest.TestCase):
             },
         ]
 
-        self.schema_mapper = (
-            schemamapping.SchemaMapper.from_taxonomy_and_damage_state_conversion_data(
-                tax_mapping_data, ds_mapping_data
-            )
+        self.schema_mapper = schemamapping.SchemaMapper.from_taxonomy_and_damage_state_conversion_data(
+            tax_mapping_data, ds_mapping_data
         )
 
     def test_same_input_and_output_schema(self):
@@ -335,9 +333,13 @@ class TestSchemaMapping(unittest.TestCase):
 
         self.assertEqual(len(mapping_results), 2)
 
-        d1_mapping_result = [x for x in mapping_results if x.damage_state == 1][0]
+        d1_mapping_result = [
+            x for x in mapping_results if x.damage_state == 1
+        ][0]
 
-        d2_mapping_result = [x for x in mapping_results if x.damage_state == 2][0]
+        d2_mapping_result = [
+            x for x in mapping_results if x.damage_state == 2
+        ][0]
 
         self.assertEqual(d1_mapping_result.schema, self.target_schema)
         self.assertEqual(d1_mapping_result.taxonomy, self.s2_b1)
