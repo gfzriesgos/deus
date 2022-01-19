@@ -1,6 +1,6 @@
 {
     "title": "DeusProcess",
-    "imageId": "deus:latest",
+    "imageId": "gfzriesgos/deus:latest",
     "workingDirectory": "/usr/share/git/deus",
     "commandToExecute": "python3 deus.py --updated_exposure_output_file updated_exposure_output_file.json --transition_output_file transition_output.json --loss_output_file damage_output.json --merged_output_file merged_output.json shakemap_input.xml",
     "exitValueHandler": "logging",
