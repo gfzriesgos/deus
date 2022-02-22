@@ -13,7 +13,6 @@ docopt==0.6.2
 Fiona==1.8.18
 GDAL==2.4.0
 geopandas==0.5.1
-georasters==0.5.15
 imageio==2.5.0
 importlib-metadata==0.19
 joblib==0.17.0

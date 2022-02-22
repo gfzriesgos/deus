@@ -41,7 +41,7 @@ class RasterIntensityProvider:
         the value may be zero in that cases.
         """
         try:
-            if self._raster_wrapper.is_loaction_in_bbox(lon, lat):
+            if self._raster_wrapper.is_location_in_bbox(lon, lat):
                 value = self._raster_wrapper.get_sample(lon, lat)
             else:
                 value = self._na_value
@@ -136,9 +136,10 @@ class StackedIntensityProvider:
         units = {}
 
         for single_sub_intensity_provider in self._sub_intensity_providers:
-            sub_intens, sub_units = single_sub_intensity_provider.get_nearest(
-                lon=lon, lat=lat
-            )
+            (
+                sub_intens,
+                sub_units,
+            ) = single_sub_intensity_provider.get_nearest(lon=lon, lat=lat)
             intensities.update(sub_intens)
             units.update(sub_units)
         return intensities, units
@@ -164,7 +165,10 @@ class AliasIntensityProvider:
         Returns the base intensities.
         It also adds intensities under other names.
         """
-        intensities, units = self._inner_intensity_provider.get_nearest(lon, lat)
+        (
+            intensities,
+            units,
+        ) = self._inner_intensity_provider.get_nearest(lon, lat)
 
         for new_intensity_measure in self._aliases:
             possible_intensity_measures = self._aliases[new_intensity_measure]
@@ -178,7 +182,9 @@ class AliasIntensityProvider:
                         intensities[new_intensity_measure] = intensities[
                             given_intensity_measure
                         ]
-                        units[new_intensity_measure] = units[given_intensity_measure]
+                        units[new_intensity_measure] = units[
+                            given_intensity_measure
+                        ]
 
         return intensities, units
 
@@ -198,7 +204,13 @@ class ConversionIntensityProvider:
     (so kind a merge).
     """
 
-    def __init__(self, inner_intensity_provider, from_intensity, as_intensity, fun):
+    def __init__(
+        self,
+        inner_intensity_provider,
+        from_intensity,
+        as_intensity,
+        fun,
+    ):
         self._inner_intensity_provider = inner_intensity_provider
         self._from_intensity = from_intensity
         self._as_intensity = as_intensity
@@ -208,12 +220,16 @@ class ConversionIntensityProvider:
         """
         Adds one intensity measurement with the given conversion function.
         """
-        intensities, units = self._inner_intensity_provider.get_nearest(lon, lat)
+        (
+            intensities,
+            units,
+        ) = self._inner_intensity_provider.get_nearest(lon, lat)
 
         if self._from_intensity in intensities.keys():
             if self._as_intensity not in intensities.keys():
                 new_intensity, new_unit = self._fun(
-                    intensities[self._from_intensity], units[self._from_intensity]
+                    intensities[self._from_intensity],
+                    units[self._from_intensity],
                 )
                 intensities[self._as_intensity] = new_intensity
                 units[self._as_intensity] = new_unit

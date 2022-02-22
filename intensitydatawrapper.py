@@ -36,6 +36,8 @@ The commom protocol is to support the following methods:
 import re
 
 import geopandas as gpd
+import numpy as np
+import pandas as pd
 
 
 class GeopandasDataFrameWrapper:
@@ -46,7 +48,12 @@ class GeopandasDataFrameWrapper:
     and unit columns.
     """
 
-    def __init__(self, gdf, prefix_value_columns="value_", prefix_unit_columns="unit_"):
+    def __init__(
+        self,
+        gdf,
+        prefix_value_columns="value_",
+        prefix_unit_columns="unit_",
+    ):
         self._gdf = gdf
         self._prefix_value_columns = prefix_value_columns
         self._prefix_unit_columns = prefix_unit_columns
@@ -149,9 +156,6 @@ class RasterDataWrapper:
     """
     This is a wrapper to read the data from
     raster.
-    The raster for the data is assumed to be
-    created using the georasters package
-    and the load_file function.
 
     It works by converting the raster to a dataframe
     and using the wrapper that exists therefore.
@@ -170,9 +174,10 @@ class RasterDataWrapper:
         input_epsg_code=None,
         usage_epsg_code="epsg:4326",
     ):
-        dataframe = raster.to_pandas()
+        dataframe = raster_to_dataframe(raster)
         geodataframe = gpd.GeoDataFrame(
-            dataframe, geometry=gpd.points_from_xy(dataframe.x, dataframe.y)
+            dataframe,
+            geometry=gpd.points_from_xy(dataframe.x, dataframe.y),
         )
         if input_epsg_code is not None:
             geodataframe.crs = {"init": input_epsg_code}
@@ -213,7 +218,30 @@ class RasterDataWrapper:
         """
         Returns the unit for the column and the index.
         """
-        return self._inner_data_wrapper.get_unit_for_column_and_index(column, index)
+        return self._inner_data_wrapper.get_unit_for_column_and_index(
+            column, index
+        )
+
+
+def raster_to_dataframe(dataset):
+    """Helper function to covnert a rasterio dataset to a dataframe."""
+    data = dataset.read()
+    transform = dataset.transform
+    n_values = data.shape[1] * data.shape[2]
+    values = np.zeros(n_values)
+    xs = np.zeros(n_values)
+    ys = np.zeros(n_values)
+
+    counter = 0
+    for i in range(data.shape[1]):
+        for j in range(data.shape[2]):
+            x, y = transform * (i, j)
+            value = data[0, i, j]
+            xs[counter] = x
+            ys[counter] = y
+            values[counter] = value
+            counter += 1
+    return pd.DataFrame({"value": values, "x": xs, "y": ys})
 
 
 class DictWithListDataWrapper:
