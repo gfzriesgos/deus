@@ -13,7 +13,7 @@ Testfile for testing
 the intensity provider for rasters.
 """
 
-import georasters as gr
+import rasterio
 
 
 class RasterIntensityProvider:
@@ -22,8 +22,9 @@ class RasterIntensityProvider:
     the rasters.
     """
 
-    def __init__(self, raster, intensity, unit, na_value=0.0):
-        self.raster = raster
+    def __init__(self, data, index, intensity, unit, na_value=0.0):
+        self.data = data
+        self.index = index
         self.intensity = intensity
         self.unit = unit
         self.na_value = na_value
@@ -32,9 +33,11 @@ class RasterIntensityProvider:
         """
         Samples on the location of lon and lat.
         """
+        index = self.index
         try:
-            value = self.raster.map_pixel(point_x=lon, point_y=lat)
-        except gr.RasterGeoError:
+            x, y = index(lon, lat)
+            value = self.data[0, x, y]
+        except IndexError:
             # it is outside of the raster
             value = self.na_value
 
@@ -45,6 +48,11 @@ class RasterIntensityProvider:
 
     @classmethod
     def from_file(cls, filename, intensity, unit, na_value=0.0):
-        raster = gr.from_file(filename)
+        with rasterio.open(filename) as dataset:
+            data = dataset.read()
+            # This works as it doesn't need to read any
+            # data from the file later.
+            def index(x, y):
+                return dataset.index(x, y)
 
-        return cls(raster, intensity, unit, na_value)
+        return cls(data, index, intensity, unit, na_value)

@@ -12,19 +12,21 @@
 Unit tests for all basic functions
 """
 
-import unittest
 import math
 import os
-import georasters as gr
+import unittest
+
 import geopandas as gpd
+import numpy as np
 import pandas as pd
+import rasterio
 from shapely import wkt
 
+import fragility
 import gpdexposure
 import intensitydatawrapper
-import rasterwrapper
-import fragility
 import intensityprovider
+import rasterwrapper
 
 
 class TestBasics(unittest.TestCase):
@@ -232,17 +234,44 @@ class TestBasics(unittest.TestCase):
         """
         Test for reading from a raster directly.
         """
+        # We want to build the equivalent to this here:
+        # test_df = pd.DataFrame(
+        #    {
+        #        "lon": [14, 15, 16, 14, 15, 16, 14, 15, 16],
+        #        "lat": [50, 50, 50, 51, 51, 51, 52, 52, 52],
+        #        "val": [11, 12, 13, 14, 15, 16, 17, 18, 19],
+        #    }
+        # )
 
-        test_df = pd.DataFrame(
-            {
-                "lon": [14, 15, 16, 14, 15, 16, 14, 15, 16],
-                "lat": [50, 50, 50, 51, 51, 51, 52, 52, 52],
-                "val": [11, 12, 13, 14, 15, 16, 17, 18, 19],
-            }
-        )
+        with rasterio.MemoryFile() as memfile:
+            transform = rasterio.transform.from_bounds(
+                west=14,
+                south=50,
+                east=16,
+                north=52,
+                width=2,
+                height=2,
+            )
+            np_data = np.array(
+                [
+                    [
+                        [17.0, 18.0, 19.0],
+                        [14.0, 15.0, 16.0],
+                        [11.0, 12.0, 13.0],
+                    ]
+                ]
+            )
+            with memfile.open(
+                driver="GTiff",
+                dtype=np_data.dtype,
+                count=1,
+                width=3,
+                height=3,
+                transform=transform,
+            ) as dataset:
+                dataset.write(np_data)
 
-        test_raster = gr.from_pandas(test_df, value="val", x="lon", y="lat")
-        test_raster_wrapper = rasterwrapper.RasterWrapper(test_raster)
+                test_raster_wrapper = rasterwrapper.RasterWrapper(dataset)
 
         intensity_provider = intensityprovider.RasterIntensityProvider(
             test_raster_wrapper,
@@ -264,28 +293,32 @@ class TestBasics(unittest.TestCase):
         self.assertEqual(intensities2["testdata"], 0.0)
         self.assertEqual(units2["testdata"], "unitless")
 
+        intensities3, _ = intensity_provider.get_nearest(lon=16, lat=51)
+        intensity_testdata3 = intensities3["testdata"]
+        self.assertLess(15.9, intensity_testdata3)
+        self.assertLess(intensity_testdata3, 16.1)
+
     def test_read_lahar_data(self):
         """
         Test the intensity provider of the lahar data.
         """
         current_dir = os.path.dirname(os.path.realpath(__file__))
-        raster = gr.from_file(
+        with rasterio.open(
             os.path.join(
                 current_dir,
                 "testinputs",
                 "fixedDEM_S_VEI_60mio_HYDRO_v10_EROSION_1600_0015_"
                 + "25res_4mom_25000s_MaxPressure_smaller.asc",
             )
-        )
-
-        intensity_data = intensitydatawrapper.RasterDataWrapper(
-            raster=raster,
-            value_name="max_pressure",
-            # check the unit; for testing it is ok to assume that it is p
-            unit="p",
-            input_epsg_code="epsg:24877",
-            usage_epsg_code="epsg:4326",
-        )
+        ) as dataset:
+            intensity_data = intensitydatawrapper.RasterDataWrapper(
+                raster=dataset,
+                value_name="max_pressure",
+                # check the unit; for testing it is ok to assume that it is p
+                unit="p",
+                input_epsg_code="epsg:24877",
+                usage_epsg_code="epsg:4326",
+            )
 
         intensity_provider = intensityprovider.IntensityProvider(
             intensity_data
