@@ -2,7 +2,7 @@
     "title": "VolcanusProcess",
     "imageId": "gfzriesgos/deus:latest",
     "workingDirectory": "/usr/share/git/deus",
-    "commandToExecute": "python3 volcanus.py --updated_exposure_output_file updated_exposure_output_file.json --transition_output_file transition_output.json --loss_output_file damage_output.json --merged_output_file merged_output.json intensities.shp",
+    "commandToExecute": "bash wps_volcanus.sh",
     "exitValueHandler": "logging",
     "stderrHandler": "pythonTraceback",
     "input": [
@@ -10,53 +10,35 @@
             "title": "intensity",
             "useAs": "file",
             "type": "geojson",
-            "path": "intensities.shp"
+            "path": "intensities.shp",
         },
         {
             "title": "intensitycolumn",
             "useAs": "commandLineArgument",
-            "type": "string"
+            "type": "string",
         },
         {
             "title": "exposure",
             "useAs": "commandLineArgument",
-            "type": "json"
+            "type": "json",
         },
         {
             "title": "schema",
             "useAs": "commandLineArgument",
-            "type": "string"
+            "type": "string",
         },
         {
             "title": "fragility",
             "useAs": "commandLineArgument",
-            "type": "json"
-        }
+            "type": "json",
+        },
     ],
     "output": [
-        {
-            "title": "updated_exposure",
-            "readFrom": "file",
-            "path": "updated_exposure_output_file.json",
-            "type": "json"
-        },
-        {
-            "title": "transition",
-            "readFrom": "file",
-            "path": "transition_output.json",
-            "type": "json"
-        },
-        {
-            "title": "damage",
-            "readFrom": "file",
-            "path": "damage_output.json",
-            "type": "json"
-        },
         {
             "title": "merged_output",
             "readFrom": "file",
             "path": "merged_output.json",
-            "type": "json"
+            "type": "json",
         }
-    ]
+    ],
 }

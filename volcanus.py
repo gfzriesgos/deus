@@ -17,8 +17,6 @@ import argparse
 import glob
 import os
 
-import tellus
-
 import ashfall
 import fragility
 import gpdexposure
@@ -26,6 +24,7 @@ import intensitydatawrapper
 import intensityprovider
 import loss
 import schemamapping
+import tellus
 
 
 def main():
@@ -45,25 +44,11 @@ def main():
     )
     argparser.add_argument("exposure_file", help="File with the exposure data")
     argparser.add_argument(
-        "exposure_schema", help="The actual schema for the exposure data"
+        "exposure_schema",
+        help="The actual schema for the exposure data",
     )
     argparser.add_argument(
         "fragilty_file", help="File with the fragility function data"
-    )
-    argparser.add_argument(
-        "--updated_exposure_output_file",
-        default="output_updated_exposure.json",
-        help="Filename for the output with the updated exposure data",
-    )
-    argparser.add_argument(
-        "--transition_output_file",
-        default="output_transitions.json",
-        help="Filename for the output with the transitions",
-    )
-    argparser.add_argument(
-        "--loss_output_file",
-        default="output_loss.json",
-        help="Filename for the output with the computed loss",
     )
     argparser.add_argument(
         "--merged_output_file",
@@ -97,4 +82,7 @@ def main():
 
 
 if __name__ == "__main__":
+    import multiprocessing
+
+    multiprocessing.set_start_method("spawn")
     main()

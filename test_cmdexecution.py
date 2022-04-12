@@ -40,15 +40,6 @@ class TestLowChange(unittest.TestCase):
 
         output_dir = os.path.join(current_dir, "testoutputs")
 
-        updated_exposure_output_filename = os.path.join(
-            output_dir, "updated_exposure_low_changes_testcase.json"
-        )
-        transition_output_filename = os.path.join(
-            output_dir, "transitions_low_changes_testcase.json"
-        )
-        loss_output_filename = os.path.join(
-            output_dir, "losses_low_changes_testcase.json"
-        )
         merged_output_filename = os.path.join(
             output_dir, "merged_low_changes_testcase.json"
         )
@@ -57,9 +48,6 @@ class TestLowChange(unittest.TestCase):
             os.mkdir(output_dir)
 
         for output_filename in [
-            updated_exposure_output_filename,
-            transition_output_filename,
-            loss_output_filename,
             merged_output_filename,
         ]:
             if os.path.exists(output_filename):
@@ -69,12 +57,6 @@ class TestLowChange(unittest.TestCase):
             [
                 "python3",
                 "deus.py",
-                "--updated_exposure_output_file",
-                updated_exposure_output_filename,
-                "--transition_output_file",
-                transition_output_filename,
-                "--loss_output_file",
-                loss_output_filename,
                 "--merged_output_file",
                 merged_output_filename,
                 test_shakemap,
@@ -113,15 +95,6 @@ class TestDeusCmdExecution(unittest.TestCase):
 
         output_dir = os.path.join(current_dir, "testoutputs")
 
-        updated_exposure_output_filename = os.path.join(
-            output_dir, "updated_exposure_multiple_imts.json"
-        )
-        transition_output_filename = os.path.join(
-            output_dir, "transitions_multiple_imts.json"
-        )
-        loss_output_filename = os.path.join(
-            output_dir, "losses_multiple_imts.json"
-        )
         merged_output_filename = os.path.join(
             output_dir, "merged_multiple_imts.json"
         )
@@ -130,9 +103,6 @@ class TestDeusCmdExecution(unittest.TestCase):
             os.mkdir(output_dir)
 
         for output_filename in [
-            updated_exposure_output_filename,
-            transition_output_filename,
-            loss_output_filename,
             merged_output_filename,
         ]:
             if os.path.exists(output_filename):
@@ -142,12 +112,6 @@ class TestDeusCmdExecution(unittest.TestCase):
             [
                 "python3",
                 "deus.py",
-                "--updated_exposure_output_file",
-                updated_exposure_output_filename,
-                "--transition_output_file",
-                transition_output_filename,
-                "--loss_output_file",
-                loss_output_filename,
                 "--merged_output_file",
                 merged_output_filename,
                 test_shakemap,
@@ -162,7 +126,7 @@ class TestDeusCmdExecution(unittest.TestCase):
             schema, test_exposure_file
         )
         output_n_buildings = get_n_buildings_by_cell_gid(
-            schema, updated_exposure_output_filename
+            schema, merged_output_filename
         )
 
         self.assertEqual(input_n_buildings, output_n_buildings)
@@ -170,7 +134,11 @@ class TestDeusCmdExecution(unittest.TestCase):
         merged_output_data = geopandas.read_file(merged_output_filename)
         for _, row in merged_output_data.iterrows():
             transitions = row.transitions
-            for key in ["n_buildings", "to_damage_state", "from_damage_state"]:
+            for key in [
+                "n_buildings",
+                "to_damage_state",
+                "from_damage_state",
+            ]:
                 self.assertEqual(type(transitions[key]), list)
             expo = row.expo
             for key in ["Damage", "Taxonomy", "Buildings"]:
@@ -195,22 +163,12 @@ class TestDeusCmdExecution(unittest.TestCase):
 
         output_dir = os.path.join(current_dir, "testoutputs")
 
-        updated_exposure_output_filename = os.path.join(
-            output_dir, "updated_exposure_ts.json"
-        )
-        transition_output_filename = os.path.join(
-            output_dir, "transitions_ts.json"
-        )
-        loss_output_filename = os.path.join(output_dir, "losses_ts.json")
         merged_output_filename = os.path.join(output_dir, "merged_ts.json")
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
 
         for output_filename in [
-            updated_exposure_output_filename,
-            transition_output_filename,
-            loss_output_filename,
             merged_output_filename,
         ]:
             if os.path.exists(output_filename):
@@ -220,12 +178,6 @@ class TestDeusCmdExecution(unittest.TestCase):
             [
                 "python3",
                 "deus.py",
-                "--updated_exposure_output_file",
-                updated_exposure_output_filename,
-                "--transition_output_file",
-                transition_output_filename,
-                "--loss_output_file",
-                loss_output_filename,
                 "--merged_output_file",
                 merged_output_filename,
                 test_shakemap,
@@ -237,7 +189,7 @@ class TestDeusCmdExecution(unittest.TestCase):
         )
 
         # We want to check that we have taxonomies in the resulting exposure
-        exposure_data = geopandas.read_file(updated_exposure_output_filename)
+        exposure_data = geopandas.read_file(merged_output_filename)
         has_taxonomies = False
         for _, row in exposure_data.iterrows():
             expo = pandas.DataFrame(row.expo)
@@ -265,35 +217,14 @@ class TestDeusCmdExecution(unittest.TestCase):
 
         output_dir = os.path.join(current_dir, "testoutputs")
 
-        updated_exposure_output_filename = os.path.join(
-            output_dir, "updated_exposure.json"
-        )
-        transition_output_filename = os.path.join(
-            output_dir, "transitions.json"
-        )
-        loss_output_filename = os.path.join(output_dir, "losses.json")
         merged_output_filename = os.path.join(output_dir, "merged.json")
-
-        updated_exposure_output_filename2 = os.path.join(
-            output_dir, "updated_exposure2.json"
-        )
-        transition_output_filename2 = os.path.join(
-            output_dir, "transitions2.json"
-        )
-        loss_output_filename2 = os.path.join(output_dir, "losses2.json")
         merged_output_filename2 = os.path.join(output_dir, "merged2.json")
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
 
         for output_filename in [
-            updated_exposure_output_filename,
-            transition_output_filename,
-            loss_output_filename,
             merged_output_filename,
-            updated_exposure_output_filename2,
-            transition_output_filename2,
-            loss_output_filename2,
             merged_output_filename2,
         ]:
             if os.path.exists(output_filename):
@@ -303,12 +234,6 @@ class TestDeusCmdExecution(unittest.TestCase):
             [
                 "python3",
                 "deus.py",
-                "--updated_exposure_output_file",
-                updated_exposure_output_filename,
-                "--transition_output_file",
-                transition_output_filename,
-                "--loss_output_file",
-                loss_output_filename,
                 "--merged_output_file",
                 merged_output_filename,
                 test_shakemap,
@@ -322,23 +247,19 @@ class TestDeusCmdExecution(unittest.TestCase):
             [
                 "python3",
                 "deus.py",
-                "--updated_exposure_output_file",
-                updated_exposure_output_filename2,
-                "--transition_output_file",
-                transition_output_filename2,
-                "--loss_output_file",
-                loss_output_filename2,
                 "--merged_output_file",
                 merged_output_filename2,
                 test_shakemap,
-                updated_exposure_output_filename,
+                merged_output_filename,
                 schema,
                 test_fragility_file,
             ],
             check=True,
         )
 
-    def test_execute_deus_in_peru_for_schema_mapping_to_suppasri(self):
+    def test_execute_deus_in_peru_for_schema_mapping_to_suppasri(
+        self,
+    ):
         """
         This is a test case for the schema mapping of the
         schema mapping for tsunamis with the peru
@@ -362,15 +283,6 @@ class TestDeusCmdExecution(unittest.TestCase):
 
         output_dir = os.path.join(current_dir, "testoutputs")
 
-        updated_exposure_output_filename = os.path.join(
-            output_dir, "updated_exposure_peru_suppasri.json"
-        )
-        transition_output_filename = os.path.join(
-            output_dir, "transitions_peru_suppasri.json"
-        )
-        loss_output_filename = os.path.join(
-            output_dir, "losses_peru_suppasri.json"
-        )
         merged_output_filename = os.path.join(
             output_dir, "merged_peru_suppasri.json"
         )
@@ -379,9 +291,6 @@ class TestDeusCmdExecution(unittest.TestCase):
             os.mkdir(output_dir)
 
         for output_filename in [
-            updated_exposure_output_filename,
-            transition_output_filename,
-            loss_output_filename,
             merged_output_filename,
         ]:
             if os.path.exists(output_filename):
@@ -391,12 +300,6 @@ class TestDeusCmdExecution(unittest.TestCase):
             [
                 "python3",
                 "deus.py",
-                "--updated_exposure_output_file",
-                updated_exposure_output_filename,
-                "--transition_output_file",
-                transition_output_filename,
-                "--loss_output_file",
-                loss_output_filename,
                 "--merged_output_file",
                 merged_output_filename,
                 test_shakemap,
@@ -411,7 +314,7 @@ class TestDeusCmdExecution(unittest.TestCase):
             schema, test_exposure_file
         )
         output_n_buildings = get_n_buildings_by_cell_gid(
-            schema, updated_exposure_output_filename
+            schema, merged_output_filename
         )
 
         self.assertEqual(input_n_buildings, output_n_buildings)
@@ -438,22 +341,12 @@ class TestDeusCmdExecutionInEcuador(unittest.TestCase):
 
         output_dir = os.path.join(current_dir, "testoutputs")
 
-        updated_exposure_output_filename = os.path.join(
-            output_dir, "updated_exposure_lahar.json"
-        )
-        transition_output_filename = os.path.join(
-            output_dir, "transitions_lahar.json"
-        )
-        loss_output_filename = os.path.join(output_dir, "losses_lahar.json")
         merged_output_filename = os.path.join(output_dir, "merged_lahar.json")
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
 
         for output_filename in [
-            updated_exposure_output_filename,
-            transition_output_filename,
-            loss_output_filename,
             merged_output_filename,
         ]:
             if os.path.exists(output_filename):
@@ -463,12 +356,6 @@ class TestDeusCmdExecutionInEcuador(unittest.TestCase):
             [
                 "python3",
                 "deus.py",
-                "--updated_exposure_output_file",
-                updated_exposure_output_filename,
-                "--transition_output_file",
-                transition_output_filename,
-                "--loss_output_file",
-                loss_output_filename,
                 "--merged_output_file",
                 merged_output_filename,
                 test_shakemap,
@@ -483,7 +370,7 @@ class TestDeusCmdExecutionInEcuador(unittest.TestCase):
             schema, test_exposure_file
         )
         output_n_buildings = get_n_buildings_by_cell_gid(
-            schema, updated_exposure_output_filename
+            schema, merged_output_filename
         )
 
         self.assertEqual(input_n_buildings, output_n_buildings)
@@ -517,15 +404,6 @@ class TestVolcanoCmdExecution(unittest.TestCase):
 
         output_dir = os.path.join(current_dir, "testoutputs")
 
-        updated_exposure_output_filename = os.path.join(
-            output_dir, "updated_exposure_ecuador_torres.json"
-        )
-        transition_output_filename = os.path.join(
-            output_dir, "transitions_ecuador_torres.json"
-        )
-        loss_output_filename = os.path.join(
-            output_dir, "losses_ecuador_torres.json"
-        )
         merged_output_filename = os.path.join(
             output_dir, "merged_ecuador_torres.json"
         )
@@ -534,9 +412,6 @@ class TestVolcanoCmdExecution(unittest.TestCase):
             os.mkdir(output_dir)
 
         for output_filename in [
-            updated_exposure_output_filename,
-            transition_output_filename,
-            loss_output_filename,
             merged_output_filename,
         ]:
             if os.path.exists(output_filename):
@@ -546,12 +421,6 @@ class TestVolcanoCmdExecution(unittest.TestCase):
             [
                 "python3",
                 "volcanus.py",
-                "--updated_exposure_output_file",
-                updated_exposure_output_filename,
-                "--transition_output_file",
-                transition_output_filename,
-                "--loss_output_file",
-                loss_output_filename,
                 "--merged_output_file",
                 merged_output_filename,
                 test_intensity,
@@ -567,7 +436,7 @@ class TestVolcanoCmdExecution(unittest.TestCase):
             schema, test_exposure_file
         )
         output_n_buildings = get_n_buildings_by_cell_gid(
-            schema, updated_exposure_output_filename
+            schema, merged_output_filename
         )
 
         self.assertEqual(input_n_buildings, output_n_buildings)
@@ -606,26 +475,8 @@ class TestVolcanusAndThenDeus(unittest.TestCase):
 
         output_dir = os.path.join(current_dir, "testoutputs")
 
-        updated_exposure_output_filename = os.path.join(
-            output_dir, "updated_exposure_ecuador_torres_1.json"
-        )
-        transition_output_filename = os.path.join(
-            output_dir, "transitions_ecuador_torres_1.json"
-        )
-        loss_output_filename = os.path.join(
-            output_dir, "losses_ecuador_torres_1.json"
-        )
         merged_output_filename = os.path.join(
             output_dir, "merged_ecuador_torres_1.json"
-        )
-        updated_exposure_output_filename2 = os.path.join(
-            output_dir, "updated_exposure_lahar_after_ash.json"
-        )
-        transition_output_filename2 = os.path.join(
-            output_dir, "transitions_lahar_after_ash.json"
-        )
-        loss_output_filename2 = os.path.join(
-            output_dir, "losses_lahar_after_ash.json"
         )
         merged_output_filename2 = os.path.join(
             output_dir, "merged_lahar_after_ash.json"
@@ -635,12 +486,6 @@ class TestVolcanusAndThenDeus(unittest.TestCase):
             os.mkdir(output_dir)
 
         for output_filename in [
-            updated_exposure_output_filename,
-            updated_exposure_output_filename2,
-            transition_output_filename,
-            transition_output_filename2,
-            loss_output_filename,
-            loss_output_filename2,
             merged_output_filename,
             merged_output_filename2,
         ]:
@@ -651,12 +496,6 @@ class TestVolcanusAndThenDeus(unittest.TestCase):
             [
                 "python3",
                 "volcanus.py",
-                "--updated_exposure_output_file",
-                updated_exposure_output_filename,
-                "--transition_output_file",
-                transition_output_filename,
-                "--loss_output_file",
-                loss_output_filename,
                 "--merged_output_file",
                 merged_output_filename,
                 test_intensity,
@@ -672,7 +511,7 @@ class TestVolcanusAndThenDeus(unittest.TestCase):
             schema, test_exposure_file
         )
         output_n_buildings = get_n_buildings_by_cell_gid(
-            schema, updated_exposure_output_filename
+            schema, merged_output_filename
         )
 
         self.assertEqual(input_n_buildings, output_n_buildings)
@@ -681,16 +520,10 @@ class TestVolcanusAndThenDeus(unittest.TestCase):
             [
                 "python3",
                 "deus.py",
-                "--updated_exposure_output_file",
-                updated_exposure_output_filename2,
-                "--transition_output_file",
-                transition_output_filename2,
-                "--loss_output_file",
-                loss_output_filename2,
                 "--merged_output_file",
                 merged_output_filename2,
                 test_shakemap,
-                updated_exposure_output_filename,
+                merged_output_filename,
                 schema,
                 test_fragility_file2,
             ],
