@@ -14,7 +14,6 @@ Name comes from https://de.wikipedia.org/wiki/Tellus
 
 import glob
 import json
-import multiprocessing
 import os
 
 import gpdexposure
@@ -49,6 +48,7 @@ class Child:
         """
         current_dir = os.path.dirname(__file__)
         schema_mapper = create_schema_mapper(current_dir)
+
         result_exposure = gpdexposure.update_exposure_transitions_and_losses(
             self.old_exposure,
             self.exposure_schema,
@@ -58,29 +58,10 @@ class Child:
             self.loss_provider,
         )
 
-        jobs_for_writing = [
-            FilterColumnsAndWriteResult(
-                result_exposure,
-                self.args_with_output_paths.updated_exposure_output_file,
-                ["gid", "geometry", "expo"],
-            ),
-            FilterColumnsAndWriteResult(
-                result_exposure,
-                self.args_with_output_paths.transition_output_file,
-                ["gid", "geometry", "transitions"],
-            ),
-            FilterColumnsAndWriteResult(
-                result_exposure,
-                self.args_with_output_paths.loss_output_file,
-                ["gid", "geometry", "loss_value", "loss_unit"],
-            ),
-            FilterColumnsAndWriteResult(
-                result_exposure, self.args_with_output_paths.merged_output_file
-            ),
-        ]
-
-        with multiprocessing.Pool() as pool:
-            pool.map(FilterColumnsAndWriteResult.run, jobs_for_writing)
+        write_result(
+            self.args_with_output_paths.merged_output_file,
+            result_exposure,
+        )
 
 
 def create_schema_mapper(current_dir):
@@ -110,26 +91,3 @@ def write_result(output_file, cells):
     if os.path.exists(output_file):
         os.unlink(output_file)
     cells.to_file(output_file, "GeoJSON")
-
-    # And because we want to reduce the size of the json files
-    # as much possible, we will read them and wrote them without
-    # any non necessary whitespace (to_file from geopandas
-    # introduces some not needed whitespace).
-    with open(output_file, "rt") as read_handle:
-        data = json.load(read_handle)
-    with open(output_file, "wt") as write_handle:
-        json.dump(data, write_handle)
-
-
-class FilterColumnsAndWriteResult:
-    def __init__(self, raw_df, path, columns=None):
-        self.raw_df = raw_df
-        self.path = path
-        self.columns = columns
-
-    def run(self):
-        if self.columns:
-            df = self.raw_df[self.columns]
-        else:
-            df = self.raw_df
-        write_result(self.path, df)

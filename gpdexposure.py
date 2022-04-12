@@ -16,10 +16,9 @@ import collections
 import ctypes
 import multiprocessing
 
-import numpy
 import geopandas
+import numpy
 import pandas
-
 
 PARALLEL_PROCESSING = True
 
@@ -80,7 +79,8 @@ def empty_expo_values():
 
 
 TransitionKey = collections.namedtuple(
-    "TransitionKey", ["taxonomy", "from_damage_state", "to_damage_state"]
+    "TransitionKey",
+    ["taxonomy", "from_damage_state", "to_damage_state"],
 )
 
 
@@ -143,11 +143,13 @@ def update_exposure_transitions_and_losses(
     if PARALLEL_PROCESSING:
         with multiprocessing.Pool(n_cpus) as pool:
             dataframe = pandas.concat(
-                pool.map(updater.update_df, splitted_exposure), sort=False
+                pool.map(updater.update_df, splitted_exposure),
+                sort=False,
             )
     else:
         dataframe = pandas.concat(
-            [updater.update_df(x) for x in splitted_exposure], sort=False
+            [updater.update_df(x) for x in splitted_exposure],
+            sort=False,
         )
     return dataframe
 
@@ -270,7 +272,9 @@ def get_updated_exposure_and_transitions(
                 expo_value.population += n_population_in_damage_state
 
                 transition_key = TransitionKey(
-                    taxonomy, old_damage_state, single_damage_state.to_state
+                    taxonomy,
+                    old_damage_state,
+                    single_damage_state.to_state,
                 )
                 result_transitions[
                     transition_key
@@ -299,7 +303,10 @@ def get_updated_exposure_and_transitions(
 
     # We also put it into the transitions as those are used to
     # compute the loss later.
-    for transition_key, transition_value in result_transitions.items():
+    for (
+        transition_key,
+        transition_value,
+    ) in result_transitions.items():
         taxonomy = transition_key.taxonomy
         transition_value.replcostbdg = repl_per_tax[taxonomy]
 
@@ -405,7 +412,10 @@ class Updater:
             schema_mapper=self.schema_mapper,
         )
         # Then we can collect the updates & transitions.
-        updated_exposure, transitions = get_updated_exposure_and_transitions(
+        (
+            updated_exposure,
+            transitions,
+        ) = get_updated_exposure_and_transitions(
             geometry=series.geometry,
             expo=mapped_exposure,
             intensity_provider=self.intensity_provider,

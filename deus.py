@@ -17,13 +17,12 @@ import argparse
 import glob
 import os
 
-import tellus
-
 import fragility
 import gpdexposure
 import intensityprovider
 import loss
 import shakemap
+import tellus
 
 
 def main():
@@ -43,25 +42,11 @@ def main():
     )
     argparser.add_argument("exposure_file", help="File with the exposure data")
     argparser.add_argument(
-        "exposure_schema", help="The actual schema for the exposure data"
+        "exposure_schema",
+        help="The actual schema for the exposure data",
     )
     argparser.add_argument(
         "fragilty_file", help="File with the fragility function data"
-    )
-    argparser.add_argument(
-        "--updated_exposure_output_file",
-        default="output_updated_exposure.json",
-        help="Filename for the output with the updated exposure data",
-    )
-    argparser.add_argument(
-        "--transition_output_file",
-        default="output_transitions.json",
-        help="Filename for the output with the transitions",
-    )
-    argparser.add_argument(
-        "--loss_output_file",
-        default="output_loss.json",
-        help="Filename for the output with the computed loss",
     )
     argparser.add_argument(
         "--merged_output_file",
@@ -71,6 +56,7 @@ def main():
     current_dir = os.path.dirname(os.path.realpath(__file__))
     loss_data_dir = os.path.join(current_dir, "loss_data")
     files = glob.glob(os.path.join(loss_data_dir, "*.json"))
+
     loss_provider = loss.LossProvider.from_files(files, "USD")
 
     args = argparser.parse_args()
@@ -92,6 +78,7 @@ def main():
     fragility_provider = fragility.Fragility.from_file(
         args.fragilty_file
     ).to_fragility_provider()
+
     old_exposure = gpdexposure.read_exposure(args.exposure_file)
 
     worker = tellus.Child(
@@ -106,4 +93,7 @@ def main():
 
 
 if __name__ == "__main__":
+    import multiprocessing
+
+    multiprocessing.set_start_method("spawn")
     main()
