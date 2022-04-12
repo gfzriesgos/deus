@@ -10,35 +10,35 @@
             "title": "intensity",
             "useAs": "file",
             "type": "geojson",
-            "path": "intensities.shp",
+            "path": "intensities.shp"
         },
         {
             "title": "intensitycolumn",
             "useAs": "commandLineArgument",
-            "type": "string",
+            "type": "string"
         },
         {
             "title": "exposure",
             "useAs": "commandLineArgument",
-            "type": "json",
+            "type": "json"
         },
         {
             "title": "schema",
             "useAs": "commandLineArgument",
-            "type": "string",
+            "type": "string"
         },
         {
             "title": "fragility",
             "useAs": "commandLineArgument",
-            "type": "json",
-        },
+            "type": "json"
+        }
     ],
     "output": [
         {
             "title": "merged_output",
             "readFrom": "file",
             "path": "merged_output.json",
-            "type": "json",
+            "type": "json"
         }
-    ],
+    ]
 }
