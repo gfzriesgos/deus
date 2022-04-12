@@ -84,7 +84,7 @@ python_black:
     - *install_os_requirements
   script:
     - *install_gdal_and_requirements
-    - pip3 install --cache-dir=.pip black==21.4b2
+    - pip3 install --cache-dir=.pip black==22.3.0
     - black -l 79 --check .
 
 run_tests:
