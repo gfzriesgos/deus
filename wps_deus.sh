@@ -1,8 +1,15 @@
 #!/bin/bash
 
-# Run deus with the command line arguments for exposure file
-# schema string & fragility json file.
-# Minify the resulting output too.
+# This is the entrypoint for running deus from the wps wrapper.
+#
+# This will run deus itself with additional cmd arguments for:
+# - the current exposure model (filename)
+# - the schema (string)
+# - the file with the fragility functions (filename)
+#
+# After it is done it will minify the resulting output with
+# the updated exposure, the transitions & the losses.
+# (Minifying will remove all unnecessary whitespace).
 
 set -e
 
