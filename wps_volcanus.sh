@@ -19,3 +19,4 @@ set -e
 
 python3 volcanus.py --merged_output_file merged_output.json intensities.shp $@
 python3 minify_json.py merged_output.json
+python3 create_shapefile.py merged_output.json
