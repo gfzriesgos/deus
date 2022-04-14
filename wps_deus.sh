@@ -15,3 +15,4 @@ set -e
 
 python3 deus.py --merged_output_file merged_output.json shakemap_input.xml $@
 python3 minify_json.py merged_output.json
+python3 create_shapefile.py merged_output.json

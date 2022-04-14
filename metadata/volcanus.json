@@ -39,6 +39,18 @@
             "readFrom": "file",
             "path": "merged_output.json",
             "type": "json"
+        },
+        {
+            "title": "shapefile_summary",
+            "readFrom": "file",
+            "path": "summary.shp",
+            "type": "shapefile"
+        },
+        {
+            "title": "meta_summary",
+            "readFrom": "file",
+            "path": "meta_summary.json",
+            "type": "json"
         }
     ]
 }
