@@ -12,14 +12,10 @@
 Testcases for the schema mappings.
 """
 
+import json
 import glob
 import os
 import unittest
-
-import geopandas as gpd
-import pandas as pd
-
-from shapely import wkt
 
 import schemamapping
 
@@ -418,6 +414,122 @@ class TestSchemaMapping(unittest.TestCase):
         self.assertEqual(b2_2_d2_mapping_result.damage_state, 2)
         self.assertLess(56.249, b2_2_d2_mapping_result.n_buildings)
         self.assertLess(b2_2_d2_mapping_result.n_buildings, 56.251)
+
+
+class TestSchemaMappingCoverage(unittest.TestCase):
+    """Test the coverage of the schema mapping files."""
+
+    def test_taxonomies_sara_to_medina(self):
+        """
+        Test the coverage of the sara to medina taxonomy conversion.
+
+        The files to map the taxonomies from sara to medina should
+        cover the same source taxonmies as the conversion from
+        sara to suppasri.
+        """
+        this_file = __file__
+        this_dir = os.path.dirname(this_file)
+        tax_mapping_dir = os.path.join(this_dir, "schema_mapping_data_tax")
+
+        tax_mapping_files = glob.glob(os.path.join(tax_mapping_dir, "*.json"))
+        tax_mapping_data = []
+
+        for filename in tax_mapping_files:
+            with open(filename) as infile:
+                tax_mapping_data.append(json.load(infile))
+
+        sara_to_suppasri = [
+            x["source_taxonomies"]
+            for x in tax_mapping_data
+            if x["source_schema"] == "SARA_v1.0"
+            and x["target_schema"] == "SUPPASRI2013_v2.0"
+        ][0]
+
+        sara_to_medina = [
+            x["source_taxonomies"]
+            for x in tax_mapping_data
+            if x["source_schema"] == "SARA_v1.0"
+            and x["target_schema"] == "Medina_2019"
+        ][0]
+
+        # We start testing some (to be sure our lists are not empty)
+        self.assertIn("MCF-DNO-H1-3", sara_to_suppasri)
+        self.assertIn("CR-LWAL-DNO-H1-3", sara_to_suppasri)
+
+        self.assertIn("MCF-DNO-H1-3", sara_to_medina)
+
+        # And then we want to be sure that we cover all the taxonmies
+        # that we also handle in the conversion to suppasri.
+        # However, for RIESGOS we decided not to use some of
+        # the older taxonomies anymore (they belong to sara, but
+        # should not be used in our exposure models anymore).
+        tax_to_ignore_for_sara_to_medina = set(
+            [
+                "CR-LFINF-DUC-H4-7",
+                "CR-LFLS-DNO-H1-3",
+                "CR-LFLS-DUC-H1-3",
+                "CR-LFLS-DUC-H4-7",
+                "CR-LFM-DNO-H1-3",
+                "CR-LFM-DNO-H4-7",
+                "CR-LFM-DNO-SOS-H1-3",
+                "CR-LFM-DNO-SOS-H4-7",
+                "CR-LFM-DUC-H1-3",
+                "CR-LFM-DUC-H4-7",
+                "CR-LWAL-DNO-H1-3",
+                "S-LFM-H4-7",
+            ]
+        )
+        for taxonomy in sara_to_suppasri:
+            if taxonomy not in tax_to_ignore_for_sara_to_medina:
+                self.assertIn(taxonomy, sara_to_medina)
+
+    def test_damage_states_sara_to_medina(self):
+        """
+        Test the coverage of the sara to medina damage state conversion.
+
+        The files to map the damage states should cover all the
+        taxonomies that the taxonomy conversion file handles.
+        """
+        this_file = __file__
+        this_dir = os.path.dirname(this_file)
+        tax_mapping_dir = os.path.join(this_dir, "schema_mapping_data_tax")
+
+        tax_mapping_files = glob.glob(os.path.join(tax_mapping_dir, "*.json"))
+        tax_mapping_data = []
+
+        for filename in tax_mapping_files:
+            with open(filename) as infile:
+                tax_mapping_data.append(json.load(infile))
+
+        tax_covered_taxonomies = [
+            x["source_taxonomies"]
+            for x in tax_mapping_data
+            if x["source_schema"] == "SARA_v1.0"
+            and x["target_schema"] == "Medina_2019"
+        ][0]
+
+        ds_mapping_dir = os.path.join(this_dir, "schema_mapping_data_ds")
+        ds_mapping_files = glob.glob(os.path.join(ds_mapping_dir, "*.json"))
+        ds_mapping_data = []
+
+        for filename in ds_mapping_files:
+            with open(filename) as infile:
+                ds_mapping_data.append(json.load(infile))
+
+        ds_covered_taxonomies = set(
+            [
+                x["source_taxonomy"]
+                for x in ds_mapping_data
+                if x["source_schema"] == "SARA_v1.0"
+                and x["target_schema"] == "Medina_2019"
+            ]
+        )
+
+        self.assertIn("CR-PC-LWAL-H1-3", tax_covered_taxonomies)
+        self.assertIn("CR-PC-LWAL-H1-3", ds_covered_taxonomies)
+
+        for taxonomy in tax_covered_taxonomies:
+            self.assertIn(taxonomy, ds_covered_taxonomies)
 
 
 if __name__ == "__main__":
