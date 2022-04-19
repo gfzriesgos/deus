@@ -18,7 +18,7 @@ def main():
         data = json.load(infile)
 
     with open(filename, "w") as outfile:
-        json.dump(data, outfile)
+        json.dump(data, outfile, separators=(",", ":"))
 
 
 if __name__ == "__main__":
