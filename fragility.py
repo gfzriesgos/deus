@@ -16,9 +16,8 @@ import collections
 import json
 import re
 
-from scipy.stats import lognorm
 import numpy as np
-
+from scipy.stats import lognorm, norm
 
 FactoryCacheKey = collections.namedtuple("FactoryCacheKey", ["mean", "stddev"])
 
@@ -35,7 +34,36 @@ class LogncdfFactory:
         key = FactoryCacheKey(mean, stddev)
         if key in self.cache.keys():
             return self.cache[key]
+        # For the parameterization see:
+        # https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.lognorm.html
+        # "A common parametrization for a lognormal random variable
+        # Y is in terms of the mean, mu, and standard deviation, sigma,
+        # of the unique normally distributed random variable X such
+        # that exp(X) = Y.
+        # This parametrization corresponds to setting
+        # s = sigma and scale = exp(mu)."
         func = lognorm(scale=np.exp(mean), s=stddev)
+        result = CachedFunction(func.cdf)
+
+        self.cache[key] = result
+        return result
+
+
+class NormCdfFactory:
+    """This is a function factory for the norm cdf."""
+
+    def __init__(self):
+        self.cache = {}
+
+    def __call__(self, mean, stddev):
+        key = FactoryCacheKey(mean, stddev)
+        if key in self.cache.keys():
+            return self.cache[key]
+        # See
+        # https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.norm.html
+        # "The location (loc) keyword specifies the mean.
+        # The scale (scale) keyword specifies the standard deviation."
+        func = norm(loc=mean, scale=stddev)
         result = CachedFunction(func.cdf)
 
         self.cache[key] = result
@@ -61,6 +89,7 @@ class CachedFunction:
 
 SUPPORTED_FRAGILITY_FUNCTION_FACTORIES = {
     "logncdf": LogncdfFactory(),
+    "normcdf": NormCdfFactory(),
 }
 
 
