@@ -126,6 +126,11 @@ def main():
     weighted_damages = []
 
     loss_unit = None
+    total = {
+        "loss_value": 0,
+        "transition_matrix_from_damage_state": {},
+        "buildings_by_damage_state": {},
+    }
     custom_cols = CustomColumnGenerator(prefix="c")
 
     for feature in data_in["features"]:
@@ -138,6 +143,8 @@ def main():
         geometries.append(geometry)
 
         loss_values.append(properties["loss_value"])
+        total["loss_value"] += properties["loss_value"]
+
         if loss_unit is None and properties["loss_unit"]:
             loss_unit = properties["loss_unit"]
 
@@ -146,16 +153,25 @@ def main():
         mean_transitions.append(compute_mean_transition(transitions_dict))
         weighted_damages.append(compute_weighted_damage(expo_dict))
         # Next is to create transition matrix
-        matrix = {}
+        transition_matrix = {}
         for from_ds, to_ds, n in zip(
             transitions_dict["from_damage_state"],
             transitions_dict["to_damage_state"],
             transitions_dict["n_buildings"],
         ):
-            matrix.setdefault(from_ds, {})
-            matrix[from_ds].setdefault(to_ds, 0)
-            matrix[from_ds][to_ds] += n
-        for k, v in matrix.items():
+            transition_matrix.setdefault(from_ds, {})
+            transition_matrix[from_ds].setdefault(to_ds, 0)
+            transition_matrix[from_ds][to_ds] += n
+            # And also the same for the total transitions
+            total["transition_matrix_from_damage_state"].setdefault(
+                from_ds, {}
+            )
+            total["transition_matrix_from_damage_state"][from_ds].setdefault(
+                to_ds, 0
+            )
+            total["transition_matrix_from_damage_state"][from_ds][to_ds] += n
+
+        for k, v in transition_matrix.items():
             custom_col_long_name = f"Transitions from damage state {k}"
             custom_col_value = json.dumps(v)
             custom_cols.set_value_for_custom_column(
@@ -175,6 +191,9 @@ def main():
             buildings_by_tax_and_ds.setdefault(taxonomy, {})
             buildings_by_tax_and_ds[taxonomy].setdefault(damage, {})
             buildings_by_tax_and_ds[taxonomy][damage] = number
+            # And update the total
+            total["buildings_by_damage_state"].setdefault(damage, 0)
+            total["buildings_by_damage_state"][damage] += number
         for (
             taxonomy,
             buildings_by_ds,
@@ -211,8 +230,10 @@ def main():
             {
                 "custom_columns": custom_cols.get_custom_column_mapping(),
                 "loss_unit": loss_unit,
+                "total": total,
             },
             outfile,
+            separators=(",", ":"),
         )
 
 
