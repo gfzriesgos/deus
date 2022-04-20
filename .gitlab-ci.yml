@@ -54,8 +54,6 @@ python_codestyle:
   stage: test
   tags:
     - group
-  # TODO: fix code to fit with PEP8 guidelines
-  allow_failure: true
   before_script:
     - *install_os_requirements
   script:
