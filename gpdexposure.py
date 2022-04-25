@@ -27,6 +27,8 @@ import geopandas
 import numpy
 import pandas
 
+from loss import combine_losses
+
 PARALLEL_PROCESSING = True
 
 
@@ -434,6 +436,18 @@ class Updater:
             loss_provider=self.loss_provider,
             schema=self.fragility_provider.schema,
         )
+        loss_unit = self.loss_provider.get_unit()
+
+        existing_loss_value = series.get("loss_value", 0, 0)
+        existing_loss_unit = series.get("loss_unit", None)
+
+        combined_loss_value, combined_loss_unit = combine_losses(
+            loss_value=loss_value,
+            loss_unit=loss_unit,
+            existing_loss_value=existing_loss_value,
+            existing_loss_unit=existing_loss_unit,
+        )
+
         # In earlier versions of deus the updated exposure, the transitions
         # and the losses were splitted. In this version we merge them right
         # here. Later on we can split them back up to produce the expected
@@ -455,8 +469,8 @@ class Updater:
                 "expo": updated_exposure_output_to_dict(updated_exposure),
                 "schema": self.fragility_provider.schema,
                 "transitions": transitions_output_to_dict(transitions),
-                "loss_value": loss_value,
-                "loss_unit": self.loss_provider.get_unit(),
+                "loss_value": combined_loss_value,
+                "loss_unit": combined_loss_unit,
             }
         )
 
