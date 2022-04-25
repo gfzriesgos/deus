@@ -438,7 +438,7 @@ class Updater:
         )
         loss_unit = self.loss_provider.get_unit()
 
-        existing_loss_value = series.get("loss_value", 0, 0)
+        existing_loss_value = series.get("loss_value", 0.0)
         existing_loss_unit = series.get("loss_unit", None)
 
         combined_loss_value, combined_loss_unit = combine_losses(
