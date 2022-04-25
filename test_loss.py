@@ -95,6 +95,25 @@ class TestLoss(unittest.TestCase):
 
         self.assertEqual(700, loss_value)
 
+    def test_combine_losses(self):
+        """Test the combine_losses function."""
+        test_cases = [
+            ((0, "usd", 0, "usd"), (0, "usd")),
+            ((130, "usd", 25, "usd"), (155, "usd")),
+            ((100.1, "usd", 24.2, "usd"), (124.3, "usd")),
+            ((130, "usd", 0, None), (130, "usd")),
+        ]
+        for test_case in test_cases:
+            inputs, expected_outputs = test_case
+
+            outputs = loss.combine_losses(*inputs)
+            self.assertEqual(outputs, expected_outputs)
+
+        def non_compatible_units():
+            loss.combine_losses(0, "unit 1", 0, "unit 2")
+
+        self.assertRaises(Exception, non_compatible_units)
+
 
 if __name__ == "__main__":
     unittest.main()
