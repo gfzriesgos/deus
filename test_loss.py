@@ -109,10 +109,10 @@ class TestLoss(unittest.TestCase):
             outputs = loss.combine_losses(*inputs)
             self.assertEqual(outputs, expected_outputs)
 
-        def non_compatible_units():
+    def test_combine_losses_with_non_compatible_units(self):
+        """Test what happens if we use non compatible units."""
+        with self.assertRaises(Exception):
             loss.combine_losses(0, "unit 1", 0, "unit 2")
-
-        self.assertRaises(Exception, non_compatible_units)
 
 
 if __name__ == "__main__":

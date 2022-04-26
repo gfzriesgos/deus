@@ -438,8 +438,15 @@ class Updater:
         )
         loss_unit = self.loss_provider.get_unit()
 
-        existing_loss_value = series.get("loss_value", 0.0)
-        existing_loss_unit = series.get("loss_unit", None)
+        # Why the cum_loss_value?
+        # Because this is the column that contains the accumulated
+        # loss so far.
+        # In the very first run it is 0.
+        # In the second run it is identitcal to the loss_value.
+        # But with the extra column we that aggregate run after
+        # run - no matter how often we need to do so.
+        existing_loss_value = series.get("cum_loss_value", 0.0)
+        existing_loss_unit = series.get("cum_loss_unit", None)
 
         combined_loss_value, combined_loss_unit = combine_losses(
             loss_value=loss_value,
@@ -469,8 +476,13 @@ class Updater:
                 "expo": updated_exposure_output_to_dict(updated_exposure),
                 "schema": self.fragility_provider.schema,
                 "transitions": transitions_output_to_dict(transitions),
-                "loss_value": combined_loss_value,
-                "loss_unit": combined_loss_unit,
+                # Loss value is just for the current run
+                "loss_value": loss_value,
+                "loss_unit": loss_unit,
+                # cum_loss_value is for the accumulated loss over
+                # multiple runs
+                "cum_loss_value": combined_loss_value,
+                "cum_loss_unit": combined_loss_unit,
             }
         )
 
