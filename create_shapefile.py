@@ -133,16 +133,21 @@ def main():
 
     ids = []
     geometries = []
-    # The loss value is one of the main components for the visualization
+    # The loss value is one of the main components for the visualization.
+    # The cum loss value is the one aggregated over multiple runs.
     loss_values = []
-    # Another one is the mean transiton value
+    cum_loss_values = []
+    # Another column for the visualization is the mean transiton value
     mean_transitions = []
     # And the weighted damage
     weighted_damages = []
+    n_buildings = []
 
     loss_unit = None
+    cum_loss_unit = None
     total = {
         "loss_value": 0,
+        "cum_loss": 0,
         "transition_matrix_from_damage_state": {},
         "buildings_by_damage_state": {},
     }
@@ -159,9 +164,14 @@ def main():
 
         loss_values.append(properties["loss_value"])
         total["loss_value"] += properties["loss_value"]
+        cum_loss_values.append(properties["cum_loss_value"])
+        total["cum_loss"] += properties["cum_loss_value"]
 
         if loss_unit is None and properties["loss_unit"]:
             loss_unit = properties["loss_unit"]
+
+        if cum_loss_unit is None and properties["cum_loss_unit"]:
+            cum_loss_unit = properties["cum_loss_unit"]
 
         transitions_dict = properties["transitions"]
         expo_dict = properties["expo"]
@@ -220,11 +230,17 @@ def main():
                 id=gid,
                 value=custom_col_value,
             )
+        buildings = sum(
+            [sum(inner.values()) for inner in buildings_by_tax_and_ds.values()]
+        )
+        n_buildings.append(buildings)
 
     df = pandas.DataFrame(
         {
             "id": ids,
             "loss_value": loss_values,
+            "cum_loss": cum_loss_values,
+            "buildings": n_buildings,
             "m_tran": mean_transitions,
             "w_damage": weighted_damages,
             **custom_cols.full_columns(ids),
@@ -246,6 +262,7 @@ def main():
                 "custom_columns": custom_cols.get_custom_column_mapping(),
                 "loss_unit": loss_unit,
                 "total": total,
+                "cum_loss_unit": cum_loss_unit,
             },
             outfile,
             separators=(",", ":"),

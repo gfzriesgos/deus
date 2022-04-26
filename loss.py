@@ -98,3 +98,19 @@ class LossProvider:
                 schema = single_data["meta"]["id"]
                 data[schema] = single_data
         return cls(data, unit=unit)
+
+
+def combine_losses(
+    loss_value, loss_unit, existing_loss_value, existing_loss_unit
+):
+    """
+    Combine the losses of the various runs of deus.
+
+    Normally both should just use the very same loss units, so we can
+    add them easily. However, in case we have different units, we
+    may need to convert them. So this is the place for it.
+    """
+    if existing_loss_unit is None or existing_loss_unit == loss_unit:
+        combined_loss_value = existing_loss_value + loss_value
+        return combined_loss_value, loss_unit
+    raise Exception(f"Can't combine {loss_unit} and {existing_loss_unit}")
