@@ -19,12 +19,14 @@
 Testcases for the schema mappings.
 """
 
-import json
 import glob
+import json
 import os
 import unittest
 
+import gpdexposure
 import schemamapping
+import tellus
 
 
 class TestSchemaMapping(unittest.TestCase):
@@ -488,7 +490,6 @@ class TestSchemaMappingCoverage(unittest.TestCase):
                 "CR-LFM-DNO-SOS-H4-7",
                 "CR-LFM-DUC-H1-3",
                 "CR-LFM-DUC-H4-7",
-                "CR-LWAL-DNO-H1-3",
                 "S-LFM-H4-7",
             ]
         )
@@ -543,6 +544,62 @@ class TestSchemaMappingCoverage(unittest.TestCase):
 
         for taxonomy in tax_covered_taxonomies:
             self.assertIn(taxonomy, ds_covered_taxonomies)
+
+
+class TestFullSchemaMapping(unittest.TestCase):
+    """Run the full schema mapping for exposure files."""
+
+    def setUp(self):
+        """Set up the tests with a real world schema mapping."""
+        current_dir = os.path.dirname(__file__)
+        self.schema_mapper = tellus.create_schema_mapper(current_dir)
+
+        path_expo_input = os.path.join(
+            current_dir, "testinputs", "expo_valp_bayes_after_1_deus_run.json"
+        )
+        self.old_exposure = gpdexposure.read_exposure(path_expo_input)
+
+    def test_sara_to_medina_in_valparaiso(self):
+        """
+        Test the mapping from a sara model to medina.
+
+        As we had trouble several times to map the sara model to
+        medina we want to run all of the code in our test.
+        """
+        for expo in self.old_exposure.expo:
+            expo = gpdexposure.expo_from_series_to_dict(expo)
+            mapped_exposure = gpdexposure.map_exposure(
+                expo=expo,
+                source_schema="SARA_v1.0",
+                target_schema="Medina_2019",
+                schema_mapper=self.schema_mapper,
+            )
+            sum_all_buildings_in = sum([x.buildings for x in expo.values()])
+            sum_all_buildings_out = sum(
+                [x.buildings for x in mapped_exposure.values()]
+            )
+            self.assertAlmostEqual(sum_all_buildings_in, sum_all_buildings_out)
+
+    def test_sara_to_suppasri_in_valparaiso(self):
+        """
+        Test the mapping from a sara model to suppasri.
+
+        This is also meant as a test for the other schema mapping
+        test to medina.
+        """
+        for expo in self.old_exposure.expo:
+            expo = gpdexposure.expo_from_series_to_dict(expo)
+            mapped_exposure = gpdexposure.map_exposure(
+                expo=expo,
+                source_schema="SARA_v1.0",
+                target_schema="SUPPASRI2013_v2.0",
+                schema_mapper=self.schema_mapper,
+            )
+            sum_all_buildings_in = sum([x.buildings for x in expo.values()])
+            sum_all_buildings_out = sum(
+                [x.buildings for x in mapped_exposure.values()]
+            )
+            self.assertAlmostEqual(sum_all_buildings_in, sum_all_buildings_out)
 
 
 if __name__ == "__main__":
