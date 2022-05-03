@@ -76,6 +76,46 @@ class TestRasterIntensityProvider(unittest.TestCase):
             self.assertLess(intensities[intensity], check.value + eps)
             self.assertEqual(unit, units[intensity])
 
+    def test_read_tsunami_data(self):
+        """Test with our tsunami dataset."""
+        raster_file = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "testinputs",
+            "tsunami_peru_mwh.tiff",
+        )
+        intensity = "MWH"
+        unit = "m"
+        na_value = 0.0
+        intensity_provider = (
+            rasterintensityprovider.RasterIntensityProvider.from_file(
+                raster_file, intensity, unit, na_value
+            )
+        )
+
+        PointsWithValue = collections.namedtuple(
+            "PointsWithValue", "x y value"
+        )
+
+        eps = 0.1
+        checks = [
+            PointsWithValue(x=-76.986, y=-12.2, value=0.0),
+            PointsWithValue(x=-76.8875032300, y=-12.2811898724, value=13.57),
+            PointsWithValue(x=-76.913582151, y=-12.261071082, value=4.91),
+            # Some that are masked or outside
+            # Due to our na_value we should get those back
+            PointsWithValue(x=-76.6, y=-12.181, value=0.0),
+            PointsWithValue(x=-76.9549164, y=-12.1770012, value=0.0),
+            PointsWithValue(x=-76.925, y=-12.185, value=0.0),
+        ]
+        for check in checks:
+            intensities, units = intensity_provider.get_nearest(
+                lon=check.x, lat=check.y
+            )
+
+            self.assertLess(check.value - eps, intensities[intensity])
+            self.assertLess(intensities[intensity], check.value + eps)
+            self.assertEqual(unit, units[intensity])
+
 
 if __name__ == "__main__":
     unittest.main()

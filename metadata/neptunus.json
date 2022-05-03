@@ -1,0 +1,61 @@
+{
+    "title": "NeptunusProcess",
+    "imageId": "gfzriesgos/deus:latest",
+    "workingDirectory": "/usr/share/git/deus",
+    "commandToExecute": "bash wps_neptunus.sh",
+    "exitValueHandler": "logging",
+    "stderrHandler": "pythonTraceback",
+    "input": [
+        {
+            "title": "intensity",
+            "useAs": "file",
+            "type": "geotiff",
+            "path": "intensities.tiff"
+        },
+        {
+            "title": "intensityname",
+            "useAs": "commandLineArgument",
+            "type": "string"
+        },
+        {
+            "title": "intensityunit",
+            "useAs": "commandLineArgument",
+            "type": "string"
+        },
+        {
+            "title": "exposure",
+            "useAs": "commandLineArgument",
+            "type": "json"
+        },
+        {
+            "title": "schema",
+            "useAs": "commandLineArgument",
+            "type": "string"
+        },
+        {
+            "title": "fragility",
+            "useAs": "commandLineArgument",
+            "type": "json"
+        }
+    ],
+    "output": [
+        {
+            "title": "merged_output",
+            "readFrom": "file",
+            "path": "merged_output.json",
+            "type": "json"
+        },
+        {
+            "title": "shapefile_summary",
+            "readFrom": "file",
+            "path": "summary.shp",
+            "type": "shapefile"
+        },
+        {
+            "title": "meta_summary",
+            "readFrom": "file",
+            "path": "meta_summary.json",
+            "type": "json"
+        }
+    ]
+}
