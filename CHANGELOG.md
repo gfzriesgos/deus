@@ -1,6 +1,14 @@
-# 3021-10-13:
+# 2022-05-03:
+
+- neptunus integration as WPS process
+# 2021-10-13:
 
 - added support for the Medina 2019 scheme
+
+# 2020-08-21:
+
+- added executable (neptunus.py) to run deus with AWI tsunami grid files
+  that contain max wave height information in meter
 
 # 2020-05-13:
 

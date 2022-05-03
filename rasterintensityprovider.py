@@ -29,12 +29,15 @@ class RasterIntensityProvider:
     the rasters.
     """
 
-    def __init__(self, data, index, intensity, unit, na_value=0.0):
+    def __init__(
+        self, data, index, intensity, unit, na_value=0.0, no_datavals=[]
+    ):
         self.data = data
         self.index = index
         self.intensity = intensity
         self.unit = unit
         self.na_value = na_value
+        self.no_datavals = no_datavals
 
     def get_nearest(self, lon, lat):
         """
@@ -46,6 +49,9 @@ class RasterIntensityProvider:
             value = self.data[0, x, y]
         except IndexError:
             # it is outside of the raster
+            value = self.na_value
+
+        if value in self.no_datavals:
             value = self.na_value
 
         intensities = {self.intensity: value}
@@ -64,4 +70,6 @@ class RasterIntensityProvider:
             def index(x, y):
                 return dataset.index(x, y)
 
-        return cls(data, index, intensity, unit, na_value)
+            no_datavals = dataset.get_nodatavals()
+
+        return cls(data, index, intensity, unit, na_value, no_datavals)
